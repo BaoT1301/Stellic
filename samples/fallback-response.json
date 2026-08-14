@@ -9,6 +9,7 @@
       "data/degree-template.json"
     ],
     "student": "Mocked, per CLAUDE.md §10 — everything public is real, the student's private record is invented. Transfer student, 86 of 120 credits, graduating May 2027, one critical bottleneck (CS 262).",
+    "creditArithmetic": "86 is the ONE credit number for this student. It now agrees across this file, samples/sample-audit.html and the manual-entry default in components/AuditUpload.tsx; it used to disagree three ways (86 / 84 / 89). Every requirement below carries `credits` = what the block is worth, per the wording of the /api/parse-audit system prompt, and the blocks add up: 32 + 20 + 8 + 13 + 38 + 6 + 3 = 120 required. Applied 32 + 20 + 8 + 13 + 13 = 86, where the 13 in Computer Science Core is CS 110, CS 112, CS 211 and CS 310. Remaining 25 + 6 + 3 = 34, and 120 - 86 = 34. The 25 is the exact credit sum of the eight courses in that block's `missing` list. 50 of the 86 are transfer credit, which is why coursesTaken lists only the 36 credits earned at Mason.",
     "onetAttribution": "Includes information from the O*NET 20.1 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET is a trademark of USDOL/ETA.",
     "postingsIndex": {
       "0": "Software Engineer, New Grad (2027 start)",
@@ -51,7 +52,7 @@
             "CS 483"
           ],
           "slotsOpen": 0,
-          "credits": 25
+          "credits": 38
         },
         {
           "name": "Senior Computer Science Electives",
@@ -87,6 +88,13 @@
           "missing": [],
           "slotsOpen": 0,
           "credits": 8
+        },
+        {
+          "name": "General Elective Credit",
+          "status": "complete",
+          "missing": [],
+          "slotsOpen": 0,
+          "credits": 13
         }
       ]
     },

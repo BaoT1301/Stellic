@@ -7,7 +7,11 @@ import { AuditUpload, type ManualAuditEntry } from "@/components/AuditUpload";
 import { DiagnosisScreen } from "@/components/DiagnosisScreen";
 import { JobPostingInput } from "@/components/JobPostingInput";
 import { ScheduleOptions } from "@/components/ScheduleOptions";
-import { computeBottlenecks, normalizeCode } from "@/lib/bottlenecks";
+import {
+  computeBottlenecks,
+  normalizeCode,
+  remainingRequired,
+} from "@/lib/bottlenecks";
 import { computeSkillGaps, type DemandedSkill } from "@/lib/gaps";
 import {
   buildSchedules,
@@ -133,6 +137,42 @@ export default function Home() {
     [gaps],
   );
 
+  // Context for the schedule cards. All derived from state the diagnosis screen
+  // already holds, so the two screens cannot disagree in front of someone who
+  // adds the numbers up.
+  //
+  // `reachable` and `blocked` MUST stay byte-identical to the same split inside
+  // GapMap.tsx — screen 3 says "3 more you can reach with an elective" and
+  // screen 4 says "closes 1 of the 3 you can reach next term", and a registrar
+  // who notices those disagreeing has found a real defect.
+  const reachableGaps = useMemo(
+    () => gaps.filter((g) => !g.covered && g.closableBy.length > 0).length,
+    [gaps],
+  );
+  const blockedGaps = useMemo(
+    () => gaps.filter((g) => !g.covered && g.closableBy.length === 0).length,
+    [gaps],
+  );
+  // Without this the cards cannot tell a required course from an elective, and
+  // labelling a required course "ELECTIVE" would be a false claim about the
+  // student's degree (§0 rule 7). useMemo matters: a fresh Set each render
+  // re-renders all three cards.
+  const requiredCodes = useMemo(
+    () => new Set(audit ? remainingRequired(audit) : []),
+    [audit],
+  );
+  const dependentsOf = useMemo(
+    () =>
+      Object.fromEntries(
+        bottlenecks.map((b) => [normalizeCode(b.code), b.dependents]),
+      ),
+    [bottlenecks],
+  );
+  const skillDemand = useMemo(
+    () => Object.fromEntries(gaps.map((g) => [g.skillId, g.demandCount])),
+    [gaps],
+  );
+
   const preferencesDirty =
     JSON.stringify(preferences) !== JSON.stringify(appliedPreferences);
 
@@ -142,11 +182,22 @@ export default function Home() {
   const gapsRef = useRef<SkillGap[]>([]);
   const bottlenecksRef = useRef<Bottleneck[]>([]);
   const auditRef = useRef<StudentAudit | null>(null);
+  /** In flight from step 1, awaited in runDiagnosis. See handlePostingsSubmit. */
+  const skillsPromise = useRef<Promise<DemandedSkill[]> | null>(null);
+  /** Focus target on each step change, for keyboard and screen-reader users. */
+  const headingRef = useRef<HTMLDivElement | null>(null);
 
   // The diagnosis screen is tall. Without this, "Build my semester" leaves the
   // viewer halfway down the next screen — which on camera reads as a broken cut.
+  //
+  // Focus moves with it. A four-state flow that swaps the whole main region
+  // without moving focus strands keyboard users at the top of the document and
+  // announces nothing to a screen reader. Three lines, and it is the difference
+  // between "keyboard navigable" being true and being a claim.
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+    headingRef.current?.focus();
   }, [step]);
 
   // -- Step 1 --------------------------------------------------------------
@@ -165,26 +216,34 @@ export default function Home() {
     }
   }
 
-  async function handlePostingsSubmit() {
-    setIsWorking(true);
+  /**
+   * The skills call is FIRED here but AWAITED in runDiagnosis. Nothing on the
+   * audit screen depends on its result, so blocking the step transition on a
+   * 1-3 second model call bought a dead-air stare at an unchanged page. By the
+   * time the student has uploaded a PDF it has almost always resolved.
+   */
+  function handlePostingsSubmit() {
     const filled = postings.filter((p) => p.trim() !== "");
-    try {
-      const res = await fetch("/api/extract-skills", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postings: filled }),
+    skillsPromise.current = fetch("/api/extract-skills", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postings: filled }),
+    })
+      .then((res) => res.json() as Promise<{ skills: DemandedSkill[]; degraded: boolean }>)
+      .then((json) => {
+        if (json.degraded) console.info("[extract-skills] served cached fixture");
+        return json.skills ?? [];
+      })
+      .catch(async (err) => {
+        // Previously this set [] and advanced anyway, which rendered
+        // "0 asked for / 0 open / 0 covered" beneath a headline reading
+        // "0 of the skills your postings asked for are still open" — a
+        // confidently wrong screen that reads as GOOD news. §0 rule 3 says
+        // degrade to something that still renders; it does not say render a lie.
+        console.error("[extract-skills] request failed, using local fixture", err);
+        const fixture = await import("@/samples/fallback-response.json");
+        return (fixture.default["extract-skills"]?.skills ?? []) as DemandedSkill[];
       });
-      const json = (await res.json()) as {
-        skills: DemandedSkill[];
-        degraded: boolean;
-      };
-      setDemanded(json.skills ?? []);
-      if (json.degraded) console.info("[extract-skills] served cached fixture");
-    } catch (err) {
-      console.error("[extract-skills] request failed", err);
-      setDemanded([]);
-    }
-    setIsWorking(false);
     setStep("audit");
   }
 
@@ -237,12 +296,17 @@ export default function Home() {
   // -- Step 3 --------------------------------------------------------------
 
   async function runDiagnosis(nextAudit: StudentAudit) {
-    const { courses, prereqs, catalogSkills } = await loadCatalog();
+    // The skills call was fired back on step 1; this is where we finally need it.
+    const [{ courses, prereqs, catalogSkills }, skills] = await Promise.all([
+      loadCatalog(),
+      skillsPromise.current ?? Promise.resolve<DemandedSkill[]>([]),
+    ]);
+    setDemanded(skills);
 
     // §11.1 and §11.2 — both local, no API call.
     const nextBottlenecks = computeBottlenecks(nextAudit, prereqs, courses);
     const nextGaps = computeSkillGaps(
-      demanded,
+      skills,
       nextAudit,
       catalogSkills,
       prereqs,
@@ -352,6 +416,19 @@ export default function Home() {
       <SiteHeader />
 
       <div className="mx-auto w-full max-w-6xl px-6">
+        {/* Focus lands here on every step change; -1 keeps it out of the tab
+            order while still being programmatically focusable. */}
+        <div ref={headingRef} tabIndex={-1} className="outline-none" />
+
+        {/* Politely announces progress to a screen reader. Visually hidden. */}
+        <p role="status" aria-live="polite" className="sr-only">
+          {isWorking
+            ? "Working"
+            : `Step ${STEPS.findIndex((s) => s.id === step) + 1} of ${STEPS.length}, ${
+                STEPS.find((s) => s.id === step)?.label ?? ""
+              }`}
+        </p>
+
         <Stepper
           step={step}
           furthest={furthest}
@@ -402,6 +479,12 @@ export default function Home() {
               options={options}
               slotsAvailable={electiveSlots}
               skillNames={skillNames}
+              reachableGaps={reachableGaps}
+              blockedGaps={blockedGaps}
+              requiredCodes={requiredCodes}
+              dependentsOf={dependentsOf}
+              skillDemand={skillDemand}
+              postingCount={filledPostings || undefined}
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onRegenerate={() => runBuildSchedules(preferences)}

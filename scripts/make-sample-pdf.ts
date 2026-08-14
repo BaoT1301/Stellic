@@ -387,7 +387,33 @@ async function main() {
   try {
     const { text } = await parser.getText();
     const flat = text.replace(/\s+/g, " ");
-    const mustContain = ["G01847362", "CS 262", "CS 367", "CS 471", "STILL NEEDED"];
+    // Two kinds of marker, and both matter.
+    //
+    // The course codes and the credit total are the DEMO SHAPE: §11.1 needs
+    // CS 262 outstanding (it gates CS 367, which gates CS 471), and 86 of 120
+    // is the one credit number this repo now uses everywhere. If any of these
+    // stops appearing, the parse still "succeeds" and the product quietly tells
+    // a different story.
+    //
+    // The status words are the VENDOR SHAPE. George Mason's degree audit runs on
+    // Stellic, whose student-facing vocabulary is Satisfied / In Progress /
+    // Remaining / Milestones, with Catalog Year on the header. This assertion is
+    // what stops the sample drifting back into DegreeWorks language, which would
+    // be a wrong domain claim in front of the judges (§0 rule 7).
+    const mustContain = [
+      "G01847362",
+      "86 of 120",
+      "CS 262",
+      "CS 367",
+      "CS 471",
+      "CS 450",
+      "CS 483",
+      "Catalog Year",
+      "Satisfied",
+      "In Progress",
+      "Remaining",
+      "Milestones",
+    ];
     const missing = mustContain.filter((needle) => !flat.includes(needle));
 
     console.log(`extracted ${text.length.toLocaleString()} characters of text`);

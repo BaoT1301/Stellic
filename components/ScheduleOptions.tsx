@@ -23,12 +23,54 @@ import { cn } from "@/lib/utils";
 
 const LETTERS = ["A", "B", "C", "D"];
 
+/**
+ * §11.3 step 2 puts the same critical, still-required courses on every option,
+ * so the cards genuinely differ only in the elective slot. Saying that once,
+ * above the row, turns "the model produced three near-copies" into "here is the
+ * one real decision" — and it is what the data actually shows.
+ *
+ * Plain hyphen and plus, never a dash: this line is read next to course codes.
+ */
+export function diffFromBase(
+  base: ScheduleOption,
+  option: ScheduleOption,
+  baseLetter: string,
+): string | undefined {
+  const baseCodes = base.courses.map((c) => c.code);
+  const codes = option.courses.map((c) => c.code);
+
+  const parts = [
+    ...baseCodes.filter((c) => !codes.includes(c)).map((c) => `-${c}`),
+    ...codes.filter((c) => !baseCodes.includes(c)).map((c) => `+${c}`),
+  ];
+
+  const credits = option.totalCredits - base.totalCredits;
+  if (credits !== 0) {
+    parts.push(`${credits > 0 ? "+" : "-"}${Math.abs(credits)} credits`);
+  }
+
+  if (parts.length === 0) return undefined;
+  return `vs Option ${baseLetter}: ${parts.join(", ")}`;
+}
+
 export interface ScheduleOptionsProps {
   options: ScheduleOption[];
   /** Elective slots open across incomplete requirements (§11.3 step 3). */
   slotsAvailable: number;
   /** skillId → skillName, so a course row can name the gap it closes. */
   skillNames?: Record<string, string>;
+  /** Open gaps a course offered next term could close — the honest denominator. */
+  reachableGaps?: number;
+  /** Open gaps whose only closers are prereq-blocked. */
+  blockedGaps?: number;
+  /** Still-needed required course codes, normalised. Drives the REQUIRED tag. */
+  requiredCodes?: Set<string>;
+  /** code → the still-needed courses waiting on it, for "Why this?". */
+  dependentsOf?: Record<string, string[]>;
+  /** skillId → how many pasted postings asked for it (SkillGap.demandCount). */
+  skillDemand?: Record<string, number>;
+  /** How many postings the student actually pasted. */
+  postingCount?: number;
   preferences: Preferences;
   onPreferencesChange: (next: Preferences) => void;
   onRegenerate: () => void;
@@ -44,6 +86,12 @@ export function ScheduleOptions({
   options,
   slotsAvailable,
   skillNames,
+  reachableGaps,
+  blockedGaps,
+  requiredCodes,
+  dependentsOf,
+  skillDemand,
+  postingCount,
   preferences,
   onPreferencesChange,
   onRegenerate,
@@ -87,6 +135,20 @@ export function ScheduleOptions({
         />
       </div>
 
+      {options.length > 1 && (
+        <div className="mt-6 max-w-2xl">
+          <p className="text-sm text-foreground">
+            The required courses are on every option. The elective slot is where{" "}
+            {options.length === 3 ? "the three" : "they"} differ.
+          </p>
+          {/* First and only place "slot" is glossed. §13's toggle row is right
+              above this, so the gloss lands before the phrase is used on a card. */}
+          <p className="mt-1 text-sm text-muted-foreground">
+            Elective slots are the classes you actually get to pick.
+          </p>
+        </div>
+      )}
+
       {options.length === 0 ? (
         // §11.3 step 8 makes this unreachable, and §0 rule 3 says build it
         // anyway: a blank screen in the demo video is worse than any feature.
@@ -95,9 +157,11 @@ export function ScheduleOptions({
           and regenerate.
         </p>
       ) : (
+        // No `items-start`: the cards stretch to equal height so ScheduleCard's
+        // `mt-auto` lands all three "Take this schedule" buttons on one line.
         <div
           className={cn(
-            "mt-6 grid items-start gap-5",
+            "mt-5 grid gap-5",
             options.length === 1 && "max-w-xl",
             options.length === 2 && "lg:grid-cols-2",
             options.length >= 3 && "md:grid-cols-2 lg:grid-cols-3",
@@ -111,6 +175,17 @@ export function ScheduleOptions({
               letter={LETTERS[i] ?? String(i + 1)}
               slotsAvailable={slotsAvailable}
               skillNames={skillNames}
+              reachableGaps={reachableGaps}
+              blockedGaps={blockedGaps}
+              requiredCodes={requiredCodes}
+              dependentsOf={dependentsOf}
+              skillDemand={skillDemand}
+              postingCount={postingCount}
+              diff={
+                i === 0
+                  ? undefined
+                  : diffFromBase(options[0]!, option, LETTERS[0]!)
+              }
               selected={option.id === selectedId}
               onSelect={() =>
                 onSelect(option.id === selectedId ? null : option.id)

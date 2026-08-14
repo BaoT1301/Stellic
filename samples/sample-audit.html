@@ -2,35 +2,90 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Degree Evaluation — Okoye, Daniel R. — G01847362</title>
+    <title>Degree Audit - George Mason University - Okoye, Daniel R.</title>
     <!--
-      SAMPLE DEGREE AUDIT — CLAUDE.md §10 ("everything public is real; everything
+      SAMPLE DEGREE AUDIT - CLAUDE.md §10 ("everything public is real; everything
       that is a student's private record is mocked").
 
       This file is the source for public/sample-audit.pdf. It is printed to PDF by
-      scripts/make-sample-pdf.ts. Every course code, title, and credit value below
-      was checked against the live GMU CourseLeaf catalog on Aug 13, 2026 per
-      CLAUDE.md §0 rule 7 — a wrong domain claim in front of registrars is worse
-      than a bug.
+      scripts/make-sample-pdf.ts.
 
-      The student, the student ID, the grades, and the advisor are invented. The
-      requirement structure is the real 2026-2027 BS Computer Science list from
-      catalog.gmu.edu, and it matches data/degree-template.json exactly.
+      WHY THIS IS NOT A DEGREEWORKS WORKSHEET ANY MORE
+      -----------------------------------------------
+      The first version of this file was authored as a DegreeWorks worksheet
+      ("Still Needed" blocks, @-wildcards). A George Mason student in 2026 does
+      not have one. George Mason's degree audit is Stellic: registrar.gmu.edu
+      calls the tool "Mason Degree Audit" and documents three views, Track / Plan
+      / Schedule, plus an Official and a Planned view. Handing registrars a
+      competitor's worksheet format is exactly the §0 rule 7 failure - a wrong
+      domain claim about the judges' own customer - so the document below is
+      re-authored in the information structure and the vocabulary a Stellic audit
+      actually uses. It copies no Stellic branding, only the structure.
 
-      Arithmetic is deliberately airtight because registrars add these up:
-        Mason Core 24 + CS Core 38 + Math 17 + Stat 3 + Nat Sci 12
-        + Senior CS 12 + CS-Related 6 + Free 8 = 120
-        applied  24 + 22 + 14 + 3 + 8 + 6 + 3 + 4 = 84
+      The vocabulary below was taken from published university documentation, not
+      invented:
+        - Statuses: Satisfied / In Progress / Remaining, plus Planned and
+          Registered for future terms. Stellic's own student legend reads
+          "Course Taken", "In progress", "Registered course in a future term",
+          "Planned course", "Remaining course or requirement".
+        - Milestones are non-course requirements, tracked separately from
+          coursework with their own progress bar and marked with a flag.
+          (registrar.gmu.edu degree audit FAQ, verbatim: "Milestones are
+          non-course requirements in Stellic, and they are tracked separately
+          from the coursework in terms of the overall progress.")
+        - Catalog Year, same source: "Catalog year tells you which University
+          Catalog edition will govern the student's program requirements."
 
-      Tuned per CLAUDE.md §18 so the pipeline that consumes it has something to
-      show: CS 262 is still outstanding, which blocks CS 367, which blocks CS 471
-      and CS 475 — a real, verifiable two-edge chain, so exactly one bottleneck
-      classifies "critical" at termsRemaining = 2. Three elective slots stay open
-      (2 senior CS + 1 CS-related) so §11.3's three strategies can diverge.
+      WHAT IS REAL AND WHAT IS MOCKED
+      -------------------------------
+      Every course code, title and credit value below was checked against
+      data/courses.json, which is the scraped live GMU CourseLeaf catalog. Every
+      term sequence below was checked against data/prereqs.json: no course is
+      listed in a term before its prerequisites were earned. The student, the ID
+      number, the grades and the advisor are invented.
+
+      Deliberately NOT asserted: the membership of GMU's approved senior CS
+      elective list. The courses exist; which of them the department currently
+      approves is a policy claim this repo has not verified, so the block says
+      "confirm the approved list with your advisor" instead of listing one.
+
+      ARITHMETIC (registrars add these up, so it is airtight)
+      ------------------------------------------------------
+        required  24 + 38 + 17 + 3 + 12 + 12 + 6 + 8 = 120
+        applied   24 + 22 + 17 + 3 +  8 +  6 + 3 + 3 =  86
+        remaining  0 + 16 +  0 + 0 +  4 +  6 + 3 + 5 =  34   (120 - 86)
+
+        Mason coursework 58 credits + transfer credit 28 credits = 86 applied.
+        Cumulative GPA 3.28 and CS-course GPA 3.36 are computed from the grades
+        printed below on the standard 4.00 scale, over the 58 Mason credits only.
+        Junior standing at 60 earned credits lands in Fall 2025 (71 credits),
+        which is what the milestone block says.
+
+      86 is now the single credit number across samples/fallback-response.json,
+      this file, and the manual-entry default in components/AuditUpload.tsx. It
+      used to disagree three ways (86 / 84 / 89).
+
+      DEMO SHAPE - do not break this (CLAUDE.md §18 calls this file the biggest
+      remaining risk). The pipeline needs:
+        - CS 262 outstanding, which is a prerequisite for CS 367, which is a
+          prerequisite for CS 471. Verified in data/prereqs.json. That two-edge
+          chain is what makes exactly one bottleneck classify "critical" at
+          termsRemaining = 2.
+        - three open elective slots (2 senior CS + 1 CS-related) so §11.3's three
+          strategies can diverge.
+        - the still-required set {CS 262, CS 367, CS 450, CS 471, CS 483} plus the
+          courses already taken produces the SAME open skill-gap set as
+          samples/fallback-response.json, so the live parse and the cached
+          fixture tell the same story. Checked, not assumed.
     -->
     <style>
       /* Print-first. Chrome/Edge --headless --print-to-pdf renders this file at
-         Letter with no browser header/footer (see scripts/make-sample-pdf.ts). */
+         Letter with no browser header/footer (see scripts/make-sample-pdf.ts).
+
+         NOTE: no `text-transform` anywhere. Chromium prints the transformed
+         glyphs, so an uppercasing rule changes the text pdf-parse extracts and
+         quietly breaks the marker assertions in make-sample-pdf.ts. Casing is
+         written literally in the markup instead. */
       @page {
         size: letter;
         margin: 0.45in;
@@ -48,8 +103,8 @@
 
       body {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 8.6pt;
-        line-height: 1.32;
+        font-size: 8.3pt;
+        line-height: 1.3;
         color: #111;
         background: #fff;
         /* Without this, print-to-pdf drops every background colour and the
@@ -117,7 +172,6 @@
 
       .progress .plabel {
         font-size: 7.4pt;
-        text-transform: uppercase;
         letter-spacing: 0.4pt;
         color: #555;
         margin-bottom: 2pt;
@@ -152,13 +206,13 @@
         width: 100%;
         border-collapse: collapse;
         border: 0.75pt solid #9aa7b2;
-        margin-bottom: 9pt;
+        margin-bottom: 5pt;
       }
 
       table.student td {
-        padding: 2.4pt 5pt;
+        padding: 2.2pt 5pt;
         border: 0.4pt solid #cdd6dd;
-        font-size: 8.2pt;
+        font-size: 7.9pt;
         vertical-align: top;
       }
 
@@ -166,19 +220,26 @@
         background: #eef2f6;
         font-weight: bold;
         color: #1f4e79;
-        width: 12%;
+        width: 13.5%;
         white-space: nowrap;
       }
 
       table.student td.v {
-        width: 21.33%;
+        width: 19.83%;
+      }
+
+      .headnote {
+        font-size: 7.6pt;
+        color: #555;
+        margin-bottom: 9pt;
+        line-height: 1.4;
       }
 
       /* ---------- requirement blocks ---------- */
 
       .block {
         border: 0.75pt solid #9aa7b2;
-        margin-bottom: 8pt;
+        margin-bottom: 6pt;
         page-break-inside: avoid;
       }
 
@@ -196,7 +257,6 @@
         font-size: 9pt;
         font-weight: bold;
         letter-spacing: 0.2pt;
-        text-transform: uppercase;
       }
 
       .block-head .bmeta {
@@ -220,6 +280,12 @@
         border: 0.5pt solid #2f7d4f;
       }
 
+      .pill.wip {
+        background: #fdeacf;
+        color: #7a4a10;
+        border: 0.5pt solid #b8791f;
+      }
+
       .pill.no {
         background: #fadcdf;
         color: #7a1c25;
@@ -235,7 +301,6 @@
         background: #dde5ec;
         color: #1f4e79;
         font-size: 7.2pt;
-        text-transform: uppercase;
         letter-spacing: 0.3pt;
         text-align: left;
         padding: 2pt 6pt;
@@ -243,7 +308,7 @@
       }
 
       table.rows td {
-        padding: 2.2pt 6pt;
+        padding: 1.9pt 6pt;
         border-bottom: 0.4pt solid #e3e8ec;
         vertical-align: top;
       }
@@ -253,26 +318,30 @@
       }
 
       /* Column widths, in order:
-         status · course · title · grade · credits · term */
-      .c-st {
-        width: 4%;
+         mark · course · title · status · grade · credits · term */
+      .c-mk {
+        width: 3.5%;
         text-align: center;
         font-weight: bold;
       }
       .c-code {
-        width: 12%;
+        width: 11%;
         white-space: nowrap;
         font-weight: bold;
       }
       .c-title {
-        width: 52%;
+        width: 43.5%;
+      }
+      .c-status {
+        width: 12%;
+        white-space: nowrap;
       }
       .c-grade {
-        width: 8%;
+        width: 7%;
         text-align: center;
       }
       .c-cr {
-        width: 9%;
+        width: 8%;
         text-align: right;
       }
       .c-term {
@@ -284,19 +353,23 @@
         color: #1a7f43;
       }
 
+      .wip {
+        color: #8a5a12;
+      }
+
       .no {
         color: #b02a37;
       }
 
-      tr.pending td {
+      tr.remaining td {
         color: #7a1c25;
       }
 
-      tr.pending td.c-title {
+      tr.remaining td.c-title {
         font-style: italic;
       }
 
-      .stillneeded {
+      .remaining-line {
         background: #fdf2f3;
         border-top: 0.75pt solid #e6b8bd;
         padding: 3.4pt 6pt;
@@ -304,10 +377,9 @@
         color: #7a1c25;
       }
 
-      .stillneeded b {
-        text-transform: uppercase;
+      .remaining-line b {
         letter-spacing: 0.3pt;
-        font-size: 7.4pt;
+        font-size: 7.6pt;
       }
 
       .blocknote {
@@ -325,6 +397,7 @@
         padding: 4pt 6pt;
         font-size: 7.6pt;
         margin-bottom: 6pt;
+        line-height: 1.5;
       }
 
       .legend b {
@@ -342,36 +415,36 @@
   <body>
     <div class="sheet">
       <div class="notice">
-        SAMPLE DOCUMENT — SIMULATED DEGREE AUDIT.
+        SAMPLE DOCUMENT - SIMULATED DEGREE AUDIT.
         <span
-          >Generated for the Reverse Audit demo. The student, ID number, grades,
+          >Generated for the Reverse Audit demo. The student, ID number, grades
           and advisor are fictional and this is not a record of any real person.
-          The requirement structure is the published 2026-2027 BS Computer
-          Science list from the George Mason University catalog.</span
+          The course codes, titles, credit values and prerequisite ordering are
+          taken from the published George Mason University catalog.</span
         >
       </div>
 
       <div class="report-title">
-        <h1>Degree Evaluation &mdash; Student View</h1>
+        <h1>Degree Audit - George Mason University</h1>
         <div class="meta">
-          Audit run: 08/13/2026 at 14:22<br />
-          Program: EC-BS-CS &nbsp;|&nbsp; Format: Student View
+          Mason Degree Audit &nbsp;|&nbsp; Official view &nbsp;|&nbsp; Track<br />
+          Audit run 08/14/2026 9:12 AM &nbsp;|&nbsp; Program EC-BS-CS
         </div>
       </div>
 
       <div class="progress-wrap">
         <div class="progress">
-          <div class="plabel">Requirements complete</div>
+          <div class="plabel">Credits applied</div>
           <div class="bar">
-            <div class="fill" style="width: 76%"></div>
-            <div class="pct">76%</div>
+            <div class="fill" style="width: 72%"></div>
+            <div class="pct">86 of 120 credits applied (72%)</div>
           </div>
         </div>
         <div class="progress">
-          <div class="plabel">Credits applied</div>
+          <div class="plabel">Milestones</div>
           <div class="bar">
-            <div class="fill" style="width: 70%"></div>
-            <div class="pct">70%</div>
+            <div class="fill" style="width: 67%"></div>
+            <div class="pct">2 of 3 milestones completed</div>
           </div>
         </div>
       </div>
@@ -388,216 +461,254 @@
         <tr>
           <td class="k">Degree</td>
           <td class="v">Bachelor of Science</td>
-          <td class="k">Major</td>
-          <td class="v">Computer Science</td>
-          <td class="k">Classification</td>
+          <td class="k">Program</td>
+          <td class="v">Computer Science, BS</td>
+          <td class="k">Class standing</td>
           <td class="v">Junior</td>
         </tr>
         <tr>
           <td class="k">College</td>
           <td class="v">Engineering and Computing</td>
           <td class="k">Catalog Year</td>
-          <td class="v">2026-2027</td>
-          <td class="k">Academic Standing</td>
+          <td class="v">2024-2025</td>
+          <td class="k">Academic standing</td>
           <td class="v">Good Standing</td>
         </tr>
         <tr>
-          <td class="k">Overall GPA</td>
-          <td class="v">3.25</td>
-          <td class="k">Major GPA</td>
-          <td class="v">3.20</td>
+          <td class="k">Cumulative GPA</td>
+          <td class="v">3.28</td>
+          <td class="k">CS course GPA</td>
+          <td class="v">3.36</td>
           <td class="k">Advisor</td>
           <td class="v">Whitfield, K.</td>
         </tr>
         <tr>
-          <td class="k">Credits Applied</td>
-          <td class="v">84</td>
-          <td class="k">Credits Required</td>
+          <td class="k">Credits applied</td>
+          <td class="v">86</td>
+          <td class="k">Credits required</td>
           <td class="v">120</td>
-          <td class="k">Anticipated Graduation</td>
-          <td class="v">May 2027</td>
+          <td class="k">Credits remaining</td>
+          <td class="v">34</td>
+        </tr>
+        <tr>
+          <td class="k">Anticipated graduation</td>
+          <td class="v">Spring 2027</td>
+          <td class="k">Open elective slots</td>
+          <td class="v">3</td>
+          <td class="k">Registered, Fall 2026</td>
+          <td class="v">0 credits</td>
         </tr>
       </table>
+
+      <div class="headnote">
+        Catalog Year tells you which University Catalog edition governs your
+        program requirements. Open elective slots are the unfilled choices in
+        your elective blocks: 2 in Senior Computer Science Electives and 1 in
+        Computer Science-Related Electives. The Natural Science and General
+        Elective Credit blocks below have credits remaining but no unfilled
+        choice slots, because any approved course applies.
+      </div>
 
       <!-- ============ DEGREE SUMMARY ============ -->
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Degree in Bachelor of Science<span class="pill no"
-              >INCOMPLETE</span
+            >Bachelor of Science, Computer Science<span class="pill wip"
+              >In Progress</span
             ></span
           >
           <span class="bmeta"
-            >Credits required: 120 &nbsp;&nbsp; Credits applied: 84
-            &nbsp;&nbsp; Credits still needed: 36</span
+            >Applied 86 &nbsp;|&nbsp; Required 120 &nbsp;|&nbsp; Remaining
+            34</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Block</th>
             <th class="c-title">Requirement</th>
-            <th class="c-grade">Status</th>
+            <th class="c-status">Status</th>
+            <th class="c-grade">&nbsp;</th>
             <th class="c-cr">Applied</th>
-            <th class="c-term">Required</th>
+            <th class="c-term">Required / Left</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">MC</td>
             <td class="c-title">Mason Core</td>
-            <td class="c-grade ok">Complete</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">&nbsp;</td>
             <td class="c-cr">24</td>
-            <td class="c-term">24</td>
-          </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
-            <td class="c-code">CSCORE</td>
-            <td class="c-title">Computer Science Core</td>
-            <td class="c-grade no">Incomplete</td>
-            <td class="c-cr">22</td>
-            <td class="c-term">38</td>
-          </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
-            <td class="c-code">MATH</td>
-            <td class="c-title">Mathematics</td>
-            <td class="c-grade no">Incomplete</td>
-            <td class="c-cr">14</td>
-            <td class="c-term">17</td>
+            <td class="c-term">24 / 0</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk wip">&#9679;</td>
+            <td class="c-code">CSCORE</td>
+            <td class="c-title">Computer Science Core</td>
+            <td class="c-status wip">In Progress</td>
+            <td class="c-grade">&nbsp;</td>
+            <td class="c-cr">22</td>
+            <td class="c-term">38 / 16</td>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#10003;</td>
+            <td class="c-code">MATH</td>
+            <td class="c-title">Mathematics</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">&nbsp;</td>
+            <td class="c-cr">17</td>
+            <td class="c-term">17 / 0</td>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">STAT</td>
             <td class="c-title">Statistics</td>
-            <td class="c-grade ok">Complete</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">&nbsp;</td>
             <td class="c-cr">3</td>
-            <td class="c-term">3</td>
+            <td class="c-term">3 / 0</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr>
+            <td class="c-mk wip">&#9679;</td>
             <td class="c-code">NATSCI</td>
             <td class="c-title">Natural Science</td>
-            <td class="c-grade no">Incomplete</td>
+            <td class="c-status wip">In Progress</td>
+            <td class="c-grade">&nbsp;</td>
             <td class="c-cr">8</td>
-            <td class="c-term">12</td>
+            <td class="c-term">12 / 4</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr>
+            <td class="c-mk wip">&#9679;</td>
             <td class="c-code">SRCS</td>
-            <td class="c-title">Senior Computer Science</td>
-            <td class="c-grade no">Incomplete</td>
+            <td class="c-title">Senior Computer Science Electives</td>
+            <td class="c-status wip">In Progress</td>
+            <td class="c-grade">&nbsp;</td>
             <td class="c-cr">6</td>
-            <td class="c-term">12</td>
+            <td class="c-term">12 / 6</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr>
+            <td class="c-mk wip">&#9679;</td>
             <td class="c-code">CSREL</td>
             <td class="c-title">Computer Science-Related Electives</td>
-            <td class="c-grade no">Incomplete</td>
+            <td class="c-status wip">In Progress</td>
+            <td class="c-grade">&nbsp;</td>
             <td class="c-cr">3</td>
-            <td class="c-term">6</td>
+            <td class="c-term">6 / 3</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
-            <td class="c-code">FREE</td>
-            <td class="c-title">Free Electives</td>
-            <td class="c-grade no">Incomplete</td>
-            <td class="c-cr">4</td>
-            <td class="c-term">8</td>
+          <tr>
+            <td class="c-mk wip">&#9679;</td>
+            <td class="c-code">GENEL</td>
+            <td class="c-title">General Elective Credit</td>
+            <td class="c-status wip">In Progress</td>
+            <td class="c-grade">&nbsp;</td>
+            <td class="c-cr">3</td>
+            <td class="c-term">8 / 5</td>
           </tr>
         </table>
+        <div class="blocknote">
+          Totals: 86 credits applied, 120 required, 34 remaining. Courses may
+          satisfy more than one requirement; credits are applied once toward the
+          120-credit degree total.
+        </div>
       </div>
 
       <!-- ============ MASON CORE ============ -->
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Mason Core<span class="pill ok">COMPLETE</span></span
+            >Mason Core<span class="pill ok">Satisfied</span></span
           >
           <span class="bmeta"
-            >Credits required: 24 &nbsp;&nbsp; Credits applied: 24</span
+            >Applied 24 &nbsp;|&nbsp; Required 24 &nbsp;|&nbsp; Remaining 0</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Requirement / Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
-            <td class="c-code">TRNS</td>
-            <td class="c-title">Written Communication (ENGH 101 equivalent)</td>
+            <td class="c-mk ok">&#10003;</td>
+            <td class="c-code">ENGH 101</td>
+            <td class="c-title">Composition (written communication)</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
             <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
+            <td class="c-code">ENGH 201</td>
+            <td class="c-title">Reading and Writing about Texts (literature)</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">TR</td>
+            <td class="c-cr">3</td>
+            <td class="c-term">Transfer</td>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">ENGH 302</td>
             <td class="c-title">Advanced Composition</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
             <td class="c-cr">3</td>
             <td class="c-term">Fall 2025</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
-            <td class="c-title">Oral Communication</td>
+            <td class="c-title">Oral communication</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
             <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
-            <td class="c-code">TRNS</td>
-            <td class="c-title">Literature</td>
-            <td class="c-grade">TR</td>
-            <td class="c-cr">3</td>
-            <td class="c-term">Transfer</td>
-          </tr>
-          <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
             <td class="c-title">Arts</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
             <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
-            <td class="c-title">Global History</td>
+            <td class="c-title">Global history</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
             <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
-            <td class="c-title">Social and Behavioral Sciences</td>
+            <td class="c-title">Social and behavioral sciences</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
             <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
-            <td class="c-title">Global Contexts</td>
+            <td class="c-title">Global contexts</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
             <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
         </table>
         <div class="blocknote">
-          Quantitative Reasoning, Natural Science, Information Technology and
-          Ethics, and Written Communication in the Major are satisfied by MATH
-          113, PHYS 160/161, CS 405, and CS 321 in the major blocks below.
-          Courses may satisfy more than one requirement; credits are applied
-          once toward the 120-credit degree total.
+          Quantitative reasoning and natural science are satisfied by MATH 113
+          and by the PHYS sequence in the blocks below. Those credits are applied
+          in those blocks, not here.
         </div>
       </div>
 
@@ -605,125 +716,141 @@
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Computer Science Core<span class="pill no">INCOMPLETE</span></span
+            >Computer Science Core<span class="pill wip">In Progress</span></span
           >
           <span class="bmeta"
-            >Credits required: 38 &nbsp;&nbsp; Credits applied: 22
-            &nbsp;&nbsp; Credits still needed: 16</span
+            >Applied 22 &nbsp;|&nbsp; Required 38 &nbsp;|&nbsp; Remaining
+            16</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 110</td>
             <td class="c-title">Essentials of Computer Science</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
             <td class="c-cr">3</td>
             <td class="c-term">Fall 2024</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 112</td>
             <td class="c-title">Introduction to Computer Programming</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B</td>
             <td class="c-cr">4</td>
             <td class="c-term">Fall 2024</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 211</td>
             <td class="c-title">Object-Oriented Programming</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B+</td>
             <td class="c-cr">3</td>
             <td class="c-term">Spring 2025</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
             <td class="c-code">CS 262</td>
-            <td class="c-title">
-              Introduction to Low-Level Programming &mdash; STILL NEEDED
-            </td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-title">Introduction to Low-Level Programming</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 310</td>
             <td class="c-title">Data Structures</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B</td>
             <td class="c-cr">3</td>
             <td class="c-term">Fall 2025</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 321</td>
             <td class="c-title">Software Engineering</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
             <td class="c-cr">3</td>
             <td class="c-term">Spring 2026</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 330</td>
             <td class="c-title">Formal Methods and Models</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B-</td>
             <td class="c-cr">3</td>
             <td class="c-term">Fall 2025</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
             <td class="c-code">CS 367</td>
-            <td class="c-title">
-              Computer Systems and Programming &mdash; STILL NEEDED
-            </td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-title">Computer Systems and Programming</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">4</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 405</td>
             <td class="c-title">Ethics and Law in Computing</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A</td>
             <td class="c-cr">3</td>
             <td class="c-term">Spring 2026</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
             <td class="c-code">CS 450</td>
-            <td class="c-title">Database Concepts &mdash; STILL NEEDED</td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-title">Database Concepts</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
             <td class="c-code">CS 471</td>
-            <td class="c-title">Operating Systems &mdash; STILL NEEDED</td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-title">Operating Systems</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
             <td class="c-code">CS 483</td>
-            <td class="c-title">Analysis of Algorithms &mdash; STILL NEEDED</td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-title">Analysis of Algorithms</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
         </table>
-        <div class="stillneeded">
-          <b>Still needed:</b> CS 262, CS 367, CS 450, CS 471, CS 483
+        <div class="remaining-line">
+          <b>Remaining in this block:</b> CS 262, CS 367, CS 450, CS 471, CS 483
+          (16 credits). No unfilled choice slots: every course in this block is
+          named.
+        </div>
+        <div class="blocknote">
+          Prerequisite note from the catalog: CS 262 is a required prerequisite
+          for CS 367, and CS 367 is a required prerequisite for CS 471. CS 450
+          and CS 483 are open now.
         </div>
       </div>
 
@@ -731,96 +858,100 @@
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Mathematics<span class="pill no">INCOMPLETE</span></span
+            >Mathematics<span class="pill ok">Satisfied</span></span
           >
           <span class="bmeta"
-            >Credits required: 17 &nbsp;&nbsp; Credits applied: 14
-            &nbsp;&nbsp; Credits still needed: 3</span
+            >Applied 17 &nbsp;|&nbsp; Required 17 &nbsp;|&nbsp; Remaining 0</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">MATH 113</td>
             <td class="c-title">Analytic Geometry and Calculus I</td>
-            <td class="c-grade">B-</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">TR</td>
+            <td class="c-cr">4</td>
+            <td class="c-term">Transfer</td>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#10003;</td>
+            <td class="c-code">MATH 114</td>
+            <td class="c-title">Analytic Geometry and Calculus II</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">C+</td>
             <td class="c-cr">4</td>
             <td class="c-term">Fall 2024</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
-            <td class="c-code">MATH 114</td>
-            <td class="c-title">Analytic Geometry and Calculus II</td>
-            <td class="c-grade">C+</td>
-            <td class="c-cr">4</td>
-            <td class="c-term">Spring 2025</td>
-          </tr>
-          <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">MATH 125</td>
             <td class="c-title">Discrete Mathematics I</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
+            <td class="c-cr">3</td>
+            <td class="c-term">Fall 2024</td>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#10003;</td>
+            <td class="c-code">MATH 203</td>
+            <td class="c-title">Linear Algebra</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">B+</td>
             <td class="c-cr">3</td>
             <td class="c-term">Spring 2025</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
-            <td class="c-code">MATH 203</td>
-            <td class="c-title">Linear Algebra</td>
-            <td class="c-grade">B+</td>
-            <td class="c-cr">3</td>
-            <td class="c-term">Fall 2025</td>
-          </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">MATH 213</td>
-            <td class="c-title">
-              Analytic Geometry and Calculus III &mdash; STILL NEEDED
-            </td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-title">Analytic Geometry and Calculus III</td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">B</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">Spring 2025</td>
           </tr>
         </table>
-        <div class="stillneeded"><b>Still needed:</b> MATH 213</div>
       </div>
 
       <!-- ============ STATISTICS ============ -->
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Statistics<span class="pill ok">COMPLETE</span></span
+            >Statistics<span class="pill ok">Satisfied</span></span
           >
           <span class="bmeta"
-            >Credits required: 3 &nbsp;&nbsp; Credits applied: 3</span
+            >Applied 3 &nbsp;|&nbsp; Required 3 &nbsp;|&nbsp; Remaining 0</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">STAT 344</td>
             <td class="c-title">
               Probability and Statistics for Engineers and Scientists I
             </td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B</td>
             <td class="c-cr">3</td>
-            <td class="c-term">Spring 2026</td>
+            <td class="c-term">Spring 2025</td>
           </tr>
         </table>
       </div>
@@ -829,129 +960,133 @@
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Natural Science<span class="pill no">INCOMPLETE</span></span
+            >Natural Science<span class="pill wip">In Progress</span></span
           >
           <span class="bmeta"
-            >Credits required: 12 &nbsp;&nbsp; Credits applied: 8
-            &nbsp;&nbsp; Credits still needed: 4</span
+            >Applied 8 &nbsp;|&nbsp; Required 12 &nbsp;|&nbsp; Remaining 4</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">PHYS 160</td>
             <td class="c-title">University Physics I</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B</td>
             <td class="c-cr">3</td>
-            <td class="c-term">Fall 2024</td>
+            <td class="c-term">Spring 2025</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">PHYS 161</td>
             <td class="c-title">University Physics I Laboratory</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A</td>
             <td class="c-cr">1</td>
-            <td class="c-term">Fall 2024</td>
+            <td class="c-term">Spring 2025</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">PHYS 260</td>
             <td class="c-title">University Physics II</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B</td>
             <td class="c-cr">3</td>
-            <td class="c-term">Spring 2025</td>
+            <td class="c-term">Fall 2025</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">PHYS 261</td>
             <td class="c-title">University Physics II Laboratory</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
             <td class="c-cr">1</td>
-            <td class="c-term">Spring 2025</td>
+            <td class="c-term">Fall 2025</td>
           </tr>
         </table>
-        <div class="stillneeded">
-          <b>Still needed:</b> 4 credits from the approved natural science list.
-          Two-course laboratory sequence requirement satisfied by PHYS 160/161
-          and PHYS 260/261.
+        <div class="remaining-line">
+          <b>Remaining in this block:</b> 4 credits from the approved natural
+          science list. No specific course is named and there is no unfilled
+          choice slot to fill.
         </div>
       </div>
 
-      <!-- ============ SENIOR COMPUTER SCIENCE ============ -->
+      <!-- ============ SENIOR COMPUTER SCIENCE ELECTIVES ============ -->
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Senior Computer Science<span class="pill no">INCOMPLETE</span></span
+            >Senior Computer Science Electives<span class="pill wip"
+              >In Progress</span
+            ></span
           >
           <span class="bmeta"
-            >Credits required: 12 &nbsp;&nbsp; Credits applied: 6
-            &nbsp;&nbsp; Credits still needed: 6</span
+            >Applied 6 &nbsp;|&nbsp; Required 12 &nbsp;|&nbsp; Remaining 6</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 480</td>
             <td class="c-title">Introduction to Artificial Intelligence</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">B+</td>
             <td class="c-cr">3</td>
             <td class="c-term">Spring 2026</td>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">CS 499</td>
             <td class="c-title">Special Topics in Computer Science</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">Summer 2026</td>
+            <td class="c-term">Spring 2026</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
-            <td class="c-code">SLOT 3</td>
-            <td class="c-title">
-              Senior computer science elective &mdash; OPEN
-            </td>
-            <td class="c-grade">&mdash;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
+            <td class="c-code">Slot 3</td>
+            <td class="c-title">Senior computer science elective, unfilled</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
-            <td class="c-code">SLOT 4</td>
-            <td class="c-title">
-              Senior computer science elective &mdash; OPEN
-            </td>
-            <td class="c-grade">&mdash;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
+            <td class="c-code">Slot 4</td>
+            <td class="c-title">Senior computer science elective, unfilled</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
         </table>
-        <div class="stillneeded">
-          <b>Still needed:</b> 2 courses (6 credits) from the approved senior
-          computer science list. At least one of the four courses in this block
-          must be CS 455, CS 468, or CS 475 &mdash; not yet satisfied.
+        <div class="remaining-line">
+          <b>Remaining in this block:</b> 2 unfilled elective slots, 6 credits.
+          No specific course codes are required.
         </div>
         <div class="blocknote">
-          Approved list includes CS 425, CS 440, CS 450, CS 451, CS 452, CS 453,
-          CS 455, CS 463, CS 465, CS 468, CS 475, CS 477, CS 478, CS 480, CS 482,
-          CS 484, CS 485, CS 487, CS 489, CS 491 (max 3 credits), CS 499 (max 6
-          credits), MATH 446, OR 481.
+          This block takes 400-level computer science coursework. Confirm the
+          currently approved list with your department advisor before you
+          register.
         </div>
       </div>
 
@@ -959,120 +1094,194 @@
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Computer Science-Related Electives<span class="pill no"
-              >INCOMPLETE</span
+            >Computer Science-Related Electives<span class="pill wip"
+              >In Progress</span
             ></span
           >
           <span class="bmeta"
-            >Credits required: 6 &nbsp;&nbsp; Credits applied: 3
-            &nbsp;&nbsp; Credits still needed: 3</span
+            >Applied 3 &nbsp;|&nbsp; Required 6 &nbsp;|&nbsp; Remaining 3</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Course</th>
             <th class="c-title">Title</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">ENGH 388</td>
             <td class="c-title">Professional and Technical Writing</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">A-</td>
             <td class="c-cr">3</td>
             <td class="c-term">Spring 2026</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
-            <td class="c-code">SLOT 2</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
+            <td class="c-code">Slot 2</td>
             <td class="c-title">
-              Computer science-related elective &mdash; OPEN
+              Computer science-related elective, unfilled
             </td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">3</td>
-            <td class="c-term">&mdash;</td>
+            <td class="c-term">-</td>
           </tr>
         </table>
-        <div class="stillneeded">
-          <b>Still needed:</b> 1 course (3 credits) from the approved computer
-          science-related elective list.
+        <div class="remaining-line">
+          <b>Remaining in this block:</b> 1 unfilled elective slot, 3 credits. No
+          specific course code is required.
         </div>
       </div>
 
-      <!-- ============ FREE ELECTIVES ============ -->
+      <!-- ============ GENERAL ELECTIVE CREDIT ============ -->
       <div class="block">
         <div class="block-head">
           <span class="bname"
-            >Free Electives<span class="pill no">INCOMPLETE</span></span
+            >General Elective Credit<span class="pill wip"
+              >In Progress</span
+            ></span
           >
           <span class="bmeta"
-            >Credits required: 8 &nbsp;&nbsp; Credits applied: 4
-            &nbsp;&nbsp; Credits still needed: 4</span
+            >Applied 3 &nbsp;|&nbsp; Required 8 &nbsp;|&nbsp; Remaining 5</span
           >
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
-            <th class="c-code">Course</th>
-            <th class="c-title">Title</th>
+            <th class="c-mk">&nbsp;</th>
+            <th class="c-code">Source</th>
+            <th class="c-title">Description</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
             <td class="c-title">Transfer elective credit</td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
-            <td class="c-cr">4</td>
+            <td class="c-cr">3</td>
             <td class="c-term">Transfer</td>
           </tr>
         </table>
-        <div class="stillneeded">
-          <b>Still needed:</b> 4 credits of free elective coursework.
+        <div class="remaining-line">
+          <b>Remaining in this block:</b> 5 credits of any credit-bearing
+          coursework, to reach the 120-credit degree minimum. There is no course
+          list and no unfilled choice slot here.
         </div>
       </div>
 
-      <!-- ============ TRANSFER + IN PROGRESS ============ -->
+      <!-- ============ MILESTONES ============ -->
       <div class="block">
         <div class="block-head">
-          <span class="bname">Transfer Credit and Registration</span>
-          <span class="bmeta">Transfer credits accepted: 25</span>
+          <span class="bname"
+            >Milestones<span class="pill wip">2 of 3 completed</span></span
+          >
+          <span class="bmeta">Non-course requirements</span>
         </div>
         <table class="rows">
           <tr>
-            <th class="c-st">&nbsp;</th>
+            <th class="c-mk">&nbsp;</th>
+            <th class="c-code">Type</th>
+            <th class="c-title">Milestone</th>
+            <th class="c-status">Status</th>
+            <th class="c-grade">&nbsp;</th>
+            <th class="c-cr">Credits</th>
+            <th class="c-term">Recorded</th>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#9873;</td>
+            <td class="c-code">Program</td>
+            <td class="c-title">
+              Major declared: Computer Science, BS
+            </td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">&nbsp;</td>
+            <td class="c-cr">0</td>
+            <td class="c-term">Fall 2024</td>
+          </tr>
+          <tr>
+            <td class="c-mk ok">&#9873;</td>
+            <td class="c-code">Standing</td>
+            <td class="c-title">
+              Junior standing reached at 60 earned credits
+            </td>
+            <td class="c-status ok">Satisfied</td>
+            <td class="c-grade">&nbsp;</td>
+            <td class="c-cr">0</td>
+            <td class="c-term">Fall 2025</td>
+          </tr>
+          <tr class="remaining">
+            <td class="c-mk no">&#9873;</td>
+            <td class="c-code">Graduation</td>
+            <td class="c-title">
+              Graduation application for Spring 2027, not yet submitted
+            </td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">&nbsp;</td>
+            <td class="c-cr">0</td>
+            <td class="c-term">-</td>
+          </tr>
+        </table>
+        <div class="blocknote">
+          Milestones are non-course requirements. They carry no credit and are
+          tracked separately from coursework, so they are not counted in the 120
+          credits above. Submit the graduation application during Fall 2026.
+        </div>
+      </div>
+
+      <!-- ============ TRANSFER + FALL 2026 ============ -->
+      <div class="block">
+        <div class="block-head">
+          <span class="bname">Transfer Credit and Fall 2026</span>
+          <span class="bmeta">Transfer credits accepted: 28</span>
+        </div>
+        <table class="rows">
+          <tr>
+            <th class="c-mk">&nbsp;</th>
             <th class="c-code">Source</th>
             <th class="c-title">Description</th>
+            <th class="c-status">Status</th>
             <th class="c-grade">Grade</th>
             <th class="c-cr">Credits</th>
             <th class="c-term">Term</th>
           </tr>
           <tr>
-            <td class="c-st ok">&#10003;</td>
+            <td class="c-mk ok">&#10003;</td>
             <td class="c-code">TRNS</td>
             <td class="c-title">
-              Northern Virginia Community College &mdash; associate coursework
-              evaluated and applied
+              Northern Virginia Community College, associate coursework
+              evaluated and applied above
             </td>
+            <td class="c-status ok">Satisfied</td>
             <td class="c-grade">TR</td>
-            <td class="c-cr">25</td>
+            <td class="c-cr">28</td>
             <td class="c-term">Fall 2024</td>
           </tr>
-          <tr class="pending">
-            <td class="c-st no">&#10007;</td>
+          <tr class="remaining">
+            <td class="c-mk no">&#10007;</td>
             <td class="c-code">202670</td>
             <td class="c-title">
-              Fall 2026 registration &mdash; no courses currently registered
+              Fall 2026: no registered sections and no planned courses
             </td>
-            <td class="c-grade">&mdash;</td>
+            <td class="c-status no">Remaining</td>
+            <td class="c-grade">-</td>
             <td class="c-cr">0</td>
             <td class="c-term">Fall 2026</td>
           </tr>
         </table>
+        <div class="blocknote">
+          Mason coursework 58 credits plus transfer credit 28 credits equals the
+          86 credits applied above. GPA is computed on the 58 Mason credits only;
+          transfer credit carries the grade TR and is not included in GPA.
+        </div>
       </div>
 
       <!-- ============ ADVISOR NOTES ============ -->
@@ -1082,33 +1291,43 @@
           <span class="bmeta">2 notes</span>
         </div>
         <div class="blocknote">
-          <b>05/06/2026 &mdash; Whitfield, K.</b> Student intends to graduate May
-          2027. 36 credits remain across two terms; discussed credit load and
-          summer options. Student has not yet completed CS 262, which is a
-          prerequisite for CS 367; CS 367 in turn is a prerequisite for CS 471
-          and for the CS 455 / CS 468 / CS 475 systems requirement in the senior
-          block.<br /><br />
-          <b>05/06/2026 &mdash; Whitfield, K.</b> Two senior computer science
-          slots and one computer science-related elective slot remain
-          unassigned. Student asked for help choosing; referred to department
-          advising.
+          <b>05/06/2026, Whitfield, K.</b> Student intends to graduate Spring
+          2027. 34 credits remain across two terms, which is above a normal load,
+          so we discussed a heavier fall or a summer term. Student has not
+          completed CS 262, which the catalog lists as a required prerequisite
+          for CS 367; CS 367 is in turn a required prerequisite for CS 471.
+          Taking CS 262 in Fall 2026 keeps the Spring 2027 graduation date
+          reachable.<br /><br />
+          <b>05/06/2026, Whitfield, K.</b> Two senior computer science elective
+          slots and one computer science-related elective slot are still
+          unfilled. Student asked for help choosing and was referred to
+          department advising.
         </div>
       </div>
 
       <div class="legend">
-        <b>Legend:</b> &#10003; Requirement complete &nbsp;&nbsp; &#10007;
-        Requirement still needed &nbsp;&nbsp; <b>TR</b> Transfer credit, not
-        included in GPA &nbsp;&nbsp; <b>OPEN</b> Unassigned elective slot
+        <b>Status legend.</b>
+        <b>Satisfied</b> requirement complete. &nbsp;
+        <b>In Progress</b> partly satisfied, credits still remaining in the
+        block. &nbsp; <b>Remaining</b> not yet satisfied. &nbsp;
+        <b>Registered</b> you hold a seat in a section in a future term. &nbsp;
+        <b>Planned</b> added to a term in Plan but not registered. &nbsp;
+        <b>TR</b> transfer credit, not included in GPA. &nbsp;
+        <b>Slot</b> an unfilled choice in an elective block.<br />
+        &#10003; satisfied &nbsp;&nbsp; &#9679; in progress &nbsp;&nbsp;
+        &#10007; remaining &nbsp;&nbsp; &#9873; milestone, a non-course
+        requirement
       </div>
 
       <div class="disclaimer">
-        This evaluation is an unofficial audit of progress toward the degree. It
+        This audit is an unofficial statement of progress toward the degree. It
         is not a transcript and it is not a guarantee of graduation. Courses may
         satisfy more than one requirement; credits are applied once toward the
         120-credit degree total. Grades of D or higher earn credit, but some
         courses in the major require a minimum grade of C to satisfy a
-        prerequisite. Confirm all requirements with your academic advisor before
-        registering.
+        prerequisite. Your catalog year and the University Catalog govern your
+        program requirements. Confirm all requirements with your academic
+        advisor before registering.
         <br /><br />
         <b
           >SAMPLE DOCUMENT. Simulated degree audit generated for the Reverse

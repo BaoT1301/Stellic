@@ -1086,11 +1086,30 @@ matching the §9.1 ground truth.
   settled on a 6-credit card. `FULL_TIME_CREDITS = 12` is the floor every
   registrar's office uses.
 
-### Still provisional
+### Prereq graph: SETTLED — keep the deterministic parser (Aug 14)
 
-- **`data/prereqs.json` came from the deterministic `scripts/parse-prereqs.ts`,**
-  not from `build-prereqs.ts`. Run `build-prereqs.ts --compare` first — it writes
-  nothing and diffs the model against the committed parser.
+`build-prereqs.ts --compare` has now been run against the live API. **47 of 270
+rules differ, and on the one CS course that differs the parser is right and the
+model is wrong.**
+
+> **CS 405** catalog text: `((CS 105^C, 105^XS, 110^C or 110^XS) and ...)`
+> parser: `oneOf: [["CS 105","CS 110"]]` ✅ — an either/or group, as written
+> model: `allOf: ["CS 105","CS 110"]` ❌ — requires BOTH
+
+The demo student has taken CS 110 and not CS 105, so the model's version would
+have marked CS 405 ineligible and silently dropped it off Options A and C. Every
+other disagreement is a graduate PHYS/STAT course that `isUndergraduate` already
+excludes, or a coreq-versus-prereq split where the parser's documented `^*`
+handling (§9.2) is the correct reading.
+
+**Do not overwrite `data/prereqs.json` with `build-prereqs.ts`.** The parser is
+the reference: it reproduces §9.2's two verified ground-truth strings exactly and
+asserts them on every run. `build-prereqs.ts` stays in the repo as the §9.2
+implementation and as the comparison harness. This is a good write-up line — the
+deterministic parser beat the model on the real data, and we have the diff.
+
+Note: `tsx` does not read `.env.local`; only `next dev` does. Scripts needing a
+key take it from the environment (`$env:OPENAI_API_KEY="..."` in pwsh).
 
 ---
 

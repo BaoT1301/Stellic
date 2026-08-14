@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Copy, Info, X } from "lucide-react";
+import { ArrowRight, Check, Copy, ExternalLink, Info, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { formatMeeting } from "@/components/ScheduleCard";
+import { bannerSectionUrl, formatMeeting } from "@/components/ScheduleCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { ScheduleOption } from "@/lib/types";
@@ -78,9 +78,19 @@ export function Cart({ option, onClear }: CartProps) {
             key={course.section.crn}
             className="flex items-center gap-4 px-5 py-3"
           >
-            <span className="w-16 shrink-0 font-mono text-lg leading-none font-semibold tabular-nums">
+            {/* The CRN links to the section's own page on the public schedule
+                of classes — no login — so "are these real?" is one click, not a
+                claim. The trailing slash after the procedure name is required
+                or Banner 404s; see bannerSectionUrl and §9.1. */}
+            <a
+              href={bannerSectionUrl(course.section.crn)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
+              className="w-16 shrink-0 font-mono text-lg leading-none font-semibold tabular-nums underline decoration-dotted underline-offset-4 transition-colors hover:text-brand"
+            >
               {course.section.crn}
-            </span>
+            </a>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm">
                 <span className="font-mono font-medium">{course.code}</span>
@@ -113,11 +123,18 @@ export function Cart({ option, onClear }: CartProps) {
         </Button>
       </div>
 
-      <p className="flex items-start gap-2 border-t border-rule bg-canvas px-5 py-3 text-xs leading-relaxed text-muted-foreground">
-        <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-        Some courses also require a linked lab or recitation section — check
-        Patriot Web before submitting.
-      </p>
+      <div className="space-y-1.5 border-t border-rule bg-canvas px-5 py-3 text-xs leading-relaxed text-muted-foreground">
+        <p className="flex items-start gap-2">
+          <ExternalLink className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          Every CRN above opens that section on Patriot Web, the public schedule
+          of classes, where the seat count is listed.
+        </p>
+        <p className="flex items-start gap-2">
+          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          Some courses also require a linked lab or recitation section — check
+          Patriot Web before submitting.
+        </p>
+      </div>
     </aside>
   );
 }

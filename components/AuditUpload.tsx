@@ -174,9 +174,16 @@ export function AuditUpload({
               <FileText className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
               <div>
                 <p className="text-sm font-medium">Don&rsquo;t have one handy?</p>
+                {/*
+                  86, not 89. The credit count used to disagree three ways:
+                  samples/fallback-response.json said 86, samples/sample-audit.html
+                  said 84, and this file said 89. 86 is now the one number, and it
+                  is the number the sample PDF actually parses to. "Junior" is
+                  consistent with it: 86 credits is junior standing (60-89).
+                */}
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Use the sample student — a transfer junior in BS Computer
-                  Science, 89 credits in, graduating May 2027.
+                  Use the sample student: a transfer junior in the BS in
+                  Computer Science, 86 credits in, graduating May 2027.
                 </p>
               </div>
             </div>
@@ -237,6 +244,17 @@ export function AuditUpload({
 /**
  * The ~20-second path. Every field is prefilled with something plausible so a
  * real student without a PDF edits rather than types.
+ *
+ * The defaults ARE the sample student, deliberately. Submitting them unchanged
+ * reproduces the same audit the "Use the sample audit" button produces:
+ * auditFromManual() in app/page.tsx subtracts this course list from
+ * data/degree-template.json, which leaves exactly the eight-course `missing`
+ * list in samples/fallback-response.json, and spends "3" across the template's
+ * elective buckets for the same 3 open slots §11.3 step 3 sums. So the two entry
+ * paths cannot tell the student two different stories.
+ *
+ * Credits completed is 86, the single reconciled number. This field said 89
+ * while the fixture said 86 and the sample PDF said 84.
  */
 function ManualEntry({
   onSubmit,
@@ -245,8 +263,8 @@ function ManualEntry({
   onSubmit: (entry: ManualAuditEntry) => void;
   disabled: boolean;
 }) {
-  const [major, setMajor] = useState("BS, Computer Science");
-  const [creditsCompleted, setCreditsCompleted] = useState("89");
+  const [major, setMajor] = useState("Computer Science, BS");
+  const [creditsCompleted, setCreditsCompleted] = useState("86");
   const [expectedGraduation, setExpectedGraduation] = useState("2027-05");
   const [electivesRemaining, setElectivesRemaining] = useState("3");
   const [courses, setCourses] = useState<string[]>([
@@ -254,8 +272,13 @@ function ManualEntry({
     "CS 112",
     "CS 211",
     "CS 310",
+    "MATH 113",
+    "MATH 114",
     "MATH 125",
+    "MATH 203",
+    "MATH 213",
     "STAT 344",
+    "ENGH 302",
   ]);
   const [draft, setDraft] = useState("");
 

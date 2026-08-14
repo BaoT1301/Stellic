@@ -23,16 +23,30 @@
  * Comma or whitespace separated. Anything that is not a 4-6 digit CRN is
  * dropped rather than rendered, so a malformed link degrades to an empty
  * worksheet instead of a broken page (§0 rule 3: never break the demo path).
+ *
+ * The simulation notice sits directly under the h1 AND in the footer. It used to
+ * be footer-only, ~788px down, which is below the fold on a 1440x900 laptop —
+ * so an honest first read of a screenshot of this page was "they registered
+ * him." Banner puts institutional notices under the heading anyway.
  */
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
+import type { Course } from "@/lib/types";
 import { NEXT_TERM_BANNER_CODE, NEXT_TERM_LABEL } from "@/lib/types";
 
 /** Banner's Add Classes Worksheet has ten fixed CRN boxes. So does ours. */
 const WORKSHEET_ROWS = 10;
+
+/**
+ * §8 comment on NEXT_TERM: "Registration runs Apr 14 - Aug 31, 2026, so a judge
+ * opening the link on Aug 21 can verify a CRN is real AND still registerable."
+ * Banner calls that window a time ticket and prints it on this exact screen, so
+ * the dates are the ones already established as true rather than new claims.
+ */
+const TIME_TICKET = "Registration open Apr 14 - Aug 31, 2026";
 
 function parseCrns(raw: string): string[] {
   const seen = new Set<string>();
@@ -43,6 +57,95 @@ function parseCrns(raw: string): string[] {
     if (/^\d{4,6}$/.test(t)) seen.add(t);
   }
   return [...seen].slice(0, WORKSHEET_ROWS);
+}
+
+/**
+ * Credits per CRN, derived from the same committed catalog every other screen
+ * reads. Loaded the way app/page.tsx loads it — a dynamic import, so the 698 KB
+ * of catalog is a separate chunk instead of part of this route's first load. It
+ * is almost always already in the browser cache here, because the only way in
+ * is the cart. On failure the total simply does not render: §0 rule 3 says
+ * degrade, and an absent line is better than an invented number (§0 rule 7).
+ */
+function useCreditsByCrn(): Record<string, number> | null {
+  const [map, setMap] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    import("@/data/courses.json")
+      .then((mod) => {
+        if (cancelled) return;
+        const next: Record<string, number> = {};
+        for (const course of mod.default as unknown as Course[]) {
+          for (const section of course.sections) next[section.crn] = course.credits;
+        }
+        setMap(next);
+      })
+      .catch(() => {
+        /* leave it null; the Total Credit Hours line stays off. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return map;
+}
+
+/**
+ * Banner prints credit hours to three decimals because the field is numeric and
+ * some courses are variable-credit. Matching the format matters more than the
+ * number here — it is one of the first things a registrar's eye lands on.
+ * CRNs we cannot resolve contribute nothing rather than an assumed 3.
+ */
+function TotalCreditHours({
+  crns,
+  creditsByCrn,
+}: {
+  crns: string[];
+  creditsByCrn: Record<string, number> | null;
+}) {
+  if (creditsByCrn === null) return null;
+  const total = crns.reduce((sum, crn) => sum + (creditsByCrn[crn] ?? 0), 0);
+  return (
+    <p className="mt-3 text-[12px] font-bold">
+      Total Credit Hours: {total.toFixed(3)}
+    </p>
+  );
+}
+
+/**
+ * The one line that keeps an honest first read of this page from being "they
+ * registered him." It sat only in the footer, ~788px down, which is below the
+ * fold on a 1440x900 laptop. Banner puts institutional notices directly under
+ * the page heading and above the term block, so this is both the more honest
+ * position and the more accurate one. The footer copy stays.
+ */
+function SimulationNotice({ className = "" }: { className?: string }) {
+  return (
+    <p
+      className={`border border-[#c9a227] bg-[#fdf7e3] px-3 py-2 text-[11px] font-bold text-[#5c4a06] ${className}`}
+    >
+      Simulated registration system. Production would connect to the
+      institution&rsquo;s SIS.
+    </p>
+  );
+}
+
+/** The page heading. Duplicated across the worksheet and its Suspense fallback,
+ *  so it and the notice beneath it are one component rather than two copies. */
+function PageHeading() {
+  return (
+    <>
+      <h1
+        className="border-b-2 border-[#1c3f5f] pb-1 text-[22px] font-bold text-[#1c3f5f]"
+        style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+      >
+        Add or Drop Classes
+      </h1>
+      <SimulationNotice className="mt-3" />
+    </>
+  );
 }
 
 /* ------------------------------------------------------------------ chrome */
@@ -90,10 +193,8 @@ function BannerChrome({ children }: { children: React.ReactNode }) {
         <p className="mt-2 text-[10px] text-[#6b7883]">
           RELEASE: 8.7.1 &nbsp;&middot;&nbsp; Student Self-Service
         </p>
-        <p className="mt-3 border border-[#c9a227] bg-[#fdf7e3] px-3 py-2 text-[11px] font-bold text-[#5c4a06]">
-          Simulated registration system. Production would connect to the
-          institution&rsquo;s SIS.
-        </p>
+        {/* Second copy. The first one is under the h1, above the fold. */}
+        <SimulationNotice className="mt-3" />
       </div>
     </div>
   );
@@ -114,6 +215,12 @@ function RegisterWorksheet() {
   const [registered, setRegistered] = useState<string[] | null>(null);
   const [stamp, setStamp] = useState("");
   const [error, setError] = useState("");
+  const creditsByCrn = useCreditsByCrn();
+  // Deduped the same way submit() dedupes, so typing one CRN into two boxes
+  // cannot double its credits in the total.
+  const filledRows = [
+    ...new Set(rows.map((r) => r.trim()).filter((r) => r !== "")),
+  ];
 
   const setRow = (i: number, value: string) => {
     // Banner's CRN boxes are numeric-only and length-capped.
@@ -159,12 +266,7 @@ function RegisterWorksheet() {
 
   return (
     <BannerChrome>
-      <h1
-        className="border-b-2 border-[#1c3f5f] pb-1 text-[22px] font-bold text-[#1c3f5f]"
-        style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-      >
-        Add or Drop Classes
-      </h1>
+      <PageHeading />
 
       {/* Term / student strip */}
       <table className="mt-3 w-full border-collapse border border-[#a8b4bf] text-[12px]">
@@ -194,6 +296,14 @@ function RegisterWorksheet() {
               Registration Holds
             </th>
             <td className="border border-[#cdd6dd] px-2 py-1">None</td>
+          </tr>
+          <tr>
+            <th className="border border-[#cdd6dd] bg-[#eef2f6] px-2 py-1 text-left font-bold text-[#1c3f5f]">
+              Time Ticket
+            </th>
+            <td className="border border-[#cdd6dd] px-2 py-1" colSpan={3}>
+              {TIME_TICKET}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -243,13 +353,17 @@ function RegisterWorksheet() {
                       {i + 1}
                     </td>
                     <td className="border border-[#cdd6dd] px-2 py-1">
+                      {/* The old #8a97a3 border measured 2.98:1 on a white row
+                          and 2.80:1 on a striped one, just under SC 1.4.11's 3:1
+                          for a control boundary. #828f9b is 3.31:1 / 3.11:1 and
+                          is indistinguishable at 1px. */}
                       <input
                         type="text"
                         inputMode="numeric"
                         value={value}
                         onChange={(e) => setRow(i, e.target.value)}
                         aria-label={`CRN row ${i + 1}`}
-                        className="w-24 border border-[#8a97a3] bg-white px-1.5 py-0.5 font-mono text-[12px] text-black focus:outline focus:outline-2 focus:outline-[#1c3f5f]"
+                        className="w-24 border border-[#828f9b] bg-white px-1.5 py-0.5 font-mono text-[12px] text-black focus:outline focus:outline-2 focus:outline-[#1c3f5f]"
                       />
                     </td>
                     <td className="border border-[#cdd6dd] px-2 py-1 text-[#55606b]">
@@ -262,6 +376,8 @@ function RegisterWorksheet() {
               </tbody>
             </table>
 
+            <TotalCreditHours crns={filledRows} creditsByCrn={creditsByCrn} />
+
             <div className="mt-3 flex items-center gap-2">
               {/* Beveled grey buttons, not shadcn. See the file header. */}
               <button
@@ -269,6 +385,16 @@ function RegisterWorksheet() {
                 className="border border-[#6f7c88] border-t-white border-l-white bg-[#dfe4e9] px-3 py-1 text-[12px] font-bold text-black active:border-t-[#6f7c88] active:border-l-[#6f7c88] active:bg-[#cfd6dd]"
               >
                 Submit Changes
+              </button>
+              {/* Banner sits Class Search between Submit Changes and Reset. It is
+                  disabled because there is no catalog browser behind this mock,
+                  and a dead button is more honest than one that goes nowhere. */}
+              <button
+                type="button"
+                disabled
+                className="cursor-not-allowed border border-[#a4adb6] border-t-white border-l-white bg-[#eceff2] px-3 py-1 text-[12px] text-[#8d97a1]"
+              >
+                Class Search
               </button>
               <button
                 type="button"
@@ -353,6 +479,8 @@ function RegisterWorksheet() {
             </tbody>
           </table>
 
+          <TotalCreditHours crns={registered} creditsByCrn={creditsByCrn} />
+
           <p className="mt-3 text-[12px] leading-relaxed">
             Course titles, meeting times, and instructors will appear on your
             detail schedule once the registration batch completes. Some courses
@@ -389,12 +517,7 @@ export default function RegisterPage() {
     <Suspense
       fallback={
         <BannerChrome>
-          <h1
-            className="border-b-2 border-[#1c3f5f] pb-1 text-[22px] font-bold text-[#1c3f5f]"
-            style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-          >
-            Add or Drop Classes
-          </h1>
+          <PageHeading />
           <p className="mt-4 text-[12px]">Loading registration worksheet&hellip;</p>
         </BannerChrome>
       }

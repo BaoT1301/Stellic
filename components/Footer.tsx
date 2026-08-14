@@ -8,6 +8,10 @@ import { NEXT_TERM_BANNER_CODE, NEXT_TERM_LABEL } from "@/lib/types";
  * The wording is fixed. Do not soften it, do not make it dismissible, and do not
  * move the O*NET attribution into it — §9.3 keeps that in TOOLS.md and README so
  * this footer stays doing one job.
+ *
+ * The second sentence was added for the judging audience specifically: a
+ * registrar's first question about anything that reads a degree audit is which
+ * document controls when the two disagree. Saying it first costs nothing.
  */
 export function Footer() {
   return (
@@ -15,7 +19,8 @@ export function Footer() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-6 text-xs leading-relaxed text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-2xl">
           Suggestions based on public job postings and course descriptions.
-          Confirm with your advisor before registering.
+          Confirm with your advisor before registering. Not an official degree
+          audit - your official audit and the University Catalog govern.
         </p>
         <p className="shrink-0 tabular-nums">
           Sections from the public schedule of classes ·{" "}

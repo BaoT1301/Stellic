@@ -26,8 +26,14 @@ const URGENCY = {
     chip: "bg-soon-soft text-soon",
     ring: "ring-soon/25",
   },
+  /**
+   * "Still required", not "Safe to delay". The old label read as permission to
+   * skip Operating Systems. These courses are as required as every other one on
+   * the audit; the only thing that is flexible is when they get taken, and the
+   * group heading on the diagnosis screen says exactly that.
+   */
   flexible: {
-    label: "Safe to delay",
+    label: "Still required",
     Icon: Check,
     bar: "bg-calm/35",
     chip: "bg-calm-soft text-calm",

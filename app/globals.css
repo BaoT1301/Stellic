@@ -60,13 +60,24 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* WCAG 2.1 AA, SC 1.4.3. The shadcn default oklch(0.556 0 0) measures 4.46:1
+     against --canvas and 4.34:1 against --muted, both under the 4.5:1 floor for
+     normal-size text, and this token carries nearly every explanatory string in
+     the app. 0.48 measures 6.16:1 on canvas, 6.54:1 on card, 5.99:1 on muted.
+     ADA Title II makes WCAG 2.1 AA the technical standard for public
+     institutions, which is the audience in CLAUDE.md §3. */
+  --muted-foreground: oklch(0.48 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* SC 1.4.11 wants 3:1 for the visual information that identifies a state, and
+     the keyboard focus indicator is the case a procurement review checks first.
+     The shadcn default oklch(0.708 0 0) measures 2.44:1 against --canvas, so a
+     focused field was hard to find; 0.55 measures 4.57:1. This token only ever
+     paints on :focus-visible, so nothing at rest changes. */
+  --ring: oklch(0.55 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -194,5 +205,36 @@
     font-weight: 600;
     letter-spacing: 0.09em;
     text-transform: uppercase;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion
+ *
+ * Every screen enters with `animate-in fade-in duration-500` and the
+ * regenerate button spins its icon while a rebuild is in flight. Both are
+ * decorative: the screen renders identically at the end of the fade, and
+ * PreferenceToggles already swaps the button label to "Rebuilding…", so
+ * nothing is only communicated by movement.
+ *
+ * One rule here is equivalent to `motion-reduce:animate-none` on each call
+ * site, and it also covers entrance animations added later. Honouring the OS
+ * setting is the standard technique for WCAG 2.1 SC 2.3.3 and supports
+ * SC 2.2.2; it is not itself a success criterion.
+ *
+ * Unlayered, so it beats Tailwind's `@layer utilities` regardless of
+ * specificity. The !important is belt and braces.
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .animate-out,
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
   }
 }

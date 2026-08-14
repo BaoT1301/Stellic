@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronRight,
   CircleAlert,
   TriangleAlert,
 } from "lucide-react";
@@ -47,6 +48,25 @@ function formatGraduation(value: string | null): string | null {
   if (!m) return value;
   const month = MONTHS[Number(m[2]) - 1];
   return month ? `${month} ${m[1]}` : value;
+}
+
+/** Small counts read better spelled out mid-sentence; digits take over past ten. */
+const COUNT_WORDS = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+];
+
+function spell(n: number): string {
+  return COUNT_WORDS[n] ?? String(n);
 }
 
 export interface DiagnosisScreenProps {
@@ -138,16 +158,20 @@ export function DiagnosisScreen({
             emphasis={termsRemaining <= 2}
           />
         )}
+        {/* Catalog year decides which requirement set is even valid, so it is
+            the first thing a registrar looks for. It is parsed (§8) and was
+            being rendered nowhere. */}
+        <Fact label="Catalog" value={audit.catalogYear ?? "not on file"} />
       </dl>
 
       <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
         <div>
           <h2 className="text-lg font-semibold tracking-tight">
-            What is load-bearing
+            What&apos;s holding up the rest of your degree
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
             Ordered by how much of your remaining degree is waiting behind each
-            one.
+            one. These are the load-bearing ones.
           </p>
 
           <Group
@@ -194,11 +218,11 @@ export function DiagnosisScreen({
             ))}
           </Group>
 
-          <Group title="Safe to delay" tone="flexible" count={flexible.length}>
+          <DelayGroup codes={flexible.map((b) => b.code)}>
             {flexible.map((b) => (
               <BottleneckCard key={b.code} bottleneck={b} titles={titles} />
             ))}
-          </Group>
+          </DelayGroup>
         </div>
 
         <GapMap gaps={gaps} postingCount={postingCount} />
@@ -266,6 +290,70 @@ function Group({
       </h3>
       <div className="mt-3 flex flex-col gap-3">{children}</div>
     </div>
+  );
+}
+
+/** The one-line body under the summary, so the collapse never reads as "skip these". */
+function delayNote(count: number): string {
+  if (count === 1) {
+    return "You still have to take it. Nothing else is waiting on it, so when you take it is up to you.";
+  }
+  return `You still have to take all ${spell(count)}. None of them blocks anything else, so the order is yours.`;
+}
+
+/**
+ * The requirements nothing else is waiting on, collapsed by default.
+ *
+ * These cards are identical to one another and owned the bottom half of this
+ * column, directly under a headline that says not every box weighs the same —
+ * the layout argued against its own copy, and the loudest thing on the screen
+ * was the least urgent thing on the audit. Collapsed, the critical card and its
+ * prereq chain become the centre of the screen and the gap map moves into the
+ * same viewport.
+ *
+ * Native <details> rather than React state, deliberately: it is keyboard
+ * operable and announced as a disclosure for free, it works before hydration,
+ * and there is no open/closed state that can fall out of step with the data.
+ * The course codes stay visible while it is closed, so nothing is hidden —
+ * only the repetition is.
+ */
+function DelayGroup({
+  codes,
+  children,
+}: {
+  codes: string[];
+  children: ReactNode;
+}) {
+  if (codes.length === 0) return null;
+  const { Icon, text } = GROUP_TONE.flexible;
+  return (
+    <details className="group mt-8">
+      <summary className="flex list-none cursor-pointer flex-col gap-2 rounded-lg py-1 [&::-webkit-details-marker]:hidden">
+        <span className={`eyebrow flex items-center gap-1.5 ${text}`}>
+          <Icon className="size-3.5" aria-hidden />
+          Still required - but nothing is waiting on them
+          <span className="tabular-nums opacity-70">{codes.length}</span>
+          <ChevronRight
+            className="size-3.5 transition-transform group-open:rotate-90"
+            aria-hidden
+          />
+        </span>
+        <span className="flex flex-wrap items-center gap-1.5 group-open:hidden">
+          {codes.map((code) => (
+            <span
+              key={code}
+              className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground"
+            >
+              {code}
+            </span>
+          ))}
+        </span>
+      </summary>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        {delayNote(codes.length)}
+      </p>
+      <div className="mt-3 flex flex-col gap-3">{children}</div>
+    </details>
   );
 }
 

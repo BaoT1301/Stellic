@@ -40,6 +40,31 @@ function clip(text: string, max = 22) {
   return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
+/**
+ * The text equivalent of the drawing, for anyone who cannot see it.
+ *
+ * WCAG 2.1 AA: a graphic that carries meaning needs the same meaning in words.
+ * It is one sentence rather than a node-by-node reading because the ordering
+ * left to right is the whole content of the picture. The root <svg> carries
+ * role="img", so assistive technology reads this label and skips the per-node
+ * <title> tooltips instead of announcing both.
+ */
+function chainDescription(
+  bottleneck: Bottleneck,
+  upstream: string | undefined,
+): string {
+  const head = upstream
+    ? `You have already finished ${upstream}. ${bottleneck.code} ${bottleneck.title} comes next.`
+    : `${bottleneck.code} ${bottleneck.title} sits at the head of it.`;
+  const waiting =
+    bottleneck.dependents.length === 0
+      ? "Nothing you still need is waiting behind it."
+      : `${bottleneck.dependents.length} ${
+          bottleneck.dependents.length === 1 ? "course" : "courses"
+        } you still need cannot be taken until it is done: ${bottleneck.dependents.join(", ")}.`;
+  return `Prerequisite chain. ${head} ${waiting}`;
+}
+
 export interface PrereqChainProps {
   bottleneck: Bottleneck;
   /** course code → title. Nodes fall back to the bare code without it. */
@@ -93,7 +118,7 @@ export function PrereqChain({
           width="100%"
           preserveAspectRatio="xMidYMid meet"
           role="img"
-          aria-label={`${bottleneck.code} is a prerequisite for ${bottleneck.dependents.join(", ") || "nothing you still need"}`}
+          aria-label={chainDescription(bottleneck, upstream)}
           className="block min-w-[520px]"
         >
           <defs>
@@ -144,16 +169,21 @@ export function PrereqChain({
                     <title> because the DOM flattens them to a single text node. */}
                 <title>{node.title ? `${node.code} — ${node.title}` : node.code}</title>
 
+                {/* 11px, not 9.5: this row is the only thing on the drawing
+                    that says what each box means, and at 9.5 it read as
+                    decoration. "CAN'T TAKE YET" rather than "BLOCKED" — a
+                    student has no reason to know that blocked is a graph term
+                    and not a hold on their account. */}
                 <text
                   x={x + NODE_W / 2}
                   y={NODE_Y - 13}
                   textAnchor="middle"
-                  fontSize="9.5"
+                  fontSize="11"
                   fontWeight="600"
                   letterSpacing="0.09em"
                   fill={done ? "var(--muted-foreground)" : head ? accent : "var(--muted-foreground)"}
                 >
-                  {done ? "DONE" : head ? "TAKE THIS TERM" : "BLOCKED"}
+                  {done ? "DONE" : head ? "TAKE THIS TERM" : "CAN'T TAKE YET"}
                 </text>
 
                 <rect
