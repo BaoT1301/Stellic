@@ -1,0 +1,49 @@
+Software Engineer II — Backend & Distributed Systems
+Northlake Systems, Inc. — Reston, VA (hybrid, 3 days on-site)
+Full-time · Entry to mid-level (0-2 years) · Requisition BE-2284
+
+About the team
+Northlake's Platform Infrastructure group owns the ingest, storage, and query
+layer behind our logistics analytics product. We move roughly 40 billion events a
+day off a fleet of customer edge devices, land them in a partitioned store, and
+serve them back under a 200 ms p99 read budget. You would be the third engineer
+on the ingest pod.
+
+What you will do
+- Design, build, and operate backend services in Go and Java that run as
+  replicated, horizontally scaled deployments across three regions.
+- Extend our event pipeline: partitioning, consumer group rebalancing, at-least-
+  once delivery, idempotent writes, and backpressure handling under load spikes.
+- Model and evolve relational schemas in PostgreSQL. You will write a lot of SQL
+  and you will be expected to read a query plan and explain why an index is or is
+  not being used.
+- Own the correctness of concurrent code: locking strategy, race conditions,
+  thread pools, and the failure modes that only show up when a node dies
+  mid-write.
+- Participate in design review. We write short design documents before we write
+  code, and every engineer is expected to critique other people's designs.
+- Instrument what you ship. Dashboards, structured logs, and alert thresholds
+  are part of the deliverable.
+
+Minimum qualifications
+- Bachelor's degree in Computer Science, Computer Engineering, or a related
+  field, or equivalent practical experience.
+- Working knowledge of data structures and algorithm analysis. You should be able
+  to reason about the time and space cost of your own code and justify a choice
+  between two data structures.
+- Demonstrated understanding of operating systems fundamentals: processes and
+  threads, virtual memory, scheduling, and file I/O.
+- Experience writing concurrent or parallel programs, and an understanding of
+  what makes distributed systems hard: partial failure, replication lag,
+  consistency models, and consensus.
+- Proficiency with SQL and relational database design, including normalization,
+  transactions, and isolation levels.
+- Familiarity with software design practice: version control, code review,
+  automated testing, and incremental delivery.
+
+Preferred qualifications
+- Coursework or project experience in computer systems or computer architecture.
+- Exposure to containerized deployment and infrastructure-as-code.
+- Prior internship building a service that other people depended on.
+
+Northlake Systems is an equal opportunity employer.

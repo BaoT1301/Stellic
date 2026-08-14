@@ -1,36 +1,235 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reverse Audit
 
-## Getting Started
+**Tell it the job you want. It builds your whole next semester — required courses
+in the right order, electives that close your skill gaps — and hands you the
+cart.**
 
-First, run the development server:
+Built for the [Stellic Pathfinders Challenge](https://www.stellic.com/pathfinders).
+
+---
+
+## The problem
+
+A degree plan tells you what's left. It doesn't tell you which boxes are
+*load-bearing*.
+
+1. **Sequencing.** Some required course sits at the head of a four-course chain.
+   Miss it this term and you push an entire downstream sequence back a year.
+   Nothing in a checklist marks that box differently from any other box.
+   Institutions offer required courses when students need them only about 15% of
+   the time, and 57% of students spend extra time and money as a result
+   (*Ad Astra 2024 Benchmark Report*, 1.3M students).
+2. **Choosing.** The handful of electives you actually get to pick are the only
+   real decisions you make in four years, and they get filled based on what fits
+   the schedule and what a friend said was easy. 52% of college graduates are
+   underemployed within a year of graduating; 45% are still underemployed a
+   decade later (*Talent Disrupted*, Strada Institute for the Future of Work and
+   the Burning Glass Institute, February 2024).
+
+Reverse Audit takes the job postings you'd want in two years and your degree
+audit, and works backwards from the listing into the course catalog —
+job posting → O*NET work activity → **a specific CRN you can register for next
+term**, constrained by your remaining requirements and your prerequisite depth.
+
+---
+
+## The two-source public-data architecture
+
+This is the part that makes the product deployable at any institution, and it is
+the reason there is no SIS integration anywhere in this repo.
+
+Every registrar's stack separates these two systems, so we read both:
+
+| Source | What it publishes | How we read it |
+|---|---|---|
+| **Course catalog** (CourseLeaf, `catalog.gmu.edu/courses/*`) | Course codes, titles, credits, descriptions, prerequisite text, major restrictions | Public server-rendered webpages, parsed with `cheerio`. `robots.txt` allows `/courses/` — we never follow the disallowed `/search/` links, we read the canonical course code out of each anchor's `title` attribute instead. |
+| **Schedule of classes** (Banner 8 self-service, `patriotweb.gmu.edu`) | CRNs, meeting days and times, instructors, modality, and — by sampling three terms — which terms a course is actually offered in | Public self-service HTML. **No login, no cookies, no session.** |
+
+**Zero SIS integration required. No institutional credentials, no API key, no
+procurement.** Both sources are public at essentially every US institution.
+
+### Real vs. mocked
+
+Everything public is real; everything that is a student's private record is
+mocked.
+
+- **Real:** the GMU course catalog, the GMU public schedule of classes, the job
+  postings you paste in, and the O*NET Detailed Work Activities dataset.
+- **Mocked:** the degree audit (`public/sample-audit.pdf`, a fictional student),
+  the registration system (`/register`), and seat availability.
+
+If we invented the courses we would also be inventing their prerequisites and
+their skills, and the bottleneck graph and the gap map would be matching our
+fiction against our fiction. Registration executes against a simulated SIS;
+production would use the institution's student information system, which
+requires an institution-issued API key that a student cannot obtain.
+
+### Everything expensive happens offline
+
+The course catalog does not change during a demo. So the scrape, the prerequisite
+graph, and the skill embeddings all run **once, as local scripts**, and their
+output is committed as static JSON in `data/`. The deployed Next.js app reads
+those files and does no ML at runtime — no vector database, no cold starts.
+
+At runtime there are exactly three OpenAI calls, all server-side:
+`/api/extract-skills`, `/api/parse-audit`, and `/api/build-schedules`. The
+bottleneck computation and the gap map run client-side with no API call at all,
+and **the model never picks a course** — `lib/schedules.ts` chooses the combos
+deterministically in TypeScript and the model only writes the prose.
+
+---
+
+## Setup
+
+Requires **Node 22 or newer** (the `openai` v7 client needs it, and we rely on
+global `fetch` rather than carrying an `undici` dependency).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### OPENAI_API_KEY
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Put your key in `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+OPENAI_API_KEY=sk-...
+```
 
-## Learn More
+`.env.local` is gitignored. The key is **server-side only** — it is read
+exclusively inside `app/api/**` and is never exposed with a `NEXT_PUBLIC_`
+prefix. The offline scripts in `scripts/` read the same variable.
 
-To learn more about Next.js, take a look at the following resources:
+Two of the six offline scripts (`build-prereqs.ts`, `embed-skills.ts`) call
+OpenAI. The rest, and the whole deployed app's non-AI surface, run without a key.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+When deploying, set `OPENAI_API_KEY` in the Vercel project settings too —
+`.env.local` is gitignored, so a missing dashboard variable is the single most
+likely deploy mistake. Verify it on the live URL:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+curl https://<your-deployment>/api/health
+# -> {"hasKey":true}
+```
 
-## Deploy on Vercel
+### Run the app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev      # http://localhost:3000
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Running the offline scripts, in order
+
+All scripts run from the **repo root** with `tsx`. They write into `data/`, and
+those outputs are committed — you only need to re-run them when the catalog
+changes or when you want to re-derive the graph.
+
+```bash
+# 1. Course catalog -> data/courses.json
+#    Descriptions, credits, raw prerequisite text, major restrictions.
+npx tsx scripts/scrape-catalog.ts
+
+# 2. Schedule of classes -> merges sections + observed termsOffered into
+#    data/courses.json. Pulls three terms (202670 Fall 2026, 202610 Spring 2026,
+#    202570 Fall 2025) so "which terms is this offered" is observed, not guessed.
+#    Sections come from Fall 2026 only — that is the only registerable term.
+npx tsx scripts/scrape-sections.ts
+
+# 3. Prerequisite grammar -> data/prereqs.json   [needs OPENAI_API_KEY]
+#    GMU does not write prose prerequisites; it emits a Banner-generated boolean
+#    expression with grade codes as superscripts. We parse it with a model and
+#    validate every emitted course code against courses.json.
+npx tsx scripts/build-prereqs.ts
+
+# 4. GATE. Prints dangling prerequisites, cycles, and the ten deepest chains.
+#    EXITS NON-ZERO on a bad graph, so a broken graph is not committable.
+#    Hand-check those ten chains against the real catalog before trusting the
+#    bottleneck feature.
+npx tsx scripts/verify-prereqs.ts
+
+# 5. O*NET Detailed Work Activities -> data/onet-dwa.json
+#    2,070 entries. No new dependencies, no key. Independent of steps 1-4, so it
+#    can run while the scraper is still going.
+npx tsx scripts/fetch-onet.ts
+
+# 6. Course <-> work-activity similarity -> data/catalog-skills.json
+#    [needs OPENAI_API_KEY, needs steps 1 and 5]
+npx tsx scripts/embed-skills.ts
+```
+
+### Demo assets
+
+```bash
+# samples/sample-audit.html -> public/sample-audit.pdf
+# No key, no network. Tries puppeteer, then any headless Chrome/Edge already on
+# the machine, then a built-in minimal PDF writer. Verifies with pdf-parse that
+# the result contains real extractable text before it reports success.
+npx tsx scripts/make-sample-pdf.ts
+
+# Force the no-browser path, to check the fallback still works:
+SAMPLE_PDF_FORCE_FALLBACK=1 npx tsx scripts/make-sample-pdf.ts
+```
+
+`samples/sample-job-swe.txt` and `samples/sample-job-data.txt` are the two
+postings behind the app's sample-fill button. `data/degree-template.json` is the
+BS Computer Science requirement template used by the manual-entry path when a
+student has no audit PDF.
+
+---
+
+## Repo layout
+
+```
+scripts/      offline pipeline. Slow and ugly is fine here.
+data/         committed JSON the deployed app imports statically.
+samples/      sample job postings, the audit source HTML, the degraded fixture.
+lib/          types.ts (frozen contracts), bottlenecks, gaps, schedules, rmp.
+app/          one page with four states, /register, and three API routes.
+components/   the UI.
+```
+
+`lib/types.ts` is the frozen data contract. `data/*.json` is read with a static
+`import`, never `fs.readFile` — a runtime path built from `process.cwd()` is
+frequently not traced into the Vercel bundle.
+
+---
+
+## Notes on what we deliberately do not do
+
+- **We never fetch RateMyProfessors.** We construct a search URL and render it as
+  a plain hyperlink; the student's browser makes the request, our server never
+  does. We aren't asserting a rating, we're saying "go look."
+- **We never claim "all prerequisites met."** Prerequisite rules carry a minimum
+  grade, but a degree audit's course list carries no grades, so the UI says
+  "prereq courses completed" — the stronger claim would be false for a student
+  with a D.
+- **No database, no persistence.** State lives in React; the catalog ships as
+  static JSON.
+- Every API route degrades to a cached fixture rather than an error state.
+
+Suggestions are based on public job postings and course descriptions. Confirm
+with your advisor before registering.
+
+---
+
+## Attribution and licensing
+
+Includes information from the O\*NET 20.1 Database by the U.S. Department of
+Labor, Employment and Training Administration (USDOL/ETA). Used under the
+CC BY 4.0 license. O\*NET is a trademark of USDOL/ETA.
+
+Method adapted from
+[Syllabus2O\*NET](https://github.com/AlirezaJavadian/Syllabus-to-ONET) and the
+Course-Skill Atlas methodology paper (Javadian Sabet, Bana, Yu & Frank,
+*Scientific Data* 11:1086, 2024). We use their *method* against the GMU catalog,
+not their dataset, which is aggregated at institution-major-year level and
+cannot name individual courses.
+
+Nearest prior art on the recommendation side: Frej et al., *"Course Recommender
+Systems Need to Consider the Job Market,"* SIGIR 2024.
+
+See [`TOOLS.md`](./TOOLS.md) for the complete list of frameworks, libraries,
+models, and AI coding assistants used to build this.

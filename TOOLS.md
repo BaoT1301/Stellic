@@ -55,6 +55,7 @@ runtime models.
 | pdf-parse | ^2.4.5 | Degree-audit PDF → text (v2 — named `PDFParse` export) |
 | zod | ^4.4.3 | Structured-output schemas + validation |
 | tsx | ^4.23.12 | Running the offline scripts |
+| puppeteer-core | ^24 | **devDependency only.** Drives the Microsoft Edge already installed on the machine to walk the four UI states and screenshot them (`scripts/shoot-screens.ts`). No bundled Chromium download, nothing shipped to the browser. |
 
 ## Data sources
 

@@ -1,0 +1,501 @@
+{
+  "_provenance": {
+    "note": "PROVISIONAL DEMO FIXTURE — served by app/api/**/route.ts whenever an OpenAI call fails or OPENAI_API_KEY is missing (CLAUDE.md §12). It is a cached-looking response, not a live one. Generated, not hand-typed: every CRN, course title, credit count and O*NET skill name below was looked up in data/courses.json, data/catalog-skills.json and data/onet-dwa.json, and every combo was checked for time conflicts before this file was written.",
+    "generatedFrom": [
+      "data/courses.json (GMU CourseLeaf catalog + Banner 8 schedule of classes, term 202670)",
+      "data/prereqs.json",
+      "data/catalog-skills.json",
+      "data/onet-dwa.json (O*NET 20.1 DWA Reference)",
+      "data/degree-template.json"
+    ],
+    "student": "Mocked, per CLAUDE.md §10 — everything public is real, the student's private record is invented. Transfer student, 86 of 120 credits, graduating May 2027, one critical bottleneck (CS 262).",
+    "onetAttribution": "Includes information from the O*NET 20.1 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET is a trademark of USDOL/ETA.",
+    "postingsIndex": {
+      "0": "Software Engineer, New Grad (2027 start)",
+      "1": "Data Analyst / Junior Data Scientist",
+      "2": "Backend / Platform Engineer, Early Career"
+    }
+  },
+  "parse-audit": {
+    "audit": {
+      "major": "Computer Science, BS",
+      "catalogYear": "2024-2025",
+      "creditsCompleted": 86,
+      "creditsRequired": 120,
+      "expectedGraduation": "2027-05",
+      "coursesTaken": [
+        "CS 110",
+        "CS 112",
+        "CS 211",
+        "CS 310",
+        "MATH 113",
+        "MATH 114",
+        "MATH 125",
+        "MATH 203",
+        "MATH 213",
+        "STAT 344",
+        "ENGH 302"
+      ],
+      "requirements": [
+        {
+          "name": "Computer Science Core",
+          "status": "incomplete",
+          "missing": [
+            "CS 262",
+            "CS 321",
+            "CS 330",
+            "CS 367",
+            "CS 405",
+            "CS 450",
+            "CS 471",
+            "CS 483"
+          ],
+          "slotsOpen": 0,
+          "credits": 25
+        },
+        {
+          "name": "Senior Computer Science Electives",
+          "status": "incomplete",
+          "missing": [],
+          "slotsOpen": 2,
+          "credits": 6
+        },
+        {
+          "name": "Computer Science-Related Electives",
+          "status": "incomplete",
+          "missing": [],
+          "slotsOpen": 1,
+          "credits": 3
+        },
+        {
+          "name": "Mathematics and Statistics",
+          "status": "complete",
+          "missing": [],
+          "slotsOpen": 0,
+          "credits": 20
+        },
+        {
+          "name": "Mason Core",
+          "status": "complete",
+          "missing": [],
+          "slotsOpen": 0,
+          "credits": 32
+        },
+        {
+          "name": "Natural Science",
+          "status": "complete",
+          "missing": [],
+          "slotsOpen": 0,
+          "credits": 8
+        }
+      ]
+    },
+    "degraded": true
+  },
+  "extract-skills": {
+    "skills": [
+      {
+        "skillId": "4.A.3.b.1.I01.D03",
+        "skillName": "Write computer programming code.",
+        "demandCount": 3,
+        "postings": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.2.a.4.I07.D12",
+        "skillName": "Analyze data to inform operational decisions or activities.",
+        "demandCount": 2,
+        "postings": [
+          1,
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.2.a.4.I05.D02",
+        "skillName": "Analyze design requirements for computer or electronics systems.",
+        "demandCount": 2,
+        "postings": [
+          0,
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.2.b.2.I02.D05",
+        "skillName": "Design integrated computer systems.",
+        "demandCount": 2,
+        "postings": [
+          0,
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.2.b.2.I02.D10",
+        "skillName": "Design software applications.",
+        "demandCount": 2,
+        "postings": [
+          0,
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.2.b.4.I03.D10",
+        "skillName": "Develop data analysis or data management procedures.",
+        "demandCount": 2,
+        "postings": [
+          0,
+          1
+        ]
+      },
+      {
+        "skillId": "4.A.3.b.6.I09.D05",
+        "skillName": "Document design or development procedures.",
+        "demandCount": 2,
+        "postings": [
+          0,
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.3.b.6.I08.D14",
+        "skillName": "Maintain data in information systems or databases.",
+        "demandCount": 2,
+        "postings": [
+          0,
+          1
+        ]
+      },
+      {
+        "skillId": "4.A.2.a.4.I04.D02",
+        "skillName": "Analyze data to identify trends or relationships among variables.",
+        "demandCount": 1,
+        "postings": [
+          1
+        ]
+      },
+      {
+        "skillId": "4.A.2.a.4.I12.D02",
+        "skillName": "Analyze security of systems, network, or data.",
+        "demandCount": 1,
+        "postings": [
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.2.a.2.I01.D06",
+        "skillName": "Evaluate data quality.",
+        "demandCount": 1,
+        "postings": [
+          1
+        ]
+      },
+      {
+        "skillId": "4.A.3.b.1.I02.D01",
+        "skillName": "Implement security measures for computer or information systems.",
+        "demandCount": 1,
+        "postings": [
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.1.a.2.I02.D02",
+        "skillName": "Monitor facilities or operational systems.",
+        "demandCount": 1,
+        "postings": [
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.3.b.1.I05.D02",
+        "skillName": "Operate computer systems.",
+        "demandCount": 1,
+        "postings": [
+          2
+        ]
+      },
+      {
+        "skillId": "4.A.3.b.1.I06.D07",
+        "skillName": "Prepare data for analysis.",
+        "demandCount": 1,
+        "postings": [
+          1
+        ]
+      }
+    ],
+    "degraded": true
+  },
+  "build-schedules": {
+    "options": [
+      {
+        "id": "max-coverage",
+        "strategy": "max-coverage",
+        "label": "Close the data gap",
+        "courses": [
+          {
+            "code": "CS 262",
+            "title": "Introduction to Low-Level Programming",
+            "section": {
+              "crn": "79379",
+              "days": "TR",
+              "startTime": "09:00",
+              "endTime": "10:15",
+              "instructor": "Hamza Mughal",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": true,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Hamza%20Mughal"
+          },
+          {
+            "code": "CS 330",
+            "title": "Formal Methods and Models",
+            "section": {
+              "crn": "80167",
+              "days": "MW",
+              "startTime": "13:30",
+              "endTime": "14:45",
+              "instructor": "Samuel Dov Gordon",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": true,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Samuel%20Dov%20Gordon"
+          },
+          {
+            "code": "CS 321",
+            "title": "Software Engineering",
+            "section": {
+              "crn": "77898",
+              "days": "TR",
+              "startTime": "10:30",
+              "endTime": "11:45",
+              "instructor": "Shvetha Soundararajan",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Shvetha%20Soundararajan"
+          },
+          {
+            "code": "CS 484",
+            "title": "Data Mining",
+            "section": {
+              "crn": "79434",
+              "days": "F",
+              "startTime": "10:30",
+              "endTime": "13:10",
+              "instructor": "Parastoo Kamranfar",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [
+              "4.A.3.b.1.I06.D07",
+              "4.A.2.a.2.I01.D06"
+            ],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Parastoo%20Kamranfar"
+          },
+          {
+            "code": "STAT 362",
+            "title": "Introduction to Computer Statistical Packages",
+            "section": {
+              "crn": "78862",
+              "days": "TR",
+              "startTime": "12:00",
+              "endTime": "13:15",
+              "instructor": "Michael Edward Holland",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [
+              "4.A.2.a.4.I07.D12",
+              "4.A.2.b.4.I03.D10",
+              "4.A.2.a.4.I04.D02"
+            ],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Michael%20Edward%20Holland"
+          }
+        ],
+        "totalCredits": 15,
+        "bottlenecksCleared": 2,
+        "gapsClosed": 5,
+        "gapsTotal": 6,
+        "slotsUsed": 2,
+        "conflicts": [],
+        "why": "All three postings treat programming as a given, so the only skills still open are on the analytics side — CS 484 and STAT 362 close five of your six, and CS 262 clears the one course CS 367 and CS 471 are both waiting on.",
+        "tradeoff": "Heaviest of the three at 15 credits, and it spends two of your three remaining elective slots in a single term."
+      },
+      {
+        "id": "balanced",
+        "strategy": "balanced",
+        "label": "Clear the blocker, keep the load sane",
+        "courses": [
+          {
+            "code": "CS 262",
+            "title": "Introduction to Low-Level Programming",
+            "section": {
+              "crn": "79435",
+              "days": "MW",
+              "startTime": "15:00",
+              "endTime": "16:15",
+              "instructor": "Kevin Michael Andrea",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": true,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Kevin%20Michael%20Andrea"
+          },
+          {
+            "code": "CS 330",
+            "title": "Formal Methods and Models",
+            "section": {
+              "crn": "77905",
+              "days": "TR",
+              "startTime": "09:00",
+              "endTime": "10:15",
+              "instructor": "Ahmed Bin Zaman",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": true,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Ahmed%20Bin%20Zaman"
+          },
+          {
+            "code": "CS 484",
+            "title": "Data Mining",
+            "section": {
+              "crn": "79434",
+              "days": "F",
+              "startTime": "10:30",
+              "endTime": "13:10",
+              "instructor": "Parastoo Kamranfar",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [
+              "4.A.3.b.1.I06.D07",
+              "4.A.2.a.2.I01.D06"
+            ],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Parastoo%20Kamranfar"
+          },
+          {
+            "code": "CS 405",
+            "title": "Ethics and Law in Computing",
+            "section": {
+              "crn": "77924",
+              "days": "MW",
+              "startTime": "09:00",
+              "endTime": "10:15",
+              "instructor": "Michael S Reep",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Michael%20S%20Reep"
+          }
+        ],
+        "totalCredits": 12,
+        "bottlenecksCleared": 2,
+        "gapsClosed": 2,
+        "gapsTotal": 6,
+        "slotsUsed": 1,
+        "conflicts": [],
+        "why": "Twelve credits that still take both blockers off the board, and CS 484 answers the data-quality and data-preparation work the analytics posting leads with.",
+        "tradeoff": "Closes two gaps instead of five — the trend-analysis and operational-reporting skills two of the three postings asked for wait until spring."
+      },
+      {
+        "id": "keeps-options-open",
+        "strategy": "keeps-options-open",
+        "label": "Widen what you can take in spring",
+        "courses": [
+          {
+            "code": "CS 262",
+            "title": "Introduction to Low-Level Programming",
+            "section": {
+              "crn": "79379",
+              "days": "TR",
+              "startTime": "09:00",
+              "endTime": "10:15",
+              "instructor": "Hamza Mughal",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": true,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Hamza%20Mughal"
+          },
+          {
+            "code": "CS 330",
+            "title": "Formal Methods and Models",
+            "section": {
+              "crn": "80167",
+              "days": "MW",
+              "startTime": "13:30",
+              "endTime": "14:45",
+              "instructor": "Samuel Dov Gordon",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": true,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Samuel%20Dov%20Gordon"
+          },
+          {
+            "code": "STAT 362",
+            "title": "Introduction to Computer Statistical Packages",
+            "section": {
+              "crn": "78862",
+              "days": "TR",
+              "startTime": "12:00",
+              "endTime": "13:15",
+              "instructor": "Michael Edward Holland",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [
+              "4.A.2.a.4.I07.D12",
+              "4.A.2.b.4.I03.D10",
+              "4.A.2.a.4.I04.D02"
+            ],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Michael%20Edward%20Holland"
+          },
+          {
+            "code": "CS 405",
+            "title": "Ethics and Law in Computing",
+            "section": {
+              "crn": "77929",
+              "days": "TR",
+              "startTime": "15:00",
+              "endTime": "16:15",
+              "instructor": "Alexander Laufer",
+              "modality": "in-person",
+              "term": "fall"
+            },
+            "isBottleneck": false,
+            "skillsClosed": [],
+            "rmpUrl": "https://www.ratemyprofessors.com/search/professors?q=Alexander%20Laufer"
+          }
+        ],
+        "totalCredits": 12,
+        "bottlenecksCleared": 2,
+        "gapsClosed": 3,
+        "gapsTotal": 6,
+        "slotsUsed": 1,
+        "conflicts": [],
+        "why": "CS 262 and CS 330 in the same term unlock eleven CS courses you cannot register for today — CS 367, CS 450, CS 480 and CS 483 among them — and STAT 362 still closes three of your six open skills.",
+        "tradeoff": "Leaves CS 484 for a later term, so the two data-mining skills stay open, and the security work the platform posting asked for stays out of reach until CS 367 is done."
+      }
+    ],
+    "degraded": true
+  }
+}

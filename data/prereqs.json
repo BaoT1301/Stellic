@@ -1,0 +1,2904 @@
+{
+  "CS 109": {
+    "allOf": [
+      "CS 108"
+    ],
+    "oneOf": [
+      [
+        "MATH 104",
+        "MATH 105",
+        "MATH 113",
+        "MATH 115",
+        "MATH 123"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 112": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 104",
+        "MATH 105",
+        "MATH 113",
+        "MATH 115",
+        "MATH 123"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 211": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 112",
+        "CS 109"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 222": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 112",
+        "CS 109"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 262": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 211",
+        "CS 222"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "CS 110"
+    ]
+  },
+  "CS 310": {
+    "allOf": [
+      "CS 211",
+      "MATH 125"
+    ],
+    "oneOf": [
+      [
+        "MATH 113",
+        "MATH 124",
+        "MATH 115"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 321": {
+    "allOf": [
+      "CS 310",
+      "ENGH 302"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 325": {
+    "allOf": [
+      "CS 211"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 330": {
+    "allOf": [
+      "CS 211",
+      "MATH 125"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 351": {
+    "allOf": [
+      "CS 262",
+      "CS 310"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 367": {
+    "allOf": [
+      "MATH 125",
+      "CS 110"
+    ],
+    "oneOf": [
+      [
+        "CS 262",
+        "CS 222"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 390": {
+    "allOf": [
+      "CS 262"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 391": {
+    "allOf": [
+      "CS 310"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 395": {
+    "allOf": [
+      "CS 211"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 399": {
+    "allOf": [
+      "CS 211"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 405": {
+    "allOf": [
+      "ENGH 302"
+    ],
+    "oneOf": [
+      [
+        "CS 105",
+        "CS 110"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 425": {
+    "allOf": [
+      "CS 310",
+      "CS 351"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 426": {
+    "allOf": [
+      "CS 325",
+      "CS 425"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 440": {
+    "allOf": [
+      "CS 310",
+      "CS 330",
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 450": {
+    "allOf": [
+      "CS 310",
+      "CS 330"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 451": {
+    "allOf": [
+      "MATH 203",
+      "CS 310",
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 452": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 325",
+        "CS 351",
+        "CS 451"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 453": {
+    "allOf": [
+      "MATH 203",
+      "CS 310",
+      "CS 330"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 455": {
+    "allOf": [
+      "CS 310",
+      "CS 367"
+    ],
+    "oneOf": [
+      [
+        "STAT 344",
+        "MATH 352"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 463": {
+    "allOf": [
+      "CS 330",
+      "CS 367",
+      "CS 310"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 465": {
+    "allOf": [
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 468": {
+    "allOf": [
+      "CS 310",
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 471": {
+    "allOf": [
+      "CS 310",
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 475": {
+    "allOf": [
+      "CS 310",
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 477": {
+    "allOf": [
+      "CS 310",
+      "CS 367"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 478": {
+    "allOf": [
+      "CS 310",
+      "CS 330"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 480": {
+    "allOf": [
+      "CS 310",
+      "CS 330"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 482": {
+    "allOf": [
+      "CS 310",
+      "MATH 203",
+      "STAT 344"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 483": {
+    "allOf": [
+      "CS 310",
+      "CS 330",
+      "MATH 125"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 484": {
+    "allOf": [
+      "CS 310"
+    ],
+    "oneOf": [
+      [
+        "STAT 344",
+        "STAT 334",
+        "STAT 346",
+        "MATH 351"
+      ],
+      [
+        "STAT 344",
+        "STAT 334",
+        "STAT 346",
+        "MATH 352"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 485": {
+    "allOf": [
+      "CS 262",
+      "CS 310",
+      "MATH 203"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 487": {
+    "allOf": [
+      "CS 310",
+      "CS 330",
+      "STAT 344"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 489": {
+    "allOf": [
+      "MATH 203"
+    ],
+    "oneOf": [
+      [
+        "CS 480",
+        "CS 484"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 491": {
+    "allOf": [
+      "CS 321"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 499": {
+    "allOf": [
+      "CS 310",
+      "CS 330"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "CS 600": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 630": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 635": {
+    "allOf": [
+      "CS 583",
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 650": {
+    "allOf": [
+      "CS 550"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 653": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [
+      [
+        "CS 580",
+        "CS 584"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 655": {
+    "allOf": [
+      "CS 555"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 657": {
+    "allOf": [
+      "CS 584"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 661": {
+    "allOf": [
+      "CS 580"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 662": {
+    "allOf": [
+      "CS 551"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 663": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 665": {
+    "allOf": [
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 672": {
+    "allOf": [
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 675": {
+    "allOf": [
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 677": {
+    "allOf": [
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 678": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 580",
+        "CS 584"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 682": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [
+      [
+        "CS 580",
+        "CS 584"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 683": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 684": {
+    "allOf": [
+      "CS 583"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 685": {
+    "allOf": [
+      "CS 580"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 687": {
+    "allOf": [
+      "CS 580"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 688": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 580",
+        "CS 584"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 719": {
+    "allOf": [
+      "CS 555",
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 747": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 580",
+        "CS 584"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 757": {
+    "allOf": [
+      "CS 688"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 773": {
+    "allOf": [
+      "CS 571"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 782": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "CS 687",
+        "CS 688"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "CS 787": {
+    "allOf": [
+      "CS 550"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "ENGH 302": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "ENGH 100",
+        "ENGH 101",
+        "ENGH 122",
+        "ENGH 123"
+      ],
+      [
+        "ENGH 201",
+        "ENGH 202",
+        "ENGH 203",
+        "ENGH 204",
+        "ENGH 206"
+      ]
+    ],
+    "minGrade": "D",
+    "coreq": []
+  },
+  "ENGH 487": {
+    "allOf": [
+      "ENGH 388"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 102": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 108",
+        "MATH 113",
+        "MATH 123"
+      ],
+      [
+        "MATH 108",
+        "MATH 113",
+        "MATH 124"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 106": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 125",
+        "IT 102"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 109": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 125",
+        "IT 102"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 206": {
+    "allOf": [
+      "IT 106"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 207": {
+    "allOf": [
+      "IT 214"
+    ],
+    "oneOf": [
+      [
+        "IT 106",
+        "IT 109",
+        "CS 112"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 209": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "IT 109",
+        "CS 112"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 213": {
+    "allOf": [
+      "IT 104"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 214": {
+    "allOf": [
+      "IT 104"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 216": {
+    "allOf": [
+      "IT 214"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 223": {
+    "allOf": [
+      "IT 104",
+      "IT 105"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 300": {
+    "allOf": [
+      "IT 105"
+    ],
+    "oneOf": [
+      [
+        "MATH 108",
+        "MATH 113",
+        "MATH 123"
+      ],
+      [
+        "MATH 108",
+        "MATH 113",
+        "MATH 124"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "IT 293"
+    ]
+  },
+  "IT 304": {
+    "allOf": [
+      "IT 104"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "IT 293"
+    ]
+  },
+  "IT 309": {
+    "allOf": [
+      "MATH 125"
+    ],
+    "oneOf": [
+      [
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 314": {
+    "allOf": [
+      "IT 214"
+    ],
+    "oneOf": [
+      [
+        "IT 106",
+        "IT 109",
+        "CS 112"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 315": {
+    "allOf": [
+      "IT 213"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 322": {
+    "allOf": [
+      "IT 214"
+    ],
+    "oneOf": [
+      [
+        "STAT 250",
+        "STAT 344"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 331": {
+    "allOf": [
+      "IT 213"
+    ],
+    "oneOf": [
+      [
+        "IT 106",
+        "IT 109",
+        "CS 112"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 332": {
+    "allOf": [
+      "IT 213"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 335": {
+    "allOf": [
+      "IT 213"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 341": {
+    "allOf": [
+      "IT 105"
+    ],
+    "oneOf": [
+      [
+        "IT 106",
+        "IT 109",
+        "CS 112"
+      ],
+      [
+        "MATH 108",
+        "MATH 113",
+        "MATH 123"
+      ],
+      [
+        "MATH 108",
+        "MATH 113",
+        "MATH 124"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "IT 300"
+    ]
+  },
+  "IT 342": {
+    "allOf": [
+      "IT 105"
+    ],
+    "oneOf": [
+      [
+        "IT 106",
+        "IT 109",
+        "CS 112"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "IT 293"
+    ]
+  },
+  "IT 343": {
+    "allOf": [
+      "IT 293"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 352": {
+    "allOf": [
+      "IT 223",
+      "IT 342"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 357": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 366": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 369": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": [
+      "IT 207"
+    ]
+  },
+  "IT 371": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209"
+      ],
+      [
+        "STAT 250",
+        "STAT 344"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 372": {
+    "allOf": [
+      "IT 105",
+      "IT 343"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 373": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 374": {
+    "allOf": [
+      "STAT 250"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 375": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 390": {
+    "allOf": [
+      "IT 213",
+      "IT 214"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 414": {
+    "allOf": [
+      "IT 314"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 416": {
+    "allOf": [
+      "STAT 250"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 425": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 426": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [
+      [
+        "IT 357",
+        "IT 366",
+        "IT 369"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 429": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 431": {
+    "allOf": [
+      "IT 207",
+      "IT 213"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 432": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [
+      [
+        "IT 341",
+        "IT 357"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 442": {
+    "allOf": [
+      "IT 341"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 445": {
+    "allOf": [
+      "IT 341"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 451": {
+    "allOf": [
+      "IT 442"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 461": {
+    "allOf": [
+      "IT 214"
+    ],
+    "oneOf": [
+      [
+        "IT 206",
+        "IT 209"
+      ]
+    ],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 462": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 467": {
+    "allOf": [
+      "IT 366"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 471": {
+    "allOf": [
+      "STAT 250",
+      "IT 442"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 481": {
+    "allOf": [
+      "IT 223"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "IT 482": {
+    "allOf": [
+      "IT 341",
+      "IT 442"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 485": {
+    "allOf": [
+      "IT 341",
+      "IT 442"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "IT 492": {
+    "allOf": [
+      "IT 207",
+      "IT 213",
+      "IT 214",
+      "IT 223",
+      "IT 300",
+      "IT 341"
+    ],
+    "oneOf": [
+      [
+        "IT 343",
+        "CS 321"
+      ],
+      [
+        "IT 206",
+        "IT 209",
+        "CS 211"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "IT 216"
+    ]
+  },
+  "IT 493": {
+    "allOf": [
+      "IT 492"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 113": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 105",
+        "MATH 104"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 114": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 113",
+        "MATH 123",
+        "MATH 115"
+      ],
+      [
+        "MATH 113",
+        "MATH 124",
+        "MATH 115"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 116": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 115",
+        "MATH 113"
+      ]
+    ],
+    "minGrade": "A",
+    "coreq": []
+  },
+  "MATH 123": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 105",
+        "MATH 104"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 124": {
+    "allOf": [
+      "MATH 123"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 125": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 105",
+        "MATH 108",
+        "MATH 113",
+        "MATH 115",
+        "MATH 123"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 203": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 213": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 214": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 215": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 216": {
+    "allOf": [
+      "MATH 203"
+    ],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 272": {
+    "allOf": [
+      "MATH 271"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 300": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ],
+      [
+        "MATH 125",
+        "MATH 175"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 302": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 307": {
+    "allOf": [
+      "MATH 203"
+    ],
+    "oneOf": [
+      [
+        "MATH 214",
+        "MATH 216"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 312": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 313": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 314": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 214",
+        "MATH 216"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 315": {
+    "allOf": [
+      "MATH 300"
+    ],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 316": {
+    "allOf": [
+      "MATH 315"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 321": {
+    "allOf": [
+      "MATH 300"
+    ],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 322": {
+    "allOf": [
+      "MATH 203",
+      "MATH 300"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 325": {
+    "allOf": [
+      "MATH 125"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 351": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 352": {
+    "allOf": [
+      "MATH 351"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 400": {
+    "allOf": [
+      "MATH 300"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 406": {
+    "allOf": [
+      "MATH 405"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 411": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 214",
+        "MATH 216"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 413": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 203",
+        "MATH 216"
+      ],
+      [
+        "MATH 214",
+        "MATH 216"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 414": {
+    "allOf": [
+      "MATH 413"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 421": {
+    "allOf": [
+      "MATH 321"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 431": {
+    "allOf": [
+      "MATH 315"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 432": {
+    "allOf": [
+      "MATH 315"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 433": {
+    "allOf": [
+      "MATH 321"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 441": {
+    "allOf": [
+      "MATH 203"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 442": {
+    "allOf": [
+      "MATH 351"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 446": {
+    "allOf": [
+      "MATH 203",
+      "CS 112"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 447": {
+    "allOf": [
+      "MATH 446"
+    ],
+    "oneOf": [
+      [
+        "MATH 214",
+        "MATH 216"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 453": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 352",
+        "STAT 356"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 462": {
+    "allOf": [
+      "MATH 203",
+      "MATH 213",
+      "CS 112"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 463": {
+    "allOf": [],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "MATH 462"
+    ]
+  },
+  "MATH 464": {
+    "allOf": [
+      "CS 112"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 465": {
+    "allOf": [
+      "MATH 214",
+      "MATH 322",
+      "CS 112"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 478": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 203",
+        "MATH 216"
+      ],
+      [
+        "MATH 214",
+        "MATH 216"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 553": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 352",
+        "STAT 356",
+        "MATH 554"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "MATH 642": {
+    "allOf": [
+      "MATH 621"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "MATH 663": {
+    "allOf": [],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": [
+      "MATH 662"
+    ]
+  },
+  "MATH 690": {
+    "allOf": [
+      "MATH 675"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "MATH 720": {
+    "allOf": [
+      "MATH 621"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "MATH 725": {
+    "allOf": [
+      "MATH 621"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "MATH 726": {
+    "allOf": [
+      "MATH 621"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "MATH 734": {
+    "allOf": [
+      "MATH 621",
+      "MATH 724"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "MATH 741": {
+    "allOf": [
+      "MATH 621"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "MATH 742": {
+    "allOf": [
+      "MATH 740"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 112": {
+    "allOf": [],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 111"
+    ]
+  },
+  "PHYS 160": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 161": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 160",
+        "PHYS 170"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 170": {
+    "allOf": [],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "MATH 113"
+    ]
+  },
+  "PHYS 225": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 244": {
+    "allOf": [],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 243"
+    ]
+  },
+  "PHYS 245": {
+    "allOf": [
+      "PHYS 243"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 246": {
+    "allOf": [
+      "PHYS 244"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 245"
+    ]
+  },
+  "PHYS 251": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 160",
+        "PHYS 170"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 260": {
+    "allOf": [
+      "PHYS 160"
+    ],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 261": {
+    "allOf": [
+      "PHYS 161"
+    ],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 262": {
+    "allOf": [
+      "PHYS 260"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 263": {
+    "allOf": [
+      "PHYS 261"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 262"
+    ]
+  },
+  "PHYS 266": {
+    "allOf": [
+      "PHYS 260"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 270": {
+    "allOf": [
+      "PHYS 170"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": [
+      "MATH 114"
+    ]
+  },
+  "PHYS 301": {
+    "allOf": [
+      "MATH 214"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 303": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 301"
+    ]
+  },
+  "PHYS 305": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 301"
+    ]
+  },
+  "PHYS 306": {
+    "allOf": [
+      "PHYS 305",
+      "PHYS 301"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 307": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 308": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 310": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 262",
+        "PHYS 307"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 311": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 261"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 312": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 261"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 325": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 261"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 326": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 301",
+        "PHYS 307"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 331": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 332": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 261",
+        "PHYS 245"
+      ],
+      [
+        "PHYS 261",
+        "PHYS 246"
+      ],
+      [
+        "PHYS 260",
+        "PHYS 270",
+        "PHYS 245"
+      ],
+      [
+        "PHYS 260",
+        "PHYS 270",
+        "PHYS 246"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 334": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 260",
+        "PHYS 270"
+      ],
+      [
+        "MATH 203",
+        "PHYS 301"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 370": {
+    "allOf": [
+      "PHYS 307"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 385": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 262",
+        "PHYS 266",
+        "PHYS 307",
+        "PHYS 245"
+      ],
+      [
+        "PHYS 262",
+        "PHYS 266",
+        "PHYS 307",
+        "MATH 113"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 402": {
+    "allOf": [
+      "PHYS 303",
+      "PHYS 305"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 403": {
+    "allOf": [
+      "PHYS 402"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 405": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 301",
+      "PHYS 303",
+      "PHYS 305",
+      "PHYS 307"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 406": {
+    "allOf": [
+      "PHYS 405"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 407": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 311",
+      "PHYS 312",
+      "PHYS 402"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 408": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 301",
+      "PHYS 303",
+      "PHYS 305",
+      "PHYS 307"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 409": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 301",
+      "PHYS 303",
+      "PHYS 305",
+      "PHYS 307"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 410": {
+    "allOf": [
+      "PHYS 251",
+      "PHYS 325",
+      "PHYS 303",
+      "PHYS 305"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 411": {
+    "allOf": [
+      "PHYS 131"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 412": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 402",
+        "PHYS 502"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 416": {
+    "allOf": [
+      "PHYS 301",
+      "PHYS 303",
+      "PHYS 305",
+      "PHYS 307",
+      "PHYS 402"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 428": {
+    "allOf": [
+      "PHYS 303",
+      "PHYS 305"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 440": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 402",
+        "PHYS 502"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "PHYS 428"
+    ]
+  },
+  "PHYS 465": {
+    "allOf": [
+      "PHYS 260",
+      "PHYS 301"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 475": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 170",
+        "PHYS 262",
+        "PHYS 307"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 611": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 502",
+        "PHYS 684"
+      ],
+      [
+        "PHYS 513",
+        "PHYS 685"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 612": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 513",
+        "PHYS 685"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 614": {
+    "allOf": [
+      "MATH 113",
+      "MATH 114",
+      "MATH 213",
+      "MATH 307"
+    ],
+    "oneOf": [
+      [
+        "PHYS 262",
+        "PHYS 266"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "PHYS 736": {
+    "allOf": [
+      "PHYS 502",
+      "PHYS 510"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 760": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "PHYS 513",
+        "PHYS 685"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 784": {
+    "allOf": [
+      "PHYS 684"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 785": {
+    "allOf": [
+      "PHYS 685"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "PHYS 786": {
+    "allOf": [
+      "PHYS 684"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 260": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 113",
+        "MATH 115",
+        "MATH 124"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 334": {
+    "allOf": [
+      "STAT 260"
+    ],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "STAT 362"
+    ]
+  },
+  "STAT 344": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 346": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "MATH 213",
+        "MATH 215"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 350": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 250",
+        "STAT 260"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 354": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 334",
+        "STAT 344",
+        "STAT 346"
+      ],
+      [
+        "STAT 334",
+        "STAT 344",
+        "STAT 362"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 356": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 334",
+        "STAT 346",
+        "MATH 351"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 360": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 250",
+        "STAT 260"
+      ],
+      [
+        "MATH 114",
+        "MATH 116"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 362": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 250",
+        "STAT 260",
+        "STAT 344"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 455": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 456": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 460": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "STAT 362"
+    ]
+  },
+  "STAT 462": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 463": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 465": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 472": {
+    "allOf": [
+      "STAT 456"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 474": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 350",
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": [
+      "STAT 362"
+    ]
+  },
+  "STAT 489": {
+    "allOf": [
+      "STAT 362",
+      "ENGH 302"
+    ],
+    "oneOf": [
+      [
+        "STAT 354",
+        "STAT 360"
+      ]
+    ],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 490": {
+    "allOf": [
+      "STAT 489"
+    ],
+    "oneOf": [],
+    "minGrade": "C",
+    "coreq": []
+  },
+  "STAT 517": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 535",
+        "STAT 554"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 522": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 535",
+        "STAT 554"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 525": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 535",
+        "STAT 554"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 526": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 535",
+        "STAT 554"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 572": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 250",
+        "STAT 521",
+        "STAT 554"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 634": {
+    "allOf": [
+      "STAT 654"
+    ],
+    "oneOf": [
+      [
+        "STAT 521",
+        "STAT 544"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 652": {
+    "allOf": [
+      "STAT 544"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": [
+      "STAT 554"
+    ]
+  },
+  "STAT 654": {
+    "allOf": [
+      "STAT 554"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 656": {
+    "allOf": [
+      "STAT 554"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": [
+      "STAT 544"
+    ]
+  },
+  "STAT 657": {
+    "allOf": [
+      "STAT 554"
+    ],
+    "oneOf": [
+      [
+        "STAT 544",
+        "STAT 521"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 658": {
+    "allOf": [
+      "STAT 554"
+    ],
+    "oneOf": [
+      [
+        "STAT 544",
+        "STAT 521"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 660": {
+    "allOf": [
+      "STAT 654"
+    ],
+    "oneOf": [
+      [
+        "STAT 652",
+        "STAT 521"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 661": {
+    "allOf": [
+      "STAT 654"
+    ],
+    "oneOf": [
+      [
+        "STAT 652",
+        "STAT 521"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 662": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 544",
+        "STAT 521"
+      ],
+      [
+        "STAT 554",
+        "STAT 535"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 665": {
+    "allOf": [
+      "STAT 654"
+    ],
+    "oneOf": [
+      [
+        "STAT 544",
+        "STAT 521"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 674": {
+    "allOf": [
+      "STAT 574"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 676": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 654",
+        "STAT 554"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 742": {
+    "allOf": [
+      "STAT 654"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 771": {
+    "allOf": [
+      "STAT 652",
+      "STAT 654"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 778": {
+    "allOf": [],
+    "oneOf": [
+      [
+        "STAT 521",
+        "STAT 652"
+      ]
+    ],
+    "minGrade": "B-",
+    "coreq": []
+  },
+  "STAT 971": {
+    "allOf": [
+      "STAT 544",
+      "MATH 315"
+    ],
+    "oneOf": [],
+    "minGrade": "B",
+    "coreq": []
+  },
+  "STAT 972": {
+    "allOf": [
+      "STAT 652"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": [
+      "STAT 971"
+    ]
+  },
+  "STAT 973": {
+    "allOf": [
+      "STAT 972"
+    ],
+    "oneOf": [],
+    "minGrade": "B-",
+    "coreq": []
+  }
+}

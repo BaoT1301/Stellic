@@ -1,0 +1,37 @@
+{
+  "major": "Computer Science, BS",
+  "catalogYear": "2026-2027",
+  "creditsRequired": 120,
+  "core": [
+    "CS 110",
+    "CS 112",
+    "CS 211",
+    "CS 262",
+    "CS 310",
+    "CS 321",
+    "CS 330",
+    "CS 367",
+    "CS 405",
+    "CS 450",
+    "CS 471",
+    "CS 483",
+    "MATH 113",
+    "MATH 114",
+    "MATH 125",
+    "MATH 203",
+    "MATH 213",
+    "STAT 344"
+  ],
+  "electiveBuckets": [
+    {
+      "name": "Senior Computer Science",
+      "slots": 4,
+      "credits": 12
+    },
+    {
+      "name": "Computer Science-Related Electives",
+      "slots": 2,
+      "credits": 6
+    }
+  ]
+}

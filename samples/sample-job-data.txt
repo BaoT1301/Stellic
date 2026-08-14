@@ -1,0 +1,51 @@
+Data Scientist / Machine Learning Engineer — Risk Analytics
+Meridian Health Analytics — Arlington, VA (hybrid)
+Full-time · Early career (0-3 years) · Requisition DS-1147
+
+About the role
+Meridian builds readmission-risk and utilization models for regional hospital
+systems. You will own a model end to end: framing the question with a clinical
+partner, pulling and cleaning the data, choosing an approach, validating it
+honestly, and shipping it as a service that runs nightly against live claims
+feeds.
+
+What you will do
+- Write substantial SQL against a 30-terabyte claims warehouse. Most of the work
+  in this role is data extraction, joining across poorly documented source
+  systems, and reconciling records that disagree.
+- Perform exploratory data analysis and communicate what you found: distributions,
+  missingness, leakage risk, and confounding. We would rather hear that a signal
+  is spurious than ship it.
+- Apply statistical inference correctly. You will be asked to defend a confidence
+  interval, choose a hypothesis test, explain why a p-value is not an effect size,
+  and design an evaluation that survives class imbalance.
+- Build and tune supervised models — regularized regression, gradient-boosted
+  trees, and where it is warranted, neural approaches — and apply clustering and
+  other unsupervised methods to segment populations.
+- Do the data mining work that precedes modeling: feature construction, dimension
+  reduction, outlier detection, and pattern discovery over sparse records.
+- Write production-quality Python. Models here are code that other engineers must
+  run, test, and modify. You will use version control, write unit tests, and go
+  through code review the same way the platform team does.
+- Present findings to clinicians and hospital operations leaders. Clear
+  visualization and plain-language explanation are graded as heavily as model
+  performance.
+
+Minimum qualifications
+- Bachelor's degree in Statistics, Data Science, Computer Science, Applied
+  Mathematics, or a related quantitative field.
+- Formal coursework in probability and statistics: distributions, estimation,
+  hypothesis testing, and regression.
+- Demonstrated ability to analyze data and identify trends in a real dataset, not
+  only a cleaned classroom one.
+- Strong SQL and comfort with relational database concepts and schema design.
+- Practical machine learning experience: model selection, cross-validation,
+  overfitting, and evaluation metrics beyond accuracy.
+- Programming proficiency in Python and familiarity with linear algebra.
+
+Preferred qualifications
+- Coursework in data mining, machine learning, or artificial intelligence.
+- Experience with distributed data processing frameworks.
+- Interest in healthcare; no clinical background required.
+
+Meridian Health Analytics is an equal opportunity employer.

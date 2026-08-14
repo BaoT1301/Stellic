@@ -463,7 +463,8 @@ Extract per course: code, title, credits, description, **raw prereq text**, and 
 **Section parsing gotchas — all ✅ VERIFIED against live Fall 2026 CS data:**
 
 - **Drop non-lecture rows.** The `Schedule Type` cell says Lecture / Laboratory / Recitation (✅ 138 Lecture, 23 Laboratory in CS alone); equivalently discard section numbers starting with `2`. This keeps §8 frozen and sidesteps lecture/lab pairing combinatorics entirely.
-- **Modality.** Banner emits percentage-band strings, and NOTHING maps to "hybrid" (zero occurrences in CS). Map: `On-campus F2F 76-100%` → `in-person`; `Wiley Off F2F 0-1% Async` / `Off-campus F2F 0-1% Async` / `Off-campus F2F 0-1% Sync` → `online`. **Log any unmapped string loudly rather than defaulting.**
+- **Modality.** Banner emits percentage-band strings. ⚠️ **The "nothing maps to hybrid" claim was CS-only and is false catalog-wide** — the other five subjects contain six further strings, and two of them state a SINGLE percentage rather than a range: `On-campus F2F 50% Async` (113 sections) and `On-campus F2F 50% Sync` (21). A range-only regex silently labels all 134 as `in-person`. Final Fall 2026 split across the six subjects: **691 in-person / 240 online / 54 hybrid.** Base map: `On-campus F2F 76-100%` → `in-person`; `Wiley Off F2F 0-1% Async` / `Off-campus F2F 0-1% Async` / `Off-campus F2F 0-1% Sync` → `online`; the 50% forms → `hybrid`. **Log any unmapped string loudly rather than defaulting.**
+- **`Required Prerequisite:` also occurs in the SINGULAR** (CS 757). Match `/^Required Prerequisites?:/` — 67 blocks on the CS page, not 66.
 - **Async sections carry `Time = "TBA"` and `Days = "&nbsp;"`.** Fix at parse time, not in the conflict checker: if Time doesn't match `/^\d{1,2}:\d{2} [ap]m/`, set `days=""` and `startTime=endTime=""`, and let the card render "Asynchronous — no set meeting time". Otherwise "TBA" hits the 12h→24h converter and renders `NaN:NaN` on a schedule card.
 
 Normalize course codes to `"DEPT NNN"` with a single ASCII space — on write, never on read. Be polite: sequential requests, ~500ms delay, real user-agent, cache raw HTML to `.cache/`.
@@ -474,8 +475,18 @@ Output: `data/courses.json` conforming to `Course[]`.
 
 Converts `prereqText` into `PrereqRule`. **GMU does not write prose** — it emits a Banner-generated boolean expression with grade codes as superscripts. The two REAL strings, ✅ verified live:
 
-> **CS 330:** `Required Prerequisites: ((CS 211^C or 211^XS) and (MATH 125^C or 125^XS)).`
-> **CS 484:** `Required Prerequisites: (CS 310^C or 310^XS) and ((STAT 344^C, 344^XS, 334^C, 334^XS or 346^C) or (MATH 351^C and 352^C)).`
+> **CS 330:** `Required Prerequisites: (CS 211^C or 211^XS) and (MATH 125^C or 125^XS).`
+> **CS 484:** `Required Prerequisites: ((CS 310^C or 310^XS) and ((STAT 344^C, 344^XS, 334^C, 334^XS or 346^C) or (MATH 351^C and 352^C))).`
+
+⚠️ **Both strings above were transcribed with the wrong parenthesization in the
+original spec** (an outer pair added to CS 330, omitted from CS 484). The
+versions here match the live catalog. **Build few-shots from `data/courses.json`,
+never from a transcription in this file.**
+
+**`^*` is the only coreq signal.** Strip the `^C Requires minimum grade of C.`
+legend lines but KEEP `^* May be taken concurrently.` — a `^*` on a token is what
+makes `PrereqRule.coreq` populatable. Example, CS 262:
+`Required Prerequisites: (CS 110^*^C, 110^XS or 101^*) and (CS 211^C, 211^XS, 222^C or 222^XS). ^* May be taken concurrently.`
 
 Build the prompt and few-shots against **that format**, not against prose. Soften the claim in the write-up too: catalog prereqs are a grade-coded grammar that differs at every institution, so we parse them with a model and validate every emitted course code against `courses.json`.
 
@@ -814,10 +825,10 @@ One page, four states, driven by React state. No routing except `/register`.
 
 ```
 ⚠ TAKE THIS TERM OR YOU GRADUATE LATE
-CS 330 — 3 courses behind it · 3 terms left
+CS 262 — 2 courses depend on it · 2 terms left
 
 ✓ SAFE TO DELAY
-CS 306 — nothing depends on it
+CS 405 — nothing you still need depends on it
 ```
 
 > **ILLUSTRATIVE ONLY.** Every string on this screen is generated from
@@ -825,6 +836,10 @@ CS 306 — nothing depends on it
 > real hero example on the day the diagnosis screen is built, from data you
 > already have. Chain depth is provable from `prereqs.json`; offering pattern is
 > only provable from observed Banner sections.
+> **CS 306 DOES NOT EXIST** in the 2026–2027 catalog — it was renumbered to
+> CS 405 "Ethics and Law in Computing" (whose entry says "Equivalent to CS 306").
+> The hero bottleneck computed from the real graph is **CS 262**, chainDepth 2,
+> holding up CS 367 and CS 471.
 > **CS 330 is NOT fall-only** — ✅ verified: Fall 2026 CRNs 77905/77906/80167,
 > Spring 2026 CRNs 17906–17909, Fall 2025 CRNs 77959/80257. GMU CS is mostly
 > every-term, so a genuinely single-term REQUIRED course may not exist. If it
@@ -1002,5 +1017,62 @@ A six-auditor adversarial review produced 114 findings; 82 survived verification
 6. **Every §14 command had a defect**: `--src-dir=false` is silently ignored, `toast` is deprecated and would have failed the whole `add` line atomically, and `pdf-parse` now installs a v2 rewrite whose API is entirely different.
 
 **Verified independently before these edits landed:** the CourseLeaf page (200, 66 required-prereq blocks, 613 non-breaking spaces), the Banner POST (200, CS 330 CRNs 77905/77906/80167, 138 lecture rows / 23 lab rows), and the published versions of `create-next-app` (16.3.1), `pdf-parse` (2.4.5) and `openai` (7.4.0).
+
+---
+
+## 19. BUILD LOG — WHAT SHIPPED, AND WHERE IT DEVIATES FROM THIS SPEC
+
+Built Aug 13 by an 8-agent workflow plus integration. `next build` passes with
+zero warnings; all four §13 states have been driven in a real browser with zero
+page errors (`npx tsx scripts/shoot-screens.ts`).
+
+**Real data, all scraped live and committed:** 689 courses across CS/MATH/STAT/
+IT/ENGH/PHYS · 274 with prereq text · 985 Fall 2026 sections across 327 courses ·
+270 prereq rules · 2,070 O*NET DWAs. CS 330's CRNs came back 77905/77906/80167,
+matching the §9.1 ground truth.
+
+### Deviations from the spec as written, and why
+
+1. **§11.3 step 6 `balanced` needed a `GAP_VALUE_WEIGHT`.** The formula is
+   dimensionally broken: measured against the real skill map, gapValue is
+   ~0.2–1.5 per course while `0.5 × heaviness` is ~1.75–2.0, so the penalty
+   always outruns the reward and the maximum is the *smallest* combo. It
+   rendered a 1-course card next to a 4-course one. Weight 5 on the coverage
+   term makes them commensurate. See `scoreCombo` in `lib/schedules.ts`.
+2. **A `requiredCount` secondary objective was added to all three comparators.**
+   §11.3 scores only gap coverage, leaving every strategy indifferent to degree
+   progress — so each comparator fell through to `totalCredits ASC`, actively
+   preferring the smallest schedule. The result was 9-credit cards for a student
+   with 36 credits left across 2 terms, with still-required, already-eligible
+   courses (CS 321, CS 330, CS 405) dropped in favour of ENGH filler. Each
+   strategy's own objective still decides first.
+3. **`isUndergraduate` (course number < 500) filters eligibility.** 111 graduate
+   courses have live Fall 2026 sections and 92 have no prereq rule at all, so
+   they were trivially "eligible" and their long technical descriptions scored
+   high. `CS 692 Special Topics in Systems and Networks` reached an
+   undergraduate's schedule card with a real CRN. §0 rule 7.
+4. **`/api/build-schedules` degraded path keeps the student's real combos** and
+   writes prose locally, rather than serving fixture options. The combos in the
+   request were computed deterministically by §11.3 and are already correct —
+   only the prose needs the model. Showing a stranger's courses would be a worse
+   and less honest degradation than real courses with local copy.
+5. **`Section` was NOT restructured** for lecture+lab pairs; non-lecture rows are
+   dropped at scrape time instead (§9.1), keeping §8 frozen. 33 sections across
+   three terms have a second meeting block that is not represented.
+
+### Provisional artifacts — fix these first when the key lands
+
+- **`data/catalog-skills.json` is lexical TF-IDF, not embeddings.** It passes
+  §9.4's hubness gate (CS 484 ∩ ENGH 302 overlap = 0) and carries a global 0.2
+  score floor that the embedding path does not need, but it still makes stem
+  collisions an embedding would not. **Run `npx tsx scripts/embed-skills.ts` and
+  re-commit before recording.** This is the single highest-value key-gated action.
+- **`data/prereqs.json` came from the deterministic `scripts/parse-prereqs.ts`,**
+  not from `build-prereqs.ts`. Run `build-prereqs.ts --compare` first — it writes
+  nothing and diffs the model against the committed parser.
+- **No route has ever reached OpenAI.** All three currently serve their degraded
+  path. The strict schemas are structurally legal but unvalidated by the API.
+
+---
 
 **The biggest remaining risk is `sample-audit.pdf`.** It is authored on Aug 14, before the pipeline that consumes it exists, and it silently determines whether the never-cut feature is visible at all. Zero critical bottlenecks → the bottleneck story vanishes from the schedule cards. Four or more → `mustTake` exceeds `targetCredits`, the combo set is empty, and State 4 renders nothing — a blank screen in the demo video. `slots = 0` → all three strategies score identically. The mitigation is already folded in: §11.3 steps 2/3/8 make an empty result unreachable, and Aug 17 carries a 30-minute checkpoint to tune **the PDF, not the algorithm**. Build the floor, then tune the input against it.

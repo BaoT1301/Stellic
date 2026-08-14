@@ -43,3 +43,6 @@ next-env.d.ts
 # reverse-audit
 .env.local
 .cache/
+
+# screenshots from scripts/shoot-screens.ts
+.cache/screens/

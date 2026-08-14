@@ -1,0 +1,2492 @@
+{
+  "CS 100": [
+
+  ],
+  "CS 105": [
+    { "skillId": "4.A.3.b.1.I06.D10", "score": 0.3118 },
+    { "skillId": "4.A.2.b.2.I02.D02", "score": 0.3019 },
+    { "skillId": "4.A.2.b.2.I02.D04", "score": 0.2593 },
+    { "skillId": "4.A.1.a.1.I18.D04", "score": 0.2274 },
+    { "skillId": "4.A.2.b.4.I03.D09", "score": 0.2232 },
+    { "skillId": "4.A.1.a.1.I03.D04", "score": 0.2028 },
+    { "skillId": "4.A.1.a.1.I18.D03", "score": 0.201 }
+  ],
+  "CS 108": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.406 }
+  ],
+  "CS 109": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.406 },
+    { "skillId": "4.A.2.b.2.I15.D02", "score": 0.2772 }
+  ],
+  "CS 110": [
+    { "skillId": "4.A.3.b.1.I02.D01", "score": 0.3084 },
+    { "skillId": "4.A.2.b.2.I23.D08", "score": 0.2679 },
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.2645 }
+  ],
+  "CS 112": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.8164 }
+  ],
+  "CS 211": [
+
+  ],
+  "CS 222": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.5301 }
+  ],
+  "CS 262": [
+    { "skillId": "4.A.1.a.2.I02.D02", "score": 0.3192 }
+  ],
+  "CS 310": [
+
+  ],
+  "CS 321": [
+    { "skillId": "4.A.2.b.2.I25.D05", "score": 0.2708 },
+    { "skillId": "4.A.2.a.4.I05.D02", "score": 0.2272 },
+    { "skillId": "4.A.2.a.4.I05.D06", "score": 0.2248 },
+    { "skillId": "4.A.2.b.2.I02.D10", "score": 0.2193 }
+  ],
+  "CS 325": [
+    { "skillId": "4.A.2.b.2.I02.D09", "score": 0.3818 },
+    { "skillId": "4.A.2.b.2.I24.D03", "score": 0.2821 }
+  ],
+  "CS 330": [
+
+  ],
+  "CS 351": [
+
+  ],
+  "CS 367": [
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.7486 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.5643 }
+  ],
+  "CS 390": [
+    { "skillId": "4.A.2.b.1.I09.D06", "score": 0.3674 },
+    { "skillId": "4.A.2.a.1.I10.D01", "score": 0.3371 },
+    { "skillId": "4.A.4.a.2.I01.D03", "score": 0.2696 },
+    { "skillId": "4.A.4.b.6.I05.D09", "score": 0.2221 }
+  ],
+  "CS 391": [
+
+  ],
+  "CS 395": [
+
+  ],
+  "CS 399": [
+
+  ],
+  "CS 405": [
+    { "skillId": "4.A.1.a.1.I05.D02", "score": 0.2185 }
+  ],
+  "CS 425": [
+    { "skillId": "4.A.1.b.3.I03.D02", "score": 0.4909 }
+  ],
+  "CS 426": [
+    { "skillId": "4.A.4.a.2.I11.D03", "score": 0.2435 }
+  ],
+  "CS 440": [
+    { "skillId": "4.A.2.b.2.I10.D02", "score": 0.2802 }
+  ],
+  "CS 450": [
+    { "skillId": "4.A.4.b.4.I06.D10", "score": 0.2259 },
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 0.2259 },
+    { "skillId": "4.A.4.a.2.I06.D02", "score": 0.2253 }
+  ],
+  "CS 451": [
+    { "skillId": "4.A.2.b.2.I18.D17", "score": 0.3575 }
+  ],
+  "CS 452": [
+
+  ],
+  "CS 453": [
+
+  ],
+  "CS 455": [
+    { "skillId": "4.A.3.b.1.I03.D04", "score": 0.3411 },
+    { "skillId": "4.A.1.a.2.I10.D02", "score": 0.2999 },
+    { "skillId": "4.A.3.b.1.I04.D01", "score": 0.2888 },
+    { "skillId": "4.A.2.a.3.I04.D02", "score": 0.2748 },
+    { "skillId": "4.A.2.b.2.I07.D05", "score": 0.2634 },
+    { "skillId": "4.A.4.b.6.I04.D05", "score": 0.2511 }
+  ],
+  "CS 463": [
+
+  ],
+  "CS 465": [
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.6914 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.5209 }
+  ],
+  "CS 468": [
+    { "skillId": "4.A.3.b.1.I02.D01", "score": 0.4835 },
+    { "skillId": "4.A.2.a.4.I12.D02", "score": 0.3856 },
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.385 }
+  ],
+  "CS 471": [
+    { "skillId": "4.A.1.a.2.I02.D02", "score": 0.8394 }
+  ],
+  "CS 475": [
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.2069 }
+  ],
+  "CS 477": [
+    { "skillId": "4.A.2.b.2.I02.D01", "score": 0.2003 }
+  ],
+  "CS 478": [
+    { "skillId": "4.A.1.a.1.I16.D03", "score": 0.2543 }
+  ],
+  "CS 480": [
+
+  ],
+  "CS 482": [
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.4016 },
+    { "skillId": "4.A.1.b.3.I02.D01", "score": 0.3313 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.3009 },
+    { "skillId": "4.A.2.b.2.I18.D20", "score": 0.2783 }
+  ],
+  "CS 483": [
+    { "skillId": "4.A.2.a.4.I11.D07", "score": 0.2391 },
+    { "skillId": "4.A.2.a.4.I11.D05", "score": 0.2092 }
+  ],
+  "CS 484": [
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.5425 },
+    { "skillId": "4.A.2.a.2.I01.D06", "score": 0.3446 },
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.3413 }
+  ],
+  "CS 485": [
+
+  ],
+  "CS 487": [
+    { "skillId": "4.A.3.b.6.I08.D29", "score": 0.2107 }
+  ],
+  "CS 489": [
+
+  ],
+  "CS 491": [
+    { "skillId": "4.A.2.a.4.I05.D08", "score": 0.283 },
+    { "skillId": "4.A.2.b.2.I14.D03", "score": 0.2548 },
+    { "skillId": "4.A.2.b.2.I14.D01", "score": 0.202 }
+  ],
+  "CS 498": [
+    { "skillId": "4.A.2.b.2.I23.D08", "score": 0.2857 }
+  ],
+  "CS 499": [
+
+  ],
+  "CS 500": [
+
+  ],
+  "CS 504": [
+    { "skillId": "4.A.2.b.4.I03.D01", "score": 0.5247 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.4473 }
+  ],
+  "CS 530": [
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2081 }
+  ],
+  "CS 531": [
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.5684 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.4275 }
+  ],
+  "CS 540": [
+    { "skillId": "4.A.2.b.2.I10.D02", "score": 0.2609 }
+  ],
+  "CS 550": [
+    { "skillId": "4.A.3.b.6.I08.D14", "score": 0.4103 }
+  ],
+  "CS 551": [
+    { "skillId": "4.A.2.b.2.I18.D17", "score": 0.3575 }
+  ],
+  "CS 555": [
+    { "skillId": "4.A.3.b.1.I03.D04", "score": 0.3411 },
+    { "skillId": "4.A.1.a.2.I10.D02", "score": 0.2999 },
+    { "skillId": "4.A.3.b.1.I04.D01", "score": 0.2888 },
+    { "skillId": "4.A.2.b.2.I07.D05", "score": 0.2634 },
+    { "skillId": "4.A.4.b.6.I04.D05", "score": 0.2511 },
+    { "skillId": "4.A.3.b.1.I06.D03", "score": 0.243 }
+  ],
+  "CS 571": [
+    { "skillId": "4.A.2.a.4.I07.D06", "score": 0.9087 },
+    { "skillId": "4.A.1.a.2.I02.D02", "score": 0.8394 }
+  ],
+  "CS 580": [
+    { "skillId": "4.A.1.a.1.I04.D03", "score": 0.2539 }
+  ],
+  "CS 583": [
+
+  ],
+  "CS 584": [
+    { "skillId": "4.A.2.a.2.I05.D03", "score": 0.3882 }
+  ],
+  "CS 587": [
+    { "skillId": "4.A.3.b.6.I08.D29", "score": 0.2107 }
+  ],
+  "CS 595": [
+
+  ],
+  "CS 600": [
+
+  ],
+  "CS 630": [
+    { "skillId": "4.A.4.b.6.I05.D05", "score": 0.5217 }
+  ],
+  "CS 635": [
+    { "skillId": "4.A.4.b.3.I05.D04", "score": 0.257 },
+    { "skillId": "4.A.2.b.2.I02.D10", "score": 0.2083 }
+  ],
+  "CS 650": [
+    { "skillId": "4.A.3.b.6.I08.D14", "score": 0.2309 }
+  ],
+  "CS 653": [
+
+  ],
+  "CS 655": [
+
+  ],
+  "CS 657": [
+
+  ],
+  "CS 661": [
+    { "skillId": "4.A.1.a.1.I05.D02", "score": 0.4097 },
+    { "skillId": "4.A.2.b.1.I05.D01", "score": 0.3188 },
+    { "skillId": "4.A.4.a.2.I03.D13", "score": 0.2893 },
+    { "skillId": "4.A.2.a.4.I07.D15", "score": 0.2539 }
+  ],
+  "CS 662": [
+    { "skillId": "4.A.1.b.3.I03.D02", "score": 0.2573 },
+    { "skillId": "4.A.2.b.2.I18.D17", "score": 0.2029 }
+  ],
+  "CS 663": [
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.3778 },
+    { "skillId": "4.A.2.a.4.I05.D03", "score": 0.3137 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.294 },
+    { "skillId": "4.A.2.b.2.I24.D03", "score": 0.2519 }
+  ],
+  "CS 665": [
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.4783 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.3591 },
+    { "skillId": "4.A.1.b.2.I08.D03", "score": 0.3024 }
+  ],
+  "CS 672": [
+    { "skillId": "4.A.1.a.2.I10.D03", "score": 0.7085 },
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.5777 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.4346 }
+  ],
+  "CS 675": [
+    { "skillId": "4.A.3.b.1.I04.D02", "score": 0.2094 }
+  ],
+  "CS 677": [
+    { "skillId": "4.A.1.a.2.I02.D02", "score": 0.5291 }
+  ],
+  "CS 678": [
+    { "skillId": "4.A.1.a.1.I16.D03", "score": 0.2543 },
+    { "skillId": "4.A.2.b.2.I15.D04", "score": 0.2474 }
+  ],
+  "CS 682": [
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.4281 },
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.3515 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.321 },
+    { "skillId": "4.A.2.b.2.I18.D20", "score": 0.2783 }
+  ],
+  "CS 683": [
+
+  ],
+  "CS 684": [
+    { "skillId": "4.A.4.b.6.I05.D05", "score": 0.4603 }
+  ],
+  "CS 685": [
+
+  ],
+  "CS 687": [
+
+  ],
+  "CS 688": [
+
+  ],
+  "CS 690": [
+
+  ],
+  "CS 691": [
+
+  ],
+  "CS 692": [
+    { "skillId": "4.A.2.a.4.I12.D02", "score": 0.8388 }
+  ],
+  "CS 693": [
+
+  ],
+  "CS 694": [
+
+  ],
+  "CS 695": [
+
+  ],
+  "CS 697": [
+
+  ],
+  "CS 700": [
+    { "skillId": "4.A.3.b.6.I03.D06", "score": 0.5045 }
+  ],
+  "CS 701": [
+    { "skillId": "4.A.3.b.6.I02.D02", "score": 0.2897 },
+    { "skillId": "4.A.3.b.6.I13.D03", "score": 0.2594 },
+    { "skillId": "4.A.2.b.2.I16.D02", "score": 0.2311 },
+    { "skillId": "4.A.2.b.2.I23.D08", "score": 0.2271 },
+    { "skillId": "4.A.3.b.6.I03.D03", "score": 0.2224 },
+    { "skillId": "4.A.3.b.6.I13.D05", "score": 0.2146 }
+  ],
+  "CS 719": [
+
+  ],
+  "CS 747": [
+    { "skillId": "4.A.3.b.6.I12.D03", "score": 0.3066 }
+  ],
+  "CS 757": [
+    { "skillId": "4.A.1.a.1.I09.D02", "score": 0.3159 },
+    { "skillId": "4.A.1.b.1.I02.D05", "score": 0.2531 }
+  ],
+  "CS 773": [
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 0.4162 },
+    { "skillId": "4.A.4.b.4.I06.D10", "score": 0.4131 },
+    { "skillId": "4.A.3.b.1.I05.D02", "score": 0.2968 },
+    { "skillId": "4.A.2.b.2.I02.D05", "score": 0.2734 },
+    { "skillId": "4.A.4.a.2.I04.D05", "score": 0.2605 }
+  ],
+  "CS 782": [
+    { "skillId": "4.A.2.b.2.I15.D04", "score": 0.296 }
+  ],
+  "CS 787": [
+    { "skillId": "4.A.4.b.6.I08.D03", "score": 0.2546 },
+    { "skillId": "4.A.4.b.6.I05.D03", "score": 0.2015 }
+  ],
+  "CS 795": [
+
+  ],
+  "CS 798": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.3175 },
+    { "skillId": "4.A.4.b.4.I12.D12", "score": 0.3056 },
+    { "skillId": "4.A.4.a.2.I02.D02", "score": 0.2986 },
+    { "skillId": "4.A.3.b.6.I03.D09", "score": 0.2964 },
+    { "skillId": "4.A.3.b.6.I03.D04", "score": 0.2605 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2392 },
+    { "skillId": "4.A.4.b.6.I04.D01", "score": 0.2213 }
+  ],
+  "CS 799": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.2796 },
+    { "skillId": "4.A.3.b.6.I03.D09", "score": 0.2197 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2106 }
+  ],
+  "CS 800": [
+    { "skillId": "4.A.2.b.2.I23.D08", "score": 0.2155 }
+  ],
+  "CS 895": [
+
+  ],
+  "CS 896": [
+
+  ],
+  "CS 998": [
+
+  ],
+  "CS 999": [
+
+  ],
+  "ENGH 100": [
+
+  ],
+  "ENGH 101": [
+    { "skillId": "4.A.4.a.8.I03.D02", "score": 0.235 }
+  ],
+  "ENGH 121": [
+
+  ],
+  "ENGH 122": [
+
+  ],
+  "ENGH 123": [
+
+  ],
+  "ENGH 201": [
+    { "skillId": "4.A.2.b.2.I01.D03", "score": 0.2251 }
+  ],
+  "ENGH 202": [
+
+  ],
+  "ENGH 203": [
+
+  ],
+  "ENGH 204": [
+
+  ],
+  "ENGH 206": [
+
+  ],
+  "ENGH 210": [
+    { "skillId": "4.A.2.b.4.I03.D08", "score": 0.3407 },
+    { "skillId": "4.A.4.a.1.I02.D05", "score": 0.2579 },
+    { "skillId": "4.A.1.b.2.I06.D09", "score": 0.2117 }
+  ],
+  "ENGH 270": [
+    { "skillId": "4.A.2.b.2.I02.D09", "score": 0.2117 }
+  ],
+  "ENGH 300": [
+
+  ],
+  "ENGH 301": [
+
+  ],
+  "ENGH 302": [
+    { "skillId": "4.A.4.a.8.I03.D02", "score": 0.2438 }
+  ],
+  "ENGH 303": [
+    { "skillId": "4.A.4.b.3.I02.D11", "score": 0.776 }
+  ],
+  "ENGH 304": [
+
+  ],
+  "ENGH 305": [
+
+  ],
+  "ENGH 307": [
+    { "skillId": "4.A.1.a.1.I02.D13", "score": 0.3392 }
+  ],
+  "ENGH 308": [
+
+  ],
+  "ENGH 309": [
+
+  ],
+  "ENGH 310": [
+
+  ],
+  "ENGH 315": [
+
+  ],
+  "ENGH 316": [
+
+  ],
+  "ENGH 318": [
+    { "skillId": "4.A.4.a.1.I03.D02", "score": 0.3459 }
+  ],
+  "ENGH 319": [
+
+  ],
+  "ENGH 320": [
+
+  ],
+  "ENGH 321": [
+
+  ],
+  "ENGH 322": [
+
+  ],
+  "ENGH 323": [
+
+  ],
+  "ENGH 324": [
+
+  ],
+  "ENGH 325": [
+
+  ],
+  "ENGH 330": [
+
+  ],
+  "ENGH 331": [
+
+  ],
+  "ENGH 332": [
+
+  ],
+  "ENGH 333": [
+
+  ],
+  "ENGH 334": [
+
+  ],
+  "ENGH 335": [
+
+  ],
+  "ENGH 336": [
+
+  ],
+  "ENGH 340": [
+
+  ],
+  "ENGH 341": [
+
+  ],
+  "ENGH 342": [
+
+  ],
+  "ENGH 343": [
+
+  ],
+  "ENGH 348": [
+
+  ],
+  "ENGH 349": [
+    { "skillId": "4.A.2.a.4.I02.D03", "score": 0.2763 }
+  ],
+  "ENGH 350": [
+
+  ],
+  "ENGH 351": [
+
+  ],
+  "ENGH 352": [
+
+  ],
+  "ENGH 353": [
+
+  ],
+  "ENGH 354": [
+
+  ],
+  "ENGH 355": [
+
+  ],
+  "ENGH 356": [
+
+  ],
+  "ENGH 360": [
+
+  ],
+  "ENGH 361": [
+
+  ],
+  "ENGH 362": [
+
+  ],
+  "ENGH 363": [
+
+  ],
+  "ENGH 366": [
+    { "skillId": "4.A.4.a.6.I03.D03", "score": 0.2234 }
+  ],
+  "ENGH 367": [
+
+  ],
+  "ENGH 368": [
+
+  ],
+  "ENGH 370": [
+
+  ],
+  "ENGH 371": [
+    { "skillId": "4.A.2.a.4.I04.D02", "score": 0.2265 }
+  ],
+  "ENGH 372": [
+
+  ],
+  "ENGH 374": [
+
+  ],
+  "ENGH 375": [
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.3119 },
+    { "skillId": "4.A.3.b.1.I06.D08", "score": 0.2004 }
+  ],
+  "ENGH 376": [
+
+  ],
+  "ENGH 377": [
+
+  ],
+  "ENGH 380": [
+    { "skillId": "4.A.2.a.2.I02.D02", "score": 0.2831 },
+    { "skillId": "4.A.1.a.1.I13.D03", "score": 0.2505 },
+    { "skillId": "4.A.2.b.2.I23.D07", "score": 0.231 },
+    { "skillId": "4.A.2.b.2.I23.D02", "score": 0.2162 }
+  ],
+  "ENGH 382": [
+
+  ],
+  "ENGH 386": [
+
+  ],
+  "ENGH 388": [
+    { "skillId": "4.A.2.b.2.I06.D02", "score": 0.3974 },
+    { "skillId": "4.A.4.b.3.I04.D15", "score": 0.3477 },
+    { "skillId": "4.A.1.a.1.I22.D03", "score": 0.2732 },
+    { "skillId": "4.A.1.b.2.I05.D05", "score": 0.2593 },
+    { "skillId": "4.A.4.a.2.I11.D02", "score": 0.25 }
+  ],
+  "ENGH 389": [
+    { "skillId": "4.A.2.b.2.I15.D04", "score": 0.5511 }
+  ],
+  "ENGH 391": [
+
+  ],
+  "ENGH 392": [
+
+  ],
+  "ENGH 393": [
+
+  ],
+  "ENGH 396": [
+    { "skillId": "4.A.4.b.4.I13.D05", "score": 0.2781 }
+  ],
+  "ENGH 397": [
+
+  ],
+  "ENGH 398": [
+
+  ],
+  "ENGH 399": [
+
+  ],
+  "ENGH 400": [
+
+  ],
+  "ENGH 401": [
+    { "skillId": "4.A.4.b.4.I13.D05", "score": 0.4391 }
+  ],
+  "ENGH 402": [
+
+  ],
+  "ENGH 408": [
+
+  ],
+  "ENGH 409": [
+
+  ],
+  "ENGH 412": [
+
+  ],
+  "ENGH 414": [
+
+  ],
+  "ENGH 415": [
+
+  ],
+  "ENGH 416": [
+
+  ],
+  "ENGH 417": [
+    { "skillId": "4.A.2.b.2.I23.D07", "score": 0.618 },
+    { "skillId": "4.A.2.b.2.I23.D02", "score": 0.5789 },
+    { "skillId": "4.A.1.a.1.I20.D10", "score": 0.5034 },
+    { "skillId": "4.A.1.a.1.I18.D03", "score": 0.3861 }
+  ],
+  "ENGH 418": [
+
+  ],
+  "ENGH 419": [
+
+  ],
+  "ENGH 421": [
+
+  ],
+  "ENGH 422": [
+
+  ],
+  "ENGH 428": [
+
+  ],
+  "ENGH 431": [
+
+  ],
+  "ENGH 432": [
+
+  ],
+  "ENGH 441": [
+
+  ],
+  "ENGH 442": [
+
+  ],
+  "ENGH 451": [
+
+  ],
+  "ENGH 452": [
+
+  ],
+  "ENGH 453": [
+
+  ],
+  "ENGH 454": [
+
+  ],
+  "ENGH 455": [
+
+  ],
+  "ENGH 456": [
+
+  ],
+  "ENGH 458": [
+    { "skillId": "4.A.2.b.2.I23.D07", "score": 0.618 },
+    { "skillId": "4.A.2.b.2.I23.D02", "score": 0.5789 },
+    { "skillId": "4.A.1.a.1.I20.D10", "score": 0.5034 },
+    { "skillId": "4.A.1.a.1.I18.D03", "score": 0.3925 }
+  ],
+  "ENGH 459": [
+    { "skillId": "4.A.3.a.1.I03.D13", "score": 0.3245 },
+    { "skillId": "4.A.1.b.3.I04.D02", "score": 0.2504 },
+    { "skillId": "4.A.3.a.1.I05.D03", "score": 0.2436 },
+    { "skillId": "4.A.1.b.2.I11.D01", "score": 0.2126 },
+    { "skillId": "4.A.3.a.4.I01.D12", "score": 0.2069 },
+    { "skillId": "4.A.3.a.1.I05.D06", "score": 0.2043 }
+  ],
+  "ENGH 470": [
+
+  ],
+  "ENGH 472": [
+    { "skillId": "4.A.3.a.2.I46.D04", "score": 0.2503 }
+  ],
+  "ENGH 474": [
+
+  ],
+  "ENGH 477": [
+
+  ],
+  "ENGH 478": [
+    { "skillId": "4.A.2.b.3.I01.D17", "score": 0.2554 },
+    { "skillId": "4.A.1.a.1.I01.D01", "score": 0.2518 }
+  ],
+  "ENGH 482": [
+    { "skillId": "4.A.4.a.2.I01.D01", "score": 0.7565 }
+  ],
+  "ENGH 483": [
+    { "skillId": "4.A.3.a.3.I06.D10", "score": 0.3679 },
+    { "skillId": "4.A.2.b.2.I18.D12", "score": 0.2628 }
+  ],
+  "ENGH 484": [
+
+  ],
+  "ENGH 485": [
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 1 },
+    { "skillId": "4.A.3.b.6.I09.D07", "score": 0.8381 }
+  ],
+  "ENGH 486": [
+
+  ],
+  "ENGH 487": [
+    { "skillId": "4.A.4.b.4.I09.D05", "score": 0.3049 },
+    { "skillId": "4.A.2.b.6.I02.D08", "score": 0.2953 },
+    { "skillId": "4.A.2.b.2.I08.D03", "score": 0.2625 },
+    { "skillId": "4.A.2.b.2.I12.D03", "score": 0.2578 },
+    { "skillId": "4.A.4.b.4.I15.D02", "score": 0.2443 },
+    { "skillId": "4.A.4.b.4.I09.D08", "score": 0.2342 }
+  ],
+  "ENGH 488": [
+
+  ],
+  "ENGH 489": [
+    { "skillId": "4.A.3.b.6.I07.D02", "score": 0.3995 },
+    { "skillId": "4.A.3.b.6.I03.D01", "score": 0.2853 },
+    { "skillId": "4.A.3.b.6.I07.D01", "score": 0.2716 }
+  ],
+  "ENGH 492": [
+
+  ],
+  "ENGH 493": [
+
+  ],
+  "ENGH 494": [
+
+  ],
+  "ENGH 495": [
+    { "skillId": "4.A.4.a.5.I01.D05", "score": 0.217 }
+  ],
+  "ENGH 497": [
+
+  ],
+  "ENGH 499": [
+    { "skillId": "4.A.2.b.2.I16.D02", "score": 0.2564 }
+  ],
+  "ENGH 500": [
+    { "skillId": "4.A.2.a.1.I08.D01", "score": 0.2273 }
+  ],
+  "ENGH 501": [
+
+  ],
+  "ENGH 502": [
+    { "skillId": "4.A.2.b.2.I23.D07", "score": 0.4341 },
+    { "skillId": "4.A.2.b.2.I23.D02", "score": 0.4066 },
+    { "skillId": "4.A.1.a.1.I18.D03", "score": 0.3598 },
+    { "skillId": "4.A.1.a.1.I20.D10", "score": 0.3542 },
+    { "skillId": "4.A.1.a.1.I20.D04", "score": 0.2755 },
+    { "skillId": "4.A.2.b.3.I01.D13", "score": 0.2749 }
+  ],
+  "ENGH 503": [
+    { "skillId": "4.A.2.b.2.I18.D12", "score": 0.2628 },
+    { "skillId": "4.A.3.b.6.I12.D08", "score": 0.2249 }
+  ],
+  "ENGH 504": [
+    { "skillId": "4.A.3.a.1.I03.D13", "score": 0.3245 },
+    { "skillId": "4.A.1.b.3.I04.D02", "score": 0.2504 },
+    { "skillId": "4.A.3.a.1.I05.D03", "score": 0.2436 },
+    { "skillId": "4.A.4.b.4.I01.D18", "score": 0.2127 },
+    { "skillId": "4.A.1.b.2.I11.D01", "score": 0.2126 },
+    { "skillId": "4.A.3.a.4.I01.D12", "score": 0.2069 },
+    { "skillId": "4.A.3.a.1.I05.D06", "score": 0.2043 }
+  ],
+  "ENGH 505": [
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 1 },
+    { "skillId": "4.A.3.b.6.I09.D07", "score": 0.8381 }
+  ],
+  "ENGH 506": [
+
+  ],
+  "ENGH 507": [
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.3119 }
+  ],
+  "ENGH 508": [
+
+  ],
+  "ENGH 509": [
+    { "skillId": "4.A.3.b.6.I07.D02", "score": 0.3995 },
+    { "skillId": "4.A.3.b.6.I03.D01", "score": 0.2853 },
+    { "skillId": "4.A.3.b.6.I07.D01", "score": 0.2716 }
+  ],
+  "ENGH 511": [
+
+  ],
+  "ENGH 513": [
+
+  ],
+  "ENGH 526": [
+
+  ],
+  "ENGH 551": [
+
+  ],
+  "ENGH 564": [
+
+  ],
+  "ENGH 565": [
+
+  ],
+  "ENGH 566": [
+
+  ],
+  "ENGH 570": [
+
+  ],
+  "ENGH 590": [
+
+  ],
+  "ENGH 591": [
+
+  ],
+  "ENGH 602": [
+
+  ],
+  "ENGH 604": [
+
+  ],
+  "ENGH 605": [
+    { "skillId": "4.A.2.b.3.I01.D17", "score": 0.2853 },
+    { "skillId": "4.A.1.a.1.I01.D01", "score": 0.2551 },
+    { "skillId": "4.A.2.b.3.I01.D13", "score": 0.2319 },
+    { "skillId": "4.A.4.b.4.I12.D09", "score": 0.2082 },
+    { "skillId": "4.A.4.b.6.I05.D10", "score": 0.2045 },
+    { "skillId": "4.A.2.a.4.I03.D01", "score": 0.204 }
+  ],
+  "ENGH 606": [
+    { "skillId": "4.A.2.b.3.I01.D17", "score": 0.2853 },
+    { "skillId": "4.A.1.a.1.I01.D01", "score": 0.2551 },
+    { "skillId": "4.A.2.b.3.I01.D13", "score": 0.2319 },
+    { "skillId": "4.A.4.b.4.I12.D09", "score": 0.2082 },
+    { "skillId": "4.A.4.b.6.I05.D10", "score": 0.2045 },
+    { "skillId": "4.A.2.a.4.I03.D01", "score": 0.204 }
+  ],
+  "ENGH 608": [
+
+  ],
+  "ENGH 609": [
+
+  ],
+  "ENGH 610": [
+    { "skillId": "4.A.4.b.3.I02.D06", "score": 0.2742 },
+    { "skillId": "4.A.4.b.3.I03.D02", "score": 0.2157 },
+    { "skillId": "4.A.3.b.6.I12.D04", "score": 0.2077 }
+  ],
+  "ENGH 611": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.3061 }
+  ],
+  "ENGH 612": [
+    { "skillId": "4.A.3.a.1.I03.D13", "score": 0.2004 }
+  ],
+  "ENGH 613": [
+    { "skillId": "4.A.2.b.2.I06.D02", "score": 0.3794 },
+    { "skillId": "4.A.4.b.3.I04.D15", "score": 0.3319 },
+    { "skillId": "4.A.4.a.2.I11.D02", "score": 0.2675 }
+  ],
+  "ENGH 614": [
+    { "skillId": "4.A.4.b.4.I15.D05", "score": 0.2052 }
+  ],
+  "ENGH 615": [
+    { "skillId": "4.A.4.b.3.I02.D06", "score": 0.2149 }
+  ],
+  "ENGH 616": [
+
+  ],
+  "ENGH 617": [
+
+  ],
+  "ENGH 618": [
+
+  ],
+  "ENGH 619": [
+
+  ],
+  "ENGH 620": [
+
+  ],
+  "ENGH 642": [
+
+  ],
+  "ENGH 644": [
+
+  ],
+  "ENGH 646": [
+    { "skillId": "4.A.2.b.2.I06.D03", "score": 0.5103 },
+    { "skillId": "4.A.2.b.2.I23.D07", "score": 0.3142 }
+  ],
+  "ENGH 661": [
+
+  ],
+  "ENGH 665": [
+
+  ],
+  "ENGH 670": [
+    { "skillId": "4.A.2.b.2.I18.D14", "score": 0.3474 }
+  ],
+  "ENGH 675": [
+
+  ],
+  "ENGH 676": [
+
+  ],
+  "ENGH 681": [
+
+  ],
+  "ENGH 683": [
+
+  ],
+  "ENGH 684": [
+
+  ],
+  "ENGH 685": [
+
+  ],
+  "ENGH 689": [
+    { "skillId": "4.A.3.b.6.I07.D02", "score": 0.5126 }
+  ],
+  "ENGH 690": [
+
+  ],
+  "ENGH 695": [
+
+  ],
+  "ENGH 696": [
+    { "skillId": "4.A.1.a.1.I14.D05", "score": 0.4222 },
+    { "skillId": "4.A.1.a.1.I06.D04", "score": 0.409 }
+  ],
+  "ENGH 697": [
+
+  ],
+  "ENGH 699": [
+
+  ],
+  "ENGH 702": [
+    { "skillId": "4.A.2.b.2.I23.D07", "score": 0.4763 },
+    { "skillId": "4.A.2.b.2.I23.D02", "score": 0.4462 },
+    { "skillId": "4.A.1.a.1.I20.D10", "score": 0.3884 },
+    { "skillId": "4.A.1.a.1.I20.D03", "score": 0.3134 }
+  ],
+  "ENGH 705": [
+    { "skillId": "4.A.2.a.1.I03.D04", "score": 0.2249 }
+  ],
+  "ENGH 710": [
+
+  ],
+  "ENGH 720": [
+
+  ],
+  "ENGH 722": [
+
+  ],
+  "ENGH 724": [
+    { "skillId": "4.A.2.b.3.I01.D03", "score": 0.2509 },
+    { "skillId": "4.A.4.a.2.I02.D02", "score": 0.2089 }
+  ],
+  "ENGH 726": [
+
+  ],
+  "ENGH 750": [
+
+  ],
+  "ENGH 751": [
+
+  ],
+  "ENGH 752": [
+
+  ],
+  "ENGH 790": [
+
+  ],
+  "ENGH 797": [
+    { "skillId": "4.A.4.a.2.I02.D02", "score": 0.2174 },
+    { "skillId": "4.A.2.b.1.I04.D13", "score": 0.2046 }
+  ],
+  "ENGH 798": [
+
+  ],
+  "ENGH 799": [
+
+  ],
+  "ENGH 820": [
+
+  ],
+  "ENGH 821": [
+
+  ],
+  "ENGH 822": [
+
+  ],
+  "ENGH 824": [
+
+  ],
+  "ENGH 826": [
+
+  ],
+  "ENGH 897": [
+
+  ],
+  "ENGH 898": [
+
+  ],
+  "ENGH 998": [
+
+  ],
+  "ENGH 999": [
+
+  ],
+  "IT 102": [
+
+  ],
+  "IT 104": [
+    { "skillId": "4.A.2.a.2.I01.D06", "score": 0.3236 },
+    { "skillId": "4.A.1.a.1.I20.D02", "score": 0.2747 }
+  ],
+  "IT 105": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.2383 },
+    { "skillId": "4.A.2.a.1.I07.D08", "score": 0.2301 },
+    { "skillId": "4.A.3.b.4.I04.D01", "score": 0.2169 },
+    { "skillId": "4.A.3.b.1.I03.D02", "score": 0.2129 },
+    { "skillId": "4.A.4.b.6.I04.D03", "score": 0.2012 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2002 }
+  ],
+  "IT 106": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.4538 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2788 }
+  ],
+  "IT 109": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.8164 }
+  ],
+  "IT 206": [
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2271 }
+  ],
+  "IT 207": [
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 0.2267 },
+    { "skillId": "4.A.2.b.4.I03.D01", "score": 0.2227 }
+  ],
+  "IT 209": [
+
+  ],
+  "IT 213": [
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.2922 },
+    { "skillId": "4.A.1.a.1.I20.D07", "score": 0.2184 }
+  ],
+  "IT 214": [
+    { "skillId": "4.A.1.a.1.I10.D02", "score": 0.2255 },
+    { "skillId": "4.A.2.b.2.I06.D04", "score": 0.2167 }
+  ],
+  "IT 216": [
+    { "skillId": "4.A.2.a.4.I05.D02", "score": 0.5598 },
+    { "skillId": "4.A.2.a.4.I05.D06", "score": 0.5476 },
+    { "skillId": "4.A.3.a.1.I12.D06", "score": 0.5122 },
+    { "skillId": "4.A.2.b.2.I21.D02", "score": 0.4199 },
+    { "skillId": "4.A.1.a.2.I05.D08", "score": 0.4189 },
+    { "skillId": "4.A.2.b.2.I02.D02", "score": 0.3608 }
+  ],
+  "IT 223": [
+    { "skillId": "4.A.2.b.4.I03.D09", "score": 0.5526 }
+  ],
+  "IT 293": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.2661 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2236 },
+    { "skillId": "4.A.4.b.4.I06.D07", "score": 0.2118 },
+    { "skillId": "4.A.2.b.1.I08.D02", "score": 0.2086 }
+  ],
+  "IT 300": [
+    { "skillId": "4.A.3.b.1.I03.D04", "score": 0.3105 },
+    { "skillId": "4.A.1.a.2.I10.D02", "score": 0.2731 },
+    { "skillId": "4.A.3.b.1.I04.D01", "score": 0.2627 },
+    { "skillId": "4.A.2.b.2.I07.D05", "score": 0.2395 },
+    { "skillId": "4.A.4.b.6.I04.D05", "score": 0.2285 }
+  ],
+  "IT 304": [
+    { "skillId": "4.A.4.b.6.I08.D02", "score": 0.2299 },
+    { "skillId": "4.A.4.a.1.I02.D02", "score": 0.2136 }
+  ],
+  "IT 309": [
+
+  ],
+  "IT 314": [
+    { "skillId": "4.A.3.b.1.I06.D06", "score": 0.3533 }
+  ],
+  "IT 315": [
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 0.2995 },
+    { "skillId": "4.A.4.b.4.I06.D10", "score": 0.2983 },
+    { "skillId": "4.A.2.a.4.I05.D03", "score": 0.2948 }
+  ],
+  "IT 322": [
+    { "skillId": "4.A.4.a.3.I02.D01", "score": 0.2822 },
+    { "skillId": "4.A.2.a.4.I06.D01", "score": 0.2769 },
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2602 },
+    { "skillId": "4.A.3.b.6.I11.D03", "score": 0.2229 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2061 }
+  ],
+  "IT 331": [
+
+  ],
+  "IT 332": [
+    { "skillId": "4.A.4.c.1.I01.D10", "score": 0.2056 }
+  ],
+  "IT 335": [
+    { "skillId": "4.A.2.b.2.I12.D03", "score": 0.4551 }
+  ],
+  "IT 341": [
+    { "skillId": "4.A.3.b.1.I03.D04", "score": 0.2226 },
+    { "skillId": "4.A.2.a.4.I12.D02", "score": 0.2008 }
+  ],
+  "IT 342": [
+    { "skillId": "4.A.1.a.2.I02.D02", "score": 0.5741 }
+  ],
+  "IT 343": [
+    { "skillId": "4.A.4.b.4.I12.D07", "score": 0.3638 },
+    { "skillId": "4.A.4.b.4.I09.D05", "score": 0.352 },
+    { "skillId": "4.A.2.b.1.I08.D02", "score": 0.3372 },
+    { "skillId": "4.A.2.a.4.I05.D06", "score": 0.3241 },
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.3241 },
+    { "skillId": "4.A.4.b.4.I12.D12", "score": 0.3164 },
+    { "skillId": "4.A.4.b.4.I06.D08", "score": 0.3121 },
+    { "skillId": "4.A.4.b.4.I06.D07", "score": 0.2966 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2724 },
+    { "skillId": "4.A.3.b.6.I09.D05", "score": 0.2354 },
+    { "skillId": "4.A.2.b.2.I07.D07", "score": 0.2234 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2203 }
+  ],
+  "IT 352": [
+    { "skillId": "4.A.3.a.1.I11.D07", "score": 0.2178 }
+  ],
+  "IT 357": [
+    { "skillId": "4.A.2.a.4.I10.D02", "score": 0.3801 },
+    { "skillId": "4.A.2.b.2.I02.D11", "score": 0.372 }
+  ],
+  "IT 366": [
+    { "skillId": "4.A.2.a.4.I12.D02", "score": 0.4109 },
+    { "skillId": "4.A.2.b.4.I03.D09", "score": 0.3055 }
+  ],
+  "IT 369": [
+    { "skillId": "4.A.2.b.2.I02.D10", "score": 0.2642 },
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.2384 }
+  ],
+  "IT 371": [
+
+  ],
+  "IT 372": [
+    { "skillId": "4.A.2.b.2.I16.D02", "score": 0.3191 }
+  ],
+  "IT 373": [
+    { "skillId": "4.A.1.a.1.I05.D02", "score": 0.3087 },
+    { "skillId": "4.A.3.b.1.I06.D06", "score": 0.2811 },
+    { "skillId": "4.A.2.b.2.I02.D07", "score": 0.2783 },
+    { "skillId": "4.A.2.a.4.I04.D02", "score": 0.2589 },
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2417 },
+    { "skillId": "4.A.2.a.4.I01.D04", "score": 0.2309 },
+    { "skillId": "4.A.2.a.4.I07.D16", "score": 0.2047 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2012 }
+  ],
+  "IT 374": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.5679 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.4067 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.3748 }
+  ],
+  "IT 375": [
+
+  ],
+  "IT 390": [
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.2272 }
+  ],
+  "IT 414": [
+    { "skillId": "4.A.4.b.4.I06.D06", "score": 0.2462 },
+    { "skillId": "4.A.3.b.6.I08.D14", "score": 0.2093 },
+    { "skillId": "4.A.4.b.4.I12.D28", "score": 0.2035 }
+  ],
+  "IT 416": [
+    { "skillId": "4.A.2.b.2.I26.D03", "score": 0.2589 },
+    { "skillId": "4.A.2.a.4.I12.D05", "score": 0.238 },
+    { "skillId": "4.A.2.b.2.I26.D02", "score": 0.2325 },
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.2013 }
+  ],
+  "IT 425": [
+    { "skillId": "4.A.2.a.4.I12.D02", "score": 0.4041 }
+  ],
+  "IT 426": [
+    { "skillId": "4.A.2.b.4.I03.D09", "score": 0.4307 },
+    { "skillId": "4.A.3.b.6.I08.D30", "score": 0.2856 },
+    { "skillId": "4.A.2.a.4.I07.D01", "score": 0.2696 },
+    { "skillId": "4.A.4.b.4.I15.D02", "score": 0.2619 }
+  ],
+  "IT 429": [
+    { "skillId": "4.A.4.b.4.I15.D01", "score": 0.2739 },
+    { "skillId": "4.A.4.b.4.I12.D26", "score": 0.2553 },
+    { "skillId": "4.A.2.b.1.I05.D01", "score": 0.2397 },
+    { "skillId": "4.A.4.b.4.I08.D02", "score": 0.2259 }
+  ],
+  "IT 431": [
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.3452 },
+    { "skillId": "4.A.1.a.2.I07.D06", "score": 0.2796 }
+  ],
+  "IT 432": [
+    { "skillId": "4.A.2.a.4.I10.D02", "score": 0.3212 },
+    { "skillId": "4.A.4.c.1.I06.D01", "score": 0.3058 },
+    { "skillId": "4.A.1.a.2.I02.D12", "score": 0.236 },
+    { "skillId": "4.A.2.b.1.I05.D02", "score": 0.2254 },
+    { "skillId": "4.A.4.a.2.I12.D01", "score": 0.2065 }
+  ],
+  "IT 442": [
+
+  ],
+  "IT 445": [
+    { "skillId": "4.A.3.b.1.I03.D04", "score": 0.2253 }
+  ],
+  "IT 451": [
+    { "skillId": "4.A.4.b.4.I12.D11", "score": 0.2992 },
+    { "skillId": "4.A.4.b.4.I09.D01", "score": 0.2307 },
+    { "skillId": "4.A.4.b.4.I12.D22", "score": 0.2159 }
+  ],
+  "IT 461": [
+    { "skillId": "4.A.2.b.2.I02.D01", "score": 0.2048 }
+  ],
+  "IT 462": [
+    { "skillId": "4.A.2.b.4.I03.D09", "score": 0.295 },
+    { "skillId": "4.A.1.a.2.I11.D03", "score": 0.2433 },
+    { "skillId": "4.A.1.a.1.I18.D04", "score": 0.2249 }
+  ],
+  "IT 467": [
+
+  ],
+  "IT 471": [
+    { "skillId": "4.A.2.a.1.I07.D01", "score": 0.2877 },
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2786 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2103 }
+  ],
+  "IT 479": [
+    { "skillId": "4.A.4.b.4.I06.D11", "score": 0.3349 },
+    { "skillId": "4.A.2.b.2.I02.D08", "score": 0.217 }
+  ],
+  "IT 481": [
+    { "skillId": "4.A.4.a.8.I01.D01", "score": 0.2436 }
+  ],
+  "IT 482": [
+
+  ],
+  "IT 485": [
+
+  ],
+  "IT 492": [
+    { "skillId": "4.A.2.a.4.I05.D08", "score": 0.4219 },
+    { "skillId": "4.A.4.b.4.I12.D08", "score": 0.3716 }
+  ],
+  "IT 493": [
+    { "skillId": "4.A.2.a.4.I05.D08", "score": 0.4219 },
+    { "skillId": "4.A.3.b.6.I15.D06", "score": 0.3766 },
+    { "skillId": "4.A.1.b.3.I02.D01", "score": 0.2719 }
+  ],
+  "IT 498": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.5222 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.4394 },
+    { "skillId": "4.A.4.b.4.I06.D07", "score": 0.4204 },
+    { "skillId": "4.A.2.b.1.I08.D02", "score": 0.4125 },
+    { "skillId": "4.A.2.b.2.I07.D07", "score": 0.3613 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.3596 }
+  ],
+  "IT 499": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.8171 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.6878 },
+    { "skillId": "4.A.4.b.4.I06.D07", "score": 0.6604 },
+    { "skillId": "4.A.2.b.1.I08.D02", "score": 0.6472 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.5667 },
+    { "skillId": "4.A.2.b.2.I07.D07", "score": 0.5664 }
+  ],
+  "IT 700": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.2412 },
+    { "skillId": "4.A.1.a.1.I16.D03", "score": 0.2227 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2026 }
+  ],
+  "IT 701": [
+    { "skillId": "4.A.1.a.1.I14.D01", "score": 0.3068 },
+    { "skillId": "4.A.1.a.1.I18.D02", "score": 0.3025 },
+    { "skillId": "4.A.3.b.6.I02.D02", "score": 0.2897 },
+    { "skillId": "4.A.1.a.1.I08.D03", "score": 0.2849 },
+    { "skillId": "4.A.1.a.1.I18.D03", "score": 0.2772 },
+    { "skillId": "4.A.3.b.6.I13.D03", "score": 0.2594 },
+    { "skillId": "4.A.2.b.2.I16.D02", "score": 0.2311 },
+    { "skillId": "4.A.1.a.1.I18.D01", "score": 0.226 },
+    { "skillId": "4.A.3.b.6.I03.D03", "score": 0.2224 },
+    { "skillId": "4.A.3.b.6.I13.D05", "score": 0.2146 },
+    { "skillId": "4.A.1.a.1.I20.D04", "score": 0.2121 },
+    { "skillId": "4.A.2.b.3.I01.D13", "score": 0.2107 }
+  ],
+  "IT 796": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.3076 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2586 },
+    { "skillId": "4.A.4.b.4.I06.D07", "score": 0.2456 },
+    { "skillId": "4.A.2.b.1.I08.D02", "score": 0.2417 },
+    { "skillId": "4.A.2.b.2.I07.D07", "score": 0.212 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2088 },
+    { "skillId": "4.A.1.a.1.I20.D08", "score": 0.2022 }
+  ],
+  "IT 797": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.3076 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2586 },
+    { "skillId": "4.A.4.b.4.I06.D07", "score": 0.2456 },
+    { "skillId": "4.A.2.b.1.I08.D02", "score": 0.2417 },
+    { "skillId": "4.A.2.b.2.I07.D07", "score": 0.212 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2088 },
+    { "skillId": "4.A.1.a.1.I20.D08", "score": 0.2022 }
+  ],
+  "IT 896": [
+
+  ],
+  "IT 998": [
+
+  ],
+  "IT 999": [
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.2366 }
+  ],
+  "MATH 104": [
+
+  ],
+  "MATH 105": [
+
+  ],
+  "MATH 106": [
+
+  ],
+  "MATH 108": [
+
+  ],
+  "MATH 110": [
+
+  ],
+  "MATH 111": [
+    { "skillId": "4.A.2.b.2.I26.D03", "score": 0.6007 },
+    { "skillId": "4.A.2.b.2.I26.D02", "score": 0.5384 },
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.4714 }
+  ],
+  "MATH 113": [
+
+  ],
+  "MATH 114": [
+
+  ],
+  "MATH 115": [
+
+  ],
+  "MATH 116": [
+
+  ],
+  "MATH 123": [
+
+  ],
+  "MATH 124": [
+
+  ],
+  "MATH 125": [
+
+  ],
+  "MATH 175": [
+    { "skillId": "4.A.3.b.6.I11.D05", "score": 0.3265 },
+    { "skillId": "4.A.2.a.2.I01.D09", "score": 0.3011 },
+    { "skillId": "4.A.2.a.2.I04.D01", "score": 0.2803 },
+    { "skillId": "4.A.4.c.1.I03.D04", "score": 0.2614 },
+    { "skillId": "4.A.3.b.6.I10.D01", "score": 0.205 }
+  ],
+  "MATH 203": [
+
+  ],
+  "MATH 213": [
+
+  ],
+  "MATH 214": [
+
+  ],
+  "MATH 215": [
+
+  ],
+  "MATH 216": [
+
+  ],
+  "MATH 271": [
+
+  ],
+  "MATH 272": [
+
+  ],
+  "MATH 300": [
+
+  ],
+  "MATH 301": [
+
+  ],
+  "MATH 302": [
+
+  ],
+  "MATH 307": [
+    { "skillId": "4.A.2.b.2.I26.D03", "score": 0.8772 },
+    { "skillId": "4.A.2.b.2.I26.D02", "score": 0.7859 },
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.6899 }
+  ],
+  "MATH 312": [
+
+  ],
+  "MATH 313": [
+
+  ],
+  "MATH 314": [
+    { "skillId": "4.A.2.b.2.I16.D01", "score": 0.5389 }
+  ],
+  "MATH 315": [
+    { "skillId": "4.A.1.b.2.I01.D07", "score": 0.2642 }
+  ],
+  "MATH 316": [
+
+  ],
+  "MATH 321": [
+
+  ],
+  "MATH 322": [
+
+  ],
+  "MATH 325": [
+
+  ],
+  "MATH 351": [
+
+  ],
+  "MATH 352": [
+
+  ],
+  "MATH 400": [
+
+  ],
+  "MATH 401": [
+
+  ],
+  "MATH 405": [
+
+  ],
+  "MATH 406": [
+
+  ],
+  "MATH 411": [
+
+  ],
+  "MATH 413": [
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.5056 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.4072 }
+  ],
+  "MATH 414": [
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.5056 },
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.4283 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.4072 }
+  ],
+  "MATH 421": [
+
+  ],
+  "MATH 431": [
+
+  ],
+  "MATH 432": [
+    { "skillId": "4.A.3.a.2.I15.D03", "score": 0.2618 },
+    { "skillId": "4.A.3.a.2.I15.D05", "score": 0.2469 },
+    { "skillId": "4.A.3.a.2.I15.D06", "score": 0.2196 }
+  ],
+  "MATH 433": [
+
+  ],
+  "MATH 441": [
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2515 }
+  ],
+  "MATH 442": [
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2515 },
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.2146 }
+  ],
+  "MATH 446": [
+
+  ],
+  "MATH 447": [
+
+  ],
+  "MATH 453": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.2197 }
+  ],
+  "MATH 462": [
+    { "skillId": "4.A.2.b.2.I13.D02", "score": 0.2047 }
+  ],
+  "MATH 463": [
+    { "skillId": "4.A.2.b.2.I13.D02", "score": 0.2047 }
+  ],
+  "MATH 464": [
+
+  ],
+  "MATH 465": [
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2367 }
+  ],
+  "MATH 478": [
+
+  ],
+  "MATH 490": [
+
+  ],
+  "MATH 491": [
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.219 }
+  ],
+  "MATH 493": [
+
+  ],
+  "MATH 494": [
+
+  ],
+  "MATH 495": [
+    { "skillId": "4.A.3.b.6.I03.D03", "score": 0.3283 },
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.2771 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2087 }
+  ],
+  "MATH 515": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.3372 },
+    { "skillId": "4.A.1.b.2.I01.D07", "score": 0.2575 },
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.2303 }
+  ],
+  "MATH 521": [
+
+  ],
+  "MATH 531": [
+
+  ],
+  "MATH 546": [
+    { "skillId": "4.A.2.b.2.I26.D03", "score": 0.2465 }
+  ],
+  "MATH 551": [
+
+  ],
+  "MATH 553": [
+
+  ],
+  "MATH 554": [
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.3371 }
+  ],
+  "MATH 555": [
+
+  ],
+  "MATH 556": [
+
+  ],
+  "MATH 557": [
+
+  ],
+  "MATH 600": [
+
+  ],
+  "MATH 601": [
+    { "skillId": "4.A.3.b.1.I03.D01", "score": 0.3422 },
+    { "skillId": "4.A.3.b.1.I04.D03", "score": 0.2717 }
+  ],
+  "MATH 602": [
+    { "skillId": "4.A.3.b.1.I03.D01", "score": 0.3422 },
+    { "skillId": "4.A.3.b.1.I04.D03", "score": 0.2717 }
+  ],
+  "MATH 604": [
+
+  ],
+  "MATH 605": [
+
+  ],
+  "MATH 607": [
+
+  ],
+  "MATH 608": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.271 },
+    { "skillId": "4.A.4.a.2.I08.D08", "score": 0.2704 },
+    { "skillId": "4.A.2.b.2.I02.D12", "score": 0.2396 }
+  ],
+  "MATH 610": [
+    { "skillId": "4.A.3.b.6.I12.D03", "score": 0.2559 }
+  ],
+  "MATH 611": [
+    { "skillId": "4.A.1.b.3.I01.D06", "score": 0.2431 },
+    { "skillId": "4.A.1.b.3.I01.D04", "score": 0.2347 },
+    { "skillId": "4.A.1.b.3.I04.D02", "score": 0.2275 }
+  ],
+  "MATH 612": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.3804 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.27 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.2492 }
+  ],
+  "MATH 613": [
+
+  ],
+  "MATH 614": [
+
+  ],
+  "MATH 619": [
+
+  ],
+  "MATH 621": [
+
+  ],
+  "MATH 624": [
+
+  ],
+  "MATH 625": [
+
+  ],
+  "MATH 629": [
+
+  ],
+  "MATH 631": [
+
+  ],
+  "MATH 639": [
+
+  ],
+  "MATH 641": [
+
+  ],
+  "MATH 642": [
+
+  ],
+  "MATH 644": [
+
+  ],
+  "MATH 649": [
+
+  ],
+  "MATH 653": [
+
+  ],
+  "MATH 654": [
+    { "skillId": "4.A.2.b.1.I08.D09", "score": 0.2056 }
+  ],
+  "MATH 655": [
+
+  ],
+  "MATH 661": [
+
+  ],
+  "MATH 662": [
+    { "skillId": "4.A.2.b.2.I13.D02", "score": 0.2047 }
+  ],
+  "MATH 663": [
+    { "skillId": "4.A.2.b.2.I13.D02", "score": 0.2047 }
+  ],
+  "MATH 664": [
+
+  ],
+  "MATH 665": [
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2367 }
+  ],
+  "MATH 671": [
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2568 }
+  ],
+  "MATH 673": [
+    { "skillId": "4.A.2.b.2.I26.D03", "score": 0.2439 },
+    { "skillId": "4.A.2.b.2.I26.D01", "score": 0.2267 },
+    { "skillId": "4.A.2.b.2.I26.D02", "score": 0.2191 }
+  ],
+  "MATH 674": [
+    { "skillId": "4.A.4.c.1.I03.D02", "score": 0.3373 }
+  ],
+  "MATH 675": [
+
+  ],
+  "MATH 677": [
+
+  ],
+  "MATH 678": [
+
+  ],
+  "MATH 679": [
+
+  ],
+  "MATH 680": [
+
+  ],
+  "MATH 683": [
+    { "skillId": "4.A.2.b.3.I01.D03", "score": 0.3162 }
+  ],
+  "MATH 685": [
+    { "skillId": "4.A.4.a.2.I06.D02", "score": 0.2716 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.2183 }
+  ],
+  "MATH 686": [
+
+  ],
+  "MATH 687": [
+
+  ],
+  "MATH 689": [
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.2283 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.2094 }
+  ],
+  "MATH 690": [
+    { "skillId": "4.A.4.b.4.I01.D18", "score": 0.2093 }
+  ],
+  "MATH 697": [
+
+  ],
+  "MATH 720": [
+
+  ],
+  "MATH 721": [
+
+  ],
+  "MATH 722": [
+
+  ],
+  "MATH 723": [
+
+  ],
+  "MATH 724": [
+
+  ],
+  "MATH 725": [
+
+  ],
+  "MATH 726": [
+
+  ],
+  "MATH 732": [
+
+  ],
+  "MATH 734": [
+
+  ],
+  "MATH 735": [
+
+  ],
+  "MATH 740": [
+
+  ],
+  "MATH 741": [
+
+  ],
+  "MATH 742": [
+
+  ],
+  "MATH 762": [
+
+  ],
+  "MATH 763": [
+
+  ],
+  "MATH 772": [
+
+  ],
+  "MATH 776": [
+
+  ],
+  "MATH 781": [
+    { "skillId": "4.A.2.a.4.I11.D03", "score": 0.5455 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.4401 }
+  ],
+  "MATH 784": [
+
+  ],
+  "MATH 790": [
+
+  ],
+  "MATH 795": [
+
+  ],
+  "MATH 798": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.2446 }
+  ],
+  "MATH 799": [
+    { "skillId": "4.A.2.a.1.I03.D04", "score": 0.2069 }
+  ],
+  "MATH 800": [
+    { "skillId": "4.A.2.b.2.I15.D08", "score": 0.2295 }
+  ],
+  "MATH 998": [
+
+  ],
+  "MATH 999": [
+
+  ],
+  "PHYS 103": [
+    { "skillId": "4.A.2.b.2.I26.D01", "score": 0.3289 }
+  ],
+  "PHYS 104": [
+    { "skillId": "4.A.2.b.2.I26.D01", "score": 0.3289 }
+  ],
+  "PHYS 106": [
+
+  ],
+  "PHYS 111": [
+    { "skillId": "4.A.1.a.1.I16.D04", "score": 0.2857 },
+    { "skillId": "4.A.1.b.3.I01.D03", "score": 0.2774 },
+    { "skillId": "4.A.3.a.2.I13.D08", "score": 0.2653 },
+    { "skillId": "4.A.1.a.1.I20.D01", "score": 0.2647 },
+    { "skillId": "4.A.3.a.3.I06.D01", "score": 0.2491 },
+    { "skillId": "4.A.1.b.2.I03.D05", "score": 0.2428 }
+  ],
+  "PHYS 112": [
+
+  ],
+  "PHYS 122": [
+
+  ],
+  "PHYS 123": [
+
+  ],
+  "PHYS 124": [
+    { "skillId": "4.A.2.a.4.I07.D03", "score": 0.2588 }
+  ],
+  "PHYS 131": [
+    { "skillId": "4.A.4.a.7.I02.D08", "score": 0.3859 },
+    { "skillId": "4.A.2.a.4.I09.D01", "score": 0.2873 },
+    { "skillId": "4.A.1.a.1.I10.D03", "score": 0.2723 },
+    { "skillId": "4.A.2.b.3.I01.D07", "score": 0.2357 }
+  ],
+  "PHYS 160": [
+
+  ],
+  "PHYS 161": [
+    { "skillId": "4.A.3.b.6.I03.D05", "score": 0.4023 }
+  ],
+  "PHYS 170": [
+
+  ],
+  "PHYS 225": [
+
+  ],
+  "PHYS 243": [
+    { "skillId": "4.A.4.b.3.I02.D09", "score": 0.8223 }
+  ],
+  "PHYS 244": [
+    { "skillId": "4.A.4.b.3.I02.D09", "score": 0.5931 }
+  ],
+  "PHYS 245": [
+    { "skillId": "4.A.4.b.3.I02.D09", "score": 0.8223 }
+  ],
+  "PHYS 246": [
+    { "skillId": "4.A.4.b.3.I02.D09", "score": 0.5931 }
+  ],
+  "PHYS 251": [
+
+  ],
+  "PHYS 260": [
+
+  ],
+  "PHYS 261": [
+    { "skillId": "4.A.3.b.6.I03.D05", "score": 0.3542 }
+  ],
+  "PHYS 262": [
+
+  ],
+  "PHYS 263": [
+    { "skillId": "4.A.3.b.6.I03.D05", "score": 0.3563 }
+  ],
+  "PHYS 266": [
+
+  ],
+  "PHYS 270": [
+
+  ],
+  "PHYS 301": [
+    { "skillId": "4.A.2.b.4.I03.D06", "score": 0.6755 },
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.453 }
+  ],
+  "PHYS 303": [
+
+  ],
+  "PHYS 305": [
+
+  ],
+  "PHYS 306": [
+
+  ],
+  "PHYS 307": [
+
+  ],
+  "PHYS 308": [
+
+  ],
+  "PHYS 310": [
+    { "skillId": "4.A.3.a.2.I13.D09", "score": 0.6143 },
+    { "skillId": "4.A.3.a.2.I13.D07", "score": 0.4216 },
+    { "skillId": "4.A.3.a.3.I06.D04", "score": 0.4044 },
+    { "skillId": "4.A.3.a.2.I06.D06", "score": 0.3812 }
+  ],
+  "PHYS 311": [
+    { "skillId": "4.A.3.b.1.I06.D11", "score": 0.2271 }
+  ],
+  "PHYS 312": [
+
+  ],
+  "PHYS 325": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2571 }
+  ],
+  "PHYS 326": [
+
+  ],
+  "PHYS 331": [
+    { "skillId": "4.A.4.a.7.I02.D08", "score": 0.2968 },
+    { "skillId": "4.A.3.a.2.I16.D02", "score": 0.2407 }
+  ],
+  "PHYS 332": [
+    { "skillId": "4.A.2.a.4.I11.D07", "score": 0.2221 }
+  ],
+  "PHYS 334": [
+
+  ],
+  "PHYS 370": [
+
+  ],
+  "PHYS 385": [
+    { "skillId": "4.A.3.b.6.I12.D04", "score": 0.405 },
+    { "skillId": "4.A.1.b.3.I01.D03", "score": 0.3083 },
+    { "skillId": "4.A.4.a.7.I02.D08", "score": 0.2518 }
+  ],
+  "PHYS 390": [
+
+  ],
+  "PHYS 391": [
+
+  ],
+  "PHYS 402": [
+
+  ],
+  "PHYS 403": [
+
+  ],
+  "PHYS 405": [
+    { "skillId": "4.A.3.b.6.I15.D06", "score": 0.2287 }
+  ],
+  "PHYS 406": [
+    { "skillId": "4.A.3.b.6.I15.D06", "score": 0.2287 }
+  ],
+  "PHYS 407": [
+    { "skillId": "4.A.3.b.6.I03.D05", "score": 0.4753 },
+    { "skillId": "4.A.3.a.2.I04.D04", "score": 0.353 }
+  ],
+  "PHYS 408": [
+
+  ],
+  "PHYS 409": [
+
+  ],
+  "PHYS 410": [
+
+  ],
+  "PHYS 411": [
+    { "skillId": "4.A.4.a.7.I02.D08", "score": 0.2817 }
+  ],
+  "PHYS 412": [
+
+  ],
+  "PHYS 416": [
+
+  ],
+  "PHYS 417": [
+
+  ],
+  "PHYS 428": [
+
+  ],
+  "PHYS 440": [
+
+  ],
+  "PHYS 465": [
+
+  ],
+  "PHYS 475": [
+    { "skillId": "4.A.1.a.1.I09.D02", "score": 0.3971 },
+    { "skillId": "4.A.1.a.1.I16.D04", "score": 0.3784 },
+    { "skillId": "4.A.3.a.3.I06.D01", "score": 0.3706 },
+    { "skillId": "4.A.1.b.3.I01.D03", "score": 0.3679 },
+    { "skillId": "4.A.3.a.2.I13.D08", "score": 0.3515 },
+    { "skillId": "4.A.1.a.1.I20.D01", "score": 0.3507 }
+  ],
+  "PHYS 502": [
+
+  ],
+  "PHYS 510": [
+    { "skillId": "4.A.2.b.2.I02.D02", "score": 0.2665 },
+    { "skillId": "4.A.2.b.2.I02.D04", "score": 0.2289 },
+    { "skillId": "4.A.2.b.1.I08.D10", "score": 0.2277 },
+    { "skillId": "4.A.2.b.1.I08.D01", "score": 0.2075 }
+  ],
+  "PHYS 512": [
+
+  ],
+  "PHYS 513": [
+
+  ],
+  "PHYS 533": [
+    { "skillId": "4.A.3.a.2.I20.D05", "score": 0.2368 },
+    { "skillId": "4.A.2.b.2.I24.D03", "score": 0.2295 }
+  ],
+  "PHYS 534": [
+    { "skillId": "4.A.3.b.1.I01.D03", "score": 0.2279 }
+  ],
+  "PHYS 540": [
+
+  ],
+  "PHYS 575": [
+    { "skillId": "4.A.1.a.1.I09.D02", "score": 0.3971 },
+    { "skillId": "4.A.1.a.1.I16.D04", "score": 0.3784 },
+    { "skillId": "4.A.3.a.3.I06.D01", "score": 0.3706 },
+    { "skillId": "4.A.1.b.3.I01.D03", "score": 0.3679 },
+    { "skillId": "4.A.3.a.2.I13.D08", "score": 0.3515 },
+    { "skillId": "4.A.1.a.1.I20.D01", "score": 0.3507 }
+  ],
+  "PHYS 580": [
+
+  ],
+  "PHYS 581": [
+    { "skillId": "4.A.4.a.7.I02.D08", "score": 0.3859 }
+  ],
+  "PHYS 590": [
+    { "skillId": "4.A.2.b.3.I01.D03", "score": 0.2815 },
+    { "skillId": "4.A.2.b.3.I01.D08", "score": 0.2598 }
+  ],
+  "PHYS 591": [
+    { "skillId": "4.A.2.a.4.I03.D01", "score": 0.3655 },
+    { "skillId": "4.A.3.b.6.I03.D06", "score": 0.3557 },
+    { "skillId": "4.A.4.b.4.I01.D10", "score": 0.3284 },
+    { "skillId": "4.A.3.a.2.I09.D04", "score": 0.3138 },
+    { "skillId": "4.A.2.b.2.I02.D06", "score": 0.2927 },
+    { "skillId": "4.A.3.b.6.I03.D04", "score": 0.2895 },
+    { "skillId": "4.A.4.b.4.I06.D08", "score": 0.282 },
+    { "skillId": "4.A.2.b.2.I18.D15", "score": 0.2244 }
+  ],
+  "PHYS 600": [
+    { "skillId": "4.A.2.b.3.I01.D21", "score": 0.2906 },
+    { "skillId": "4.A.2.b.3.I01.D20", "score": 0.2776 },
+    { "skillId": "4.A.2.b.3.I01.D06", "score": 0.2056 },
+    { "skillId": "4.A.2.b.3.I01.D11", "score": 0.2004 }
+  ],
+  "PHYS 611": [
+
+  ],
+  "PHYS 612": [
+
+  ],
+  "PHYS 613": [
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.4648 }
+  ],
+  "PHYS 614": [
+
+  ],
+  "PHYS 615": [
+
+  ],
+  "PHYS 620": [
+
+  ],
+  "PHYS 628": [
+
+  ],
+  "PHYS 630": [
+    { "skillId": "4.A.1.b.3.I01.D03", "score": 0.2367 }
+  ],
+  "PHYS 640": [
+
+  ],
+  "PHYS 660": [
+
+  ],
+  "PHYS 665": [
+
+  ],
+  "PHYS 670": [
+    { "skillId": "4.A.4.b.3.I06.D03", "score": 0.3459 },
+    { "skillId": "4.A.4.b.6.I04.D04", "score": 0.2553 },
+    { "skillId": "4.A.2.b.4.I03.D12", "score": 0.231 },
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2203 }
+  ],
+  "PHYS 671": [
+    { "skillId": "4.A.4.b.3.I06.D03", "score": 0.3459 },
+    { "skillId": "4.A.4.b.6.I04.D04", "score": 0.2553 },
+    { "skillId": "4.A.2.b.4.I03.D12", "score": 0.231 },
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2203 }
+  ],
+  "PHYS 683": [
+    { "skillId": "4.A.4.b.3.I02.D12", "score": 0.2098 }
+  ],
+  "PHYS 684": [
+
+  ],
+  "PHYS 685": [
+
+  ],
+  "PHYS 690": [
+
+  ],
+  "PHYS 694": [
+    { "skillId": "4.A.4.b.6.I05.D05", "score": 0.5947 }
+  ],
+  "PHYS 695": [
+
+  ],
+  "PHYS 701": [
+
+  ],
+  "PHYS 703": [
+
+  ],
+  "PHYS 705": [
+
+  ],
+  "PHYS 711": [
+
+  ],
+  "PHYS 736": [
+
+  ],
+  "PHYS 760": [
+
+  ],
+  "PHYS 780": [
+
+  ],
+  "PHYS 784": [
+
+  ],
+  "PHYS 785": [
+
+  ],
+  "PHYS 786": [
+
+  ],
+  "PHYS 794": [
+    { "skillId": "4.A.4.b.3.I04.D01", "score": 0.2258 }
+  ],
+  "PHYS 796": [
+
+  ],
+  "PHYS 798": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.3559 },
+    { "skillId": "4.A.4.b.4.I12.D12", "score": 0.3056 },
+    { "skillId": "4.A.4.a.2.I02.D02", "score": 0.2986 },
+    { "skillId": "4.A.3.b.6.I03.D09", "score": 0.2796 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2682 },
+    { "skillId": "4.A.3.b.6.I03.D04", "score": 0.2456 }
+  ],
+  "PHYS 799": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.276 },
+    { "skillId": "4.A.3.b.6.I03.D09", "score": 0.2579 },
+    { "skillId": "4.A.3.b.6.I03.D04", "score": 0.2264 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2079 }
+  ],
+  "PHYS 998": [
+
+  ],
+  "PHYS 999": [
+    { "skillId": "4.A.4.b.4.I03.D02", "score": 0.2172 }
+  ],
+  "STAT 250": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2091 }
+  ],
+  "STAT 260": [
+    { "skillId": "4.A.3.a.2.I02.D01", "score": 0.2218 },
+    { "skillId": "4.A.2.a.4.I10.D05", "score": 0.2009 }
+  ],
+  "STAT 334": [
+    { "skillId": "4.A.2.b.2.I02.D03", "score": 0.6285 }
+  ],
+  "STAT 344": [
+    { "skillId": "4.A.4.a.2.I02.D03", "score": 0.6823 }
+  ],
+  "STAT 346": [
+    { "skillId": "4.A.1.a.2.I01.D03", "score": 0.3247 },
+    { "skillId": "4.A.2.a.4.I07.D02", "score": 0.2919 },
+    { "skillId": "4.A.4.b.4.I01.D07", "score": 0.2409 },
+    { "skillId": "4.A.4.b.4.I12.D12", "score": 0.2384 },
+    { "skillId": "4.A.1.a.1.I20.D02", "score": 0.2368 },
+    { "skillId": "4.A.2.b.3.I01.D13", "score": 0.2308 },
+    { "skillId": "4.A.1.a.1.I20.D05", "score": 0.2053 },
+    { "skillId": "4.A.4.a.2.I04.D03", "score": 0.2023 }
+  ],
+  "STAT 350": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.4085 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2905 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.268 }
+  ],
+  "STAT 354": [
+    { "skillId": "4.A.4.a.2.I02.D03", "score": 0.6823 }
+  ],
+  "STAT 356": [
+
+  ],
+  "STAT 360": [
+
+  ],
+  "STAT 362": [
+    { "skillId": "4.A.2.b.4.I03.D16", "score": 0.3855 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.333 },
+    { "skillId": "4.A.2.a.4.I07.D11", "score": 0.3274 },
+    { "skillId": "4.A.2.a.1.I10.D02", "score": 0.3105 },
+    { "skillId": "4.A.2.a.4.I07.D12", "score": 0.2913 },
+    { "skillId": "4.A.2.a.4.I07.D14", "score": 0.2822 },
+    { "skillId": "4.A.2.a.4.I07.D09", "score": 0.2818 },
+    { "skillId": "4.A.2.a.4.I04.D02", "score": 0.2397 }
+  ],
+  "STAT 455": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.9671 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.6976 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.6424 }
+  ],
+  "STAT 456": [
+
+  ],
+  "STAT 460": [
+
+  ],
+  "STAT 462": [
+
+  ],
+  "STAT 463": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.5369 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.3841 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.3541 }
+  ],
+  "STAT 465": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.3795 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.325 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2694 },
+    { "skillId": "4.A.3.a.2.I02.D01", "score": 0.264 },
+    { "skillId": "4.A.2.a.4.I12.D04", "score": 0.2496 }
+  ],
+  "STAT 472": [
+    { "skillId": "4.A.2.b.2.I02.D10", "score": 0.2369 },
+    { "skillId": "4.A.3.a.2.I01.D18", "score": 0.2266 }
+  ],
+  "STAT 474": [
+    { "skillId": "4.A.1.a.1.I09.D01", "score": 0.4689 },
+    { "skillId": "4.A.2.a.4.I10.D05", "score": 0.2965 },
+    { "skillId": "4.A.2.a.4.I01.D03", "score": 0.2938 }
+  ],
+  "STAT 489": [
+    { "skillId": "4.A.4.b.5.I02.D05", "score": 0.5805 },
+    { "skillId": "4.A.4.a.2.I07.D03", "score": 0.3814 },
+    { "skillId": "4.A.4.a.2.I07.D01", "score": 0.3781 },
+    { "skillId": "4.A.4.a.2.I11.D03", "score": 0.3566 }
+  ],
+  "STAT 490": [
+
+  ],
+  "STAT 494": [
+    { "skillId": "4.A.4.a.2.I11.D01", "score": 0.4243 }
+  ],
+  "STAT 498": [
+
+  ],
+  "STAT 499": [
+
+  ],
+  "STAT 500": [
+
+  ],
+  "STAT 507": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2445 }
+  ],
+  "STAT 508": [
+    { "skillId": "4.A.2.a.4.I12.D01", "score": 0.2118 }
+  ],
+  "STAT 515": [
+
+  ],
+  "STAT 517": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.9671 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.6976 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.6424 }
+  ],
+  "STAT 521": [
+
+  ],
+  "STAT 522": [
+
+  ],
+  "STAT 525": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.3795 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.325 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2694 },
+    { "skillId": "4.A.3.a.2.I02.D01", "score": 0.264 },
+    { "skillId": "4.A.2.a.4.I12.D04", "score": 0.2496 }
+  ],
+  "STAT 526": [
+
+  ],
+  "STAT 532": [
+    { "skillId": "4.A.2.b.4.I03.D16", "score": 0.3996 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.333 },
+    { "skillId": "4.A.2.a.4.I07.D11", "score": 0.3274 },
+    { "skillId": "4.A.2.a.1.I10.D02", "score": 0.3105 },
+    { "skillId": "4.A.2.a.4.I07.D12", "score": 0.2913 },
+    { "skillId": "4.A.2.a.4.I07.D14", "score": 0.2822 },
+    { "skillId": "4.A.2.a.4.I07.D09", "score": 0.2818 }
+  ],
+  "STAT 535": [
+    { "skillId": "4.A.1.a.1.I18.D04", "score": 0.3925 },
+    { "skillId": "4.A.1.a.1.I18.D03", "score": 0.3267 },
+    { "skillId": "4.A.4.b.3.I02.D09", "score": 0.3217 }
+  ],
+  "STAT 539": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.3071 }
+  ],
+  "STAT 544": [
+
+  ],
+  "STAT 554": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.3799 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.3071 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2697 },
+    { "skillId": "4.A.3.a.2.I47.D03", "score": 0.2658 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.2488 }
+  ],
+  "STAT 556": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.497 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.3551 },
+    { "skillId": "4.A.2.b.2.I02.D01", "score": 0.3284 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.3274 }
+  ],
+  "STAT 560": [
+
+  ],
+  "STAT 572": [
+    { "skillId": "4.A.2.b.2.I02.D10", "score": 0.2329 },
+    { "skillId": "4.A.3.a.2.I01.D18", "score": 0.2266 },
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.2174 }
+  ],
+  "STAT 574": [
+    { "skillId": "4.A.1.a.1.I09.D01", "score": 0.6571 }
+  ],
+  "STAT 634": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.5567 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.3986 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.3674 },
+    { "skillId": "4.A.3.b.6.I03.D05", "score": 0.3442 },
+    { "skillId": "4.A.2.b.4.I03.D01", "score": 0.3411 }
+  ],
+  "STAT 646": [
+    { "skillId": "4.A.2.a.4.I05.D05", "score": 0.2426 },
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2101 }
+  ],
+  "STAT 652": [
+
+  ],
+  "STAT 654": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.3071 },
+    { "skillId": "4.A.2.a.4.I07.D09", "score": 0.2205 }
+  ],
+  "STAT 656": [
+
+  ],
+  "STAT 657": [
+
+  ],
+  "STAT 658": [
+    { "skillId": "4.A.2.a.4.I07.D08", "score": 0.4884 }
+  ],
+  "STAT 660": [
+
+  ],
+  "STAT 661": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.2897 }
+  ],
+  "STAT 662": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.6335 },
+    { "skillId": "4.A.2.a.2.I05.D03", "score": 0.5446 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.4545 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.4188 }
+  ],
+  "STAT 663": [
+    { "skillId": "4.A.2.b.2.I18.D14", "score": 0.305 },
+    { "skillId": "4.A.4.a.8.I03.D06", "score": 0.2446 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.2402 },
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.216 }
+  ],
+  "STAT 665": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.5653 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.4048 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.3731 }
+  ],
+  "STAT 674": [
+
+  ],
+  "STAT 676": [
+
+  ],
+  "STAT 689": [
+
+  ],
+  "STAT 742": [
+
+  ],
+  "STAT 771": [
+    { "skillId": "4.A.3.b.1.I06.D07", "score": 0.5318 },
+    { "skillId": "4.A.2.b.4.I03.D10", "score": 0.3804 },
+    { "skillId": "4.A.2.b.1.I04.D10", "score": 0.3507 }
+  ],
+  "STAT 778": [
+
+  ],
+  "STAT 796": [
+
+  ],
+  "STAT 798": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.3157 },
+    { "skillId": "4.A.3.b.6.I03.D09", "score": 0.2907 },
+    { "skillId": "4.A.3.b.6.I03.D04", "score": 0.2554 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2378 },
+    { "skillId": "4.A.4.b.6.I04.D01", "score": 0.2171 }
+  ],
+  "STAT 799": [
+    { "skillId": "4.A.3.b.6.I03.D02", "score": 0.276 },
+    { "skillId": "4.A.3.b.6.I03.D09", "score": 0.2579 },
+    { "skillId": "4.A.3.b.6.I03.D04", "score": 0.2264 },
+    { "skillId": "4.A.3.b.6.I03.D07", "score": 0.2079 }
+  ],
+  "STAT 800": [
+
+  ],
+  "STAT 889": [
+
+  ],
+  "STAT 896": [
+
+  ],
+  "STAT 971": [
+
+  ],
+  "STAT 972": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.2197 }
+  ],
+  "STAT 973": [
+    { "skillId": "4.A.2.a.4.I04.D01", "score": 0.2197 }
+  ],
+  "STAT 990": [
+    { "skillId": "4.A.3.b.6.I03.D01", "score": 0.333 },
+    { "skillId": "4.A.4.a.3.I02.D03", "score": 0.2646 }
+  ],
+  "STAT 998": [
+
+  ],
+  "STAT 999": [
+
+  ]
+}

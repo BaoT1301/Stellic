@@ -128,3 +128,71 @@
     @apply font-sans;
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Reverse Audit application tokens
+ *
+ * Tailwind v4: THERE IS NO tailwind.config.js. Theme tokens live here,
+ * under @theme. See CLAUDE.md §6. Adding a config file is the #1 source
+ * of "why isn't my custom color working."
+ *
+ * The palette is deliberately narrow. CLAUDE.md §3 says the finalist
+ * audience is registrars and provosts, so colour carries meaning and
+ * nothing else: red = you graduate late, ochre = act next term, slate =
+ * safe to delay, green = a demanded skill you are already getting.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-rule: var(--rule);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  /* urgency, straight off Bottleneck.urgency */
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --color-soon: var(--soon);
+  --color-soon-soft: var(--soon-soft);
+  --color-calm: var(--calm);
+  --color-calm-soft: var(--calm-soft);
+  /* gap map, straight off SkillGap.covered */
+  --color-covered: var(--covered);
+  --color-covered-soft: var(--covered-soft);
+  --color-missing: var(--missing);
+  --color-missing-soft: var(--missing-soft);
+}
+
+:root {
+  --canvas: oklch(0.979 0.004 95);
+  --rule: oklch(0.902 0.004 95);
+  --brand: oklch(0.435 0.115 262);
+  --brand-soft: oklch(0.958 0.018 262);
+  --critical: oklch(0.505 0.175 26);
+  --critical-soft: oklch(0.966 0.024 30);
+  --soon: oklch(0.525 0.105 68);
+  --soon-soft: oklch(0.968 0.032 80);
+  --calm: oklch(0.455 0.028 220);
+  --calm-soft: oklch(0.968 0.008 220);
+  --covered: oklch(0.442 0.078 165);
+  --covered-soft: oklch(0.964 0.028 165);
+  --missing: oklch(0.5 0.155 30);
+  --missing-soft: oklch(0.969 0.026 35);
+}
+
+@layer base {
+  /* Paper, not screen-white. The cards read as documents against it. */
+  body {
+    background-color: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Section eyebrow. Used on every screen so the four states feel like one
+     document rather than four pages. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+}

@@ -1,0 +1,293 @@
+"use client";
+
+import type { ReactNode } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleAlert,
+  TriangleAlert,
+} from "lucide-react";
+
+import { BottleneckCard } from "@/components/BottleneckCard";
+import { GapMap } from "@/components/GapMap";
+import { Button } from "@/components/ui/button";
+import { NEXT_TERM_LABEL } from "@/lib/types";
+import type { Bottleneck, SkillGap, StudentAudit } from "@/lib/types";
+
+/**
+ * State 3 — CLAUDE.md §13. Two columns: what is load-bearing, and the gap map.
+ * "This screen and the next are the two that sell the product."
+ *
+ * Every string on this screen comes from §11.1's output at runtime. §13 is
+ * explicit that its own example is ILLUSTRATIVE ONLY and that nothing here may
+ * be hardcoded — so the counts, the headings and the hero selection are all
+ * derived from the props below.
+ */
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/** "2027-05" → "May 2027". The contract pins the pattern to ^\d{4}-\d{2}$. */
+function formatGraduation(value: string | null): string | null {
+  if (!value) return null;
+  const m = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!m) return value;
+  const month = MONTHS[Number(m[2]) - 1];
+  return month ? `${month} ${m[1]}` : value;
+}
+
+export interface DiagnosisScreenProps {
+  audit: StudentAudit;
+  bottlenecks: Bottleneck[];
+  gaps: SkillGap[];
+  /** course code → title, for dependent chips and chain nodes. */
+  titles?: Record<string, string>;
+  /** course code → its direct prerequisites, for the chain's left-hand node. */
+  prereqsOf?: Record<string, string[]>;
+  postingCount?: number;
+  /**
+   * Critical bottlenecks with no section next term. §11.3 step 2 requires these
+   * to appear here as "see your advisor" and NEVER on a schedule card.
+   */
+  unofferedCritical?: string[];
+  onContinue: () => void;
+  onBack?: () => void;
+  isWorking?: boolean;
+}
+
+export function DiagnosisScreen({
+  audit,
+  bottlenecks,
+  gaps,
+  titles,
+  prereqsOf,
+  postingCount,
+  unofferedCritical = [],
+  onContinue,
+  onBack,
+  isWorking = false,
+}: DiagnosisScreenProps) {
+  const critical = bottlenecks.filter((b) => b.urgency === "critical");
+  const soon = bottlenecks.filter((b) => b.urgency === "soon");
+  const flexible = bottlenecks.filter((b) => b.urgency === "flexible");
+
+  // The hero is the deepest critical course — the one whose chain is worth
+  // drawing. Falls back to the deepest "soon" so the SVG never disappears just
+  // because a student happens to be in good shape.
+  const hero =
+    [...critical, ...soon].sort((a, b) => b.chainDepth - a.chainDepth)[0] ?? null;
+  const heroHasChain = hero !== null && hero.chainDepth > 0;
+
+  const termsRemaining = bottlenecks[0]?.termsRemaining;
+  const graduation = formatGraduation(audit.expectedGraduation);
+  const openGaps = gaps.filter((g) => !g.covered).length;
+
+  return (
+    <section className="animate-in fade-in duration-500">
+      <header className="max-w-3xl">
+        <p className="eyebrow text-brand">Step 3 · the diagnosis</p>
+        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+          Not every box on your audit weighs the same.
+        </h1>
+        <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
+          {critical.length > 0 ? (
+            <>
+              {critical.length === 1 ? "One" : critical.length} of your remaining
+              requirements{" "}
+              {critical.length === 1 ? "sits" : "sit"} at the head of a chain and
+              cost{critical.length === 1 ? "s" : ""} you a term for every one you
+              miss. {openGaps} of the skills your postings asked for are still
+              open.
+            </>
+          ) : (
+            <>
+              Nothing you have left is on the critical path — your sequencing is
+              clean. {openGaps} of the skills your postings asked for are still
+              open, and that is where your electives go.
+            </>
+          )}
+        </p>
+      </header>
+
+      {/* flex-col + divide-y on mobile, flex-row + divide-x above sm. Using
+          flex-wrap here instead would put a stray rule on the wrapped row. */}
+      <dl className="mt-8 flex flex-col divide-y divide-rule overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 sm:flex-row sm:divide-x sm:divide-y-0">
+        <Fact label="Program" value={audit.major} />
+        <Fact
+          label="Credits"
+          value={`${audit.creditsCompleted} of ${audit.creditsRequired}`}
+        />
+        <Fact label="Graduating" value={graduation ?? "not on file"} />
+        {termsRemaining !== undefined && (
+          <Fact
+            label="Terms left"
+            value={`${termsRemaining} ${termsRemaining === 1 ? "term" : "terms"}`}
+            emphasis={termsRemaining <= 2}
+          />
+        )}
+      </dl>
+
+      <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">
+            What is load-bearing
+          </h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+            Ordered by how much of your remaining degree is waiting behind each
+            one.
+          </p>
+
+          <Group
+            title="Take this term or you graduate late"
+            tone="critical"
+            count={critical.length}
+          >
+            {critical.map((b) => (
+              <BottleneckCard
+                key={b.code}
+                bottleneck={b}
+                titles={titles}
+                completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
+                showChain={heroHasChain && b.code === hero?.code}
+              />
+            ))}
+          </Group>
+
+          {unofferedCritical.length > 0 && (
+            <p className="mt-4 rounded-lg bg-critical-soft px-4 py-3 text-sm leading-relaxed text-critical">
+              <span className="font-mono font-medium">
+                {unofferedCritical.join(", ")}
+              </span>{" "}
+              {unofferedCritical.length === 1 ? "is" : "are"} on your critical
+              path but {unofferedCritical.length === 1 ? "has" : "have"} no{" "}
+              {NEXT_TERM_LABEL} section. Nothing we build can include{" "}
+              {unofferedCritical.length === 1 ? "it" : "them"} — see your advisor.
+            </p>
+          )}
+
+          <Group
+            title="Take this term or next"
+            tone="soon"
+            count={soon.length}
+          >
+            {soon.map((b) => (
+              <BottleneckCard
+                key={b.code}
+                bottleneck={b}
+                titles={titles}
+                completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
+                showChain={heroHasChain && b.code === hero?.code}
+              />
+            ))}
+          </Group>
+
+          <Group title="Safe to delay" tone="flexible" count={flexible.length}>
+            {flexible.map((b) => (
+              <BottleneckCard key={b.code} bottleneck={b} titles={titles} />
+            ))}
+          </Group>
+        </div>
+
+        <GapMap gaps={gaps} postingCount={postingCount} />
+      </div>
+
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
+        {onBack ? (
+          <Button variant="ghost" size="lg" onClick={onBack} disabled={isWorking}>
+            <ArrowLeft aria-hidden data-icon="inline-start" />
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
+        <Button
+          size="lg"
+          onClick={onContinue}
+          disabled={isWorking}
+          className="h-11 px-5 text-[0.9375rem]"
+        >
+          {isWorking ? "Building your semester…" : "Build my semester"}
+          {!isWorking && <ArrowRight aria-hidden data-icon="inline-end" />}
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+/** Direct prerequisites the student has already cleared — left context on the chain. */
+function completedPrereqsFor(
+  code: string,
+  prereqsOf: Record<string, string[]> | undefined,
+  audit: StudentAudit,
+): string[] {
+  const direct = prereqsOf?.[code] ?? [];
+  const taken = new Set(audit.coursesTaken);
+  return direct.filter((c) => taken.has(c));
+}
+
+const GROUP_TONE = {
+  critical: { Icon: TriangleAlert, text: "text-critical" },
+  soon: { Icon: CircleAlert, text: "text-soon" },
+  flexible: { Icon: Check, text: "text-calm" },
+} as const;
+
+function Group({
+  title,
+  tone,
+  count,
+  children,
+}: {
+  title: string;
+  tone: keyof typeof GROUP_TONE;
+  count: number;
+  children: ReactNode;
+}) {
+  if (count === 0) return null;
+  const { Icon, text } = GROUP_TONE[tone];
+  return (
+    <div className="mt-8">
+      <h3 className={`eyebrow flex items-center gap-1.5 ${text}`}>
+        <Icon className="size-3.5" aria-hidden />
+        {title}
+        <span className="tabular-nums opacity-70">{count}</span>
+      </h3>
+      <div className="mt-3 flex flex-col gap-3">{children}</div>
+    </div>
+  );
+}
+
+function Fact({
+  label,
+  value,
+  emphasis = false,
+}: {
+  label: string;
+  value: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <div className="min-w-0 flex-1 px-5 py-4">
+      <dt className="eyebrow text-muted-foreground">{label}</dt>
+      <dd
+        className={`mt-1.5 truncate text-sm font-medium tabular-nums ${
+          emphasis ? "text-critical" : "text-foreground"
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
