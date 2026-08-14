@@ -75,6 +75,32 @@ export function isUndergraduate(code: string): boolean {
 }
 
 /**
+ * Is `code` a defensible ELECTIVE suggestion for this student?
+ *
+ * A student past junior standing should not be told to spend a scarce elective
+ * slot on a lower-division course. Real embeddings surfaced this the moment they
+ * replaced the lexical map: MATH 106 "Quantitative Reasoning" and STAT 260
+ * "Introduction to Statistical Practice I" landed on the schedule card of a
+ * student who had already completed MATH 213 and STAT 344, and IT 209
+ * "Introduction to Object Oriented Programming" landed next to CS 484 for a
+ * student who had finished CS 211. Every one of those is legal, registerable,
+ * and obviously wrong to anyone who advises students — precisely the §0 rule 7
+ * failure that costs more than a bug would.
+ *
+ * The rule mirrors ordinary advising practice (degrees carry an upper-division
+ * credit minimum), and it applies ONLY to electives: a still-required course is
+ * exempt at any level, which is what keeps 200-level CS 262 on the card.
+ */
+export const UPPER_DIVISION = 300;
+export const JUNIOR_STANDING_CREDITS = 60;
+
+export function electiveLevelOk(code: string, audit: StudentAudit): boolean {
+  if (audit.creditsCompleted < JUNIOR_STANDING_CREDITS) return true;
+  const n = courseNumber(code);
+  return n === 0 || n >= UPPER_DIVISION;
+}
+
+/**
  * §11.1 step 1 — the union of `requirement.missing` across INCOMPLETE
  * requirements, minus anything the audit also lists as taken.
  *

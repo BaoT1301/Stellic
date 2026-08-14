@@ -1060,18 +1060,37 @@ matching the §9.1 ground truth.
    dropped at scrape time instead (§9.1), keeping §8 frozen. 33 sections across
    three terms have a second meeting block that is not represented.
 
-### Provisional artifacts — fix these first when the key lands
+### Key is in — what that changed (Aug 14)
 
-- **`data/catalog-skills.json` is lexical TF-IDF, not embeddings.** It passes
-  §9.4's hubness gate (CS 484 ∩ ENGH 302 overlap = 0) and carries a global 0.2
-  score floor that the embedding path does not need, but it still makes stem
-  collisions an embedding would not. **Run `npx tsx scripts/embed-skills.ts` and
-  re-commit before recording.** This is the single highest-value key-gated action.
+- **`data/catalog-skills.json` is now real `text-embedding-3-small` output**, not
+  the lexical stand-in. Sanity gate passes with CS 484 ∩ ENGH 302 overlap = 0 and
+  11 of CS 484's 15 chips data/analysis-flavoured (lexical managed 3).
+- **All three strict schemas are confirmed ACCEPTED by the live API** —
+  `npx tsx scripts/check-openai.ts`. That includes the `pattern` keyword on
+  `expectedGraduation`, which was the flagged §12.1 risk; it round-trips
+  `"2027-05"` correctly. Re-run that script after any change to `lib/schemas.ts`.
+- **Real embeddings surfaced two failures the lexical map had hidden**, both now
+  fixed and both §0 rule 7 problems:
+  1. `electiveLevelOk` in `lib/bottlenecks.ts` — a student past junior standing
+     was being offered MATH 106 "Quantitative Reasoning" and STAT 260 after
+     completing MATH 213 and STAT 344. Electives now carry a 300-level floor;
+     still-required courses are exempt at any level, which is what keeps
+     200-level CS 262 on the card.
+  2. §12.2's prompt had a hard floor of "between 8 and 20 skills", which forced
+     the model to pad — it mapped a backend-engineer posting onto "Prepare
+     production storyboards" and put ENGH 492 **Advanced Fiction Writing
+     Workshop** on the schedule. The floor is gone and cross-domain matching is
+     now explicitly forbidden.
+- **The `balanced` credit penalty is symmetric.** Penalising only the upper side
+  made "balanced" mean "smallest", and once the level floor thinned the pool it
+  settled on a 6-credit card. `FULL_TIME_CREDITS = 12` is the floor every
+  registrar's office uses.
+
+### Still provisional
+
 - **`data/prereqs.json` came from the deterministic `scripts/parse-prereqs.ts`,**
   not from `build-prereqs.ts`. Run `build-prereqs.ts --compare` first — it writes
   nothing and diffs the model against the committed parser.
-- **No route has ever reached OpenAI.** All three currently serve their degraded
-  path. The strict schemas are structurally legal but unvalidated by the API.
 
 ---
 

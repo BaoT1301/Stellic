@@ -76,7 +76,9 @@ You are given a fixed catalog of allowed DWAs below. Follow these rules exactly:
 4. "demandCount" is the number of entries in "postings".
 5. One entry per distinct skill. Do not emit the same skillId twice — merge the indices instead.
 6. Judge on substance, not vocabulary. "Write SQL against our warehouse daily" is database work; "defend a confidence interval" is statistical analysis; "read a query plan" is not the same activity as "build a dashboard".
-7. Return between 8 and 20 skills total. Prefer the activities the postings actually spend words on over marginal ones. Do not pad the list to reach a count.
+7. Return AT MOST 20 skills. There is NO MINIMUM. Six precise activities beat twelve where six were forced. Prefer the activities the postings actually spend words on.
+8. If a requirement has no genuine match in the allowed list, OMIT it. Never settle for the nearest available id. A wrong match is far worse than a missing one: each returned skill is what the schedule builder then tries to close, so one bad mapping puts an unrelated course on the student's schedule with a real CRN next to it.
+9. Never map a technical requirement onto an activity from an unrelated professional domain — creative writing, construction, food service, healthcare, performing arts — merely because a word overlaps. "Builds data pipelines" is not "Prepare production storyboards." If the closest allowed activity comes from a different domain than the posting, that is a signal to OMIT, not to match.
 
 ALLOWED DWAs (skillId<TAB>skillName):
 ${scopedSkills.map((s) => `${s.skillId}\t${s.skillName}`).join("\n")}`;

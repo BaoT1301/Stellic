@@ -4,6 +4,7 @@
 // `catalog-skills.json` + the extracted job skills + the parsed audit.
 
 import {
+  electiveLevelOk,
   isUndergraduate,
   normalizeCode,
   prereqsSatisfied,
@@ -144,9 +145,13 @@ export function computeSkillGaps(
           .filter(
             (t) =>
               !taken.has(t.code) &&
-              // See `isUndergraduate` — the one addition to the spec's filter
-              // list. Without it the chips offer PHYS 695 to a CS junior.
+              // See `isUndergraduate` — without it the chips offer PHYS 695 to
+              // a CS junior. `electiveLevelOk` is the mirror at the other end:
+              // closableBy is by definition an ELECTIVE suggestion (the skill is
+              // not covered by anything required), so a 100-level course here
+              // reads exactly as wrong as a 600-level one.
               isUndergraduate(t.code) &&
+              electiveLevelOk(t.code, audit) &&
               // §13: "prereq courses completed", never "all prereqs met" —
               // `prereqsSatisfied` cannot see grades.
               prereqsSatisfied(t.code, prereqs, taken),

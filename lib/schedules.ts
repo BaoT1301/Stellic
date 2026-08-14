@@ -12,6 +12,7 @@
 
 import {
   courseNumber,
+  electiveLevelOk,
   isUndergraduate,
   normalizeCode,
   prereqsSatisfied,
@@ -68,6 +69,7 @@ const LIGHT_TARGET_CREDITS = 12; // preferences.lighterWorkload
 const MORNING_CUTOFF_MINUTES = 10 * 60; // §8: "no section starting before 10:00"
 const UPPER_DIVISION = 400; // §11.3 step 6 heaviness
 const CREDIT_COMFORT = 13; // §11.3 step 6 balanced penalty knee
+const FULL_TIME_CREDITS = 12; // full-time floor — see the balanced score
 // Puts gapValue on the same scale as the heaviness penalty — see scoreCombo.
 const GAP_VALUE_WEIGHT = 5;
 
@@ -397,10 +399,17 @@ function scoreCombo(
     // That is §11.3's own "two visually identical cards" failure inverted.
     // Weighting the coverage term makes the two commensurate without touching
     // the penalty structure the spec actually reasoned about.
+    // The credit penalty also had to become SYMMETRIC. Penalising only the
+    // upper side made "balanced" mean "smallest", and once the elective level
+    // floor thinned the candidate pool it settled on a 6-credit card for a
+    // student who needs 18 a term. Twelve credits is the full-time floor every
+    // registrar's office uses; below it this is not a balanced semester, it is
+    // a part-time one, and financial aid generally requires the same number.
     balanced:
       GAP_VALUE_WEIGHT * gapValue -
       0.5 * heaviness -
-      2 * Math.max(0, totalCredits - CREDIT_COMFORT),
+      2 * Math.max(0, totalCredits - CREDIT_COMFORT) -
+      2 * Math.max(0, FULL_TIME_CREDITS - totalCredits),
   };
 }
 
@@ -614,7 +623,9 @@ export function buildSchedules(
   const pool = [...candidates.values()].filter((c) => !baseCodes.has(c.code));
   const requiredPool = pool.filter((c) => c.isRequired);
   const electivePool = pool
-    .filter((c) => !c.isRequired)
+    // Required courses are exempt from the level floor at any number — that is
+    // what keeps 200-level CS 262 on the card while keeping MATH 106 off it.
+    .filter((c) => !c.isRequired && electiveLevelOk(c.code, audit))
     .sort(
       (a, b) =>
         b.gapValue - a.gapValue ||
