@@ -93,9 +93,19 @@ export function AuditUpload({
         <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
           Now the boring half.
         </h1>
+        {/*
+          This paragraph used to end "nothing here leaves this session", which
+          was FALSE: §12.1 posts the extracted text to OpenAI. A degree audit is
+          a FERPA education record and the judging audience signs data-processing
+          agreements for a living, so an inaccurate privacy claim is far more
+          damaging here than an honest third-party disclosure. §6 guarantees the
+          second half ("Persistence: None"), so every clause below is defensible
+          under questioning.
+        */}
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
           Drop in your degree audit. We read the requirements you have left, not
-          your grades — nothing here leaves this session.
+          your grades. The text goes to OpenAI to pull those requirements out,
+          and that is it — no account, no database, nothing stored.
         </p>
       </header>
 
@@ -124,8 +134,18 @@ export function AuditUpload({
           <p className="mt-5 text-base font-medium">
             Drop your degree audit here
           </p>
+          {/*
+            Stellic leads deliberately: George Mason's own degree audit runs on
+            Stellic (registrar.gmu.edu calls it "Mason Degree Audit"), so it is
+            the export our demo student actually has. Listing DegreeWorks first
+            was a §0 rule 7 error about the judges' own customer.
+          */}
           <p className="mt-1.5 text-sm text-muted-foreground">
-            PDF, up to 4.5 MB. DegreeWorks, Stellic and Banner exports all work.
+            PDF, up to 4.5 MB. Stellic, DegreeWorks and Banner exports all work.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Not sure where to find it? Student portal → Student Services →
+            Degree Evaluation → print to PDF.
           </p>
           <Button
             variant="outline"

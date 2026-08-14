@@ -58,6 +58,15 @@ export function JobPostingInput({
           for, match it against what your remaining requirements already teach
           you, and work backwards into next term&rsquo;s course list.
         </p>
+        {/*
+          The words CRN, register and "three schedules" appeared nowhere above
+          the fold, so a student had no idea what they were pasting a job ad FOR.
+          This is the outcome sentence, and it glosses CRN once, in place.
+        */}
+        <p className="mt-3 text-lg leading-relaxed text-foreground text-pretty">
+          You get three Fall 2026 schedules built from real sections, with the
+          actual CRNs you paste into registration.
+        </p>
       </header>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -70,10 +79,19 @@ export function JobPostingInput({
           <Sparkles aria-hidden />
           Load sample postings
         </Button>
+        {/* "Three" was false — SAMPLE_POSTING_URLS in app/page.tsx has two, and
+            the toast already said "Two sample postings loaded". */}
         <p className="text-sm text-muted-foreground">
-          Three real early-career listings. Fastest way to see the whole thing.
+          Two real early-career listings. Fastest way to see the whole thing.
         </p>
       </div>
+
+      {/* Provenance, in the first two seconds. Flips the opening frame from
+          landing page to instrument, and every number is committed data. */}
+      <p className="mt-4 text-xs text-muted-foreground">
+        689 courses · 985 Fall 2026 sections · 270 prerequisite rules ·
+        George Mason University public catalog and schedule of classes.
+      </p>
 
       <div className="mt-10 grid gap-4 lg:grid-cols-3">
         {SLOT_HINTS.map((slot, i) => {
