@@ -161,6 +161,11 @@ export function AuditUpload({
             type="file"
             accept="application/pdf,.pdf"
             className="sr-only"
+            // sr-only, but still a real form control in the tree, so axe flags
+            // it critical under WCAG 4.1.2 without an accessible name. The
+            // visible "Choose a file" button is what people click; a screen
+            // reader that lands on the input directly needs this.
+            aria-label="Choose your degree audit PDF"
             onChange={(e) => {
               accept(e.target.files?.[0]);
               e.target.value = "";

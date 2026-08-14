@@ -112,14 +112,31 @@ export function PrereqChain({
 
   return (
     <figure className={cn("m-0", className)}>
-      <div className="overflow-x-auto">
+      {/*
+        A scrollable region must be reachable by keyboard (WCAG 2.1.1) — axe
+        flags this "serious" otherwise, because a sighted keyboard user on a
+        narrow viewport cannot pan the chain. tabIndex 0 plus a name and a role
+        makes it a real, announced, focusable region. The SVG inside keeps its
+        own aria-label, which is the text equivalent of the whole diagram.
+      */}
+      <div
+        className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        tabIndex={0}
+        role="group"
+        aria-label="Prerequisite chain, scrollable"
+      >
         <svg
           viewBox={`0 0 ${width} ${height}`}
           width="100%"
           preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label={chainDescription(bottleneck, upstream)}
-          className="block min-w-[520px]"
+          // min-w only below sm. Measured: an unconditional min-w-[520px] made
+          // the SVG 520px inside a 505px card, so the last node rendered
+          // half-clipped at the card edge on the screen the video dwells on.
+          // From sm up the viewBox scales the whole chain to fit; below sm the
+          // min-width keeps the node labels readable and the wrapper scrolls.
+          className="block w-full min-w-[520px] sm:min-w-0"
         >
           <defs>
             <marker

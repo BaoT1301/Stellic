@@ -268,7 +268,10 @@ export function ScheduleCard({
                   rel="noopener noreferrer"
                   aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
                   title="Course reference number. Opens this section on the public schedule of classes."
-                  className="inline-flex shrink-0 items-center gap-1 font-mono text-[0.6875rem] text-muted-foreground tabular-nums underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
+                  // py-1 for the WCAG 2.2 SC 2.5.8 24px target floor. The CRN
+                  // is the most-tapped link on this card — it is how a judge
+                  // checks the section is real against Banner.
+                  className="inline-flex shrink-0 items-center gap-1 py-1 font-mono text-[0.6875rem] text-muted-foreground tabular-nums underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
                 >
                   {course.section.crn}
                   <ExternalLink className="size-2.5" aria-hidden />
@@ -289,7 +292,7 @@ export function ScheduleCard({
                     href={course.rmpUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
+                    className="inline-flex items-center gap-1 py-1 underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
                     title={`Look up ${course.section.instructor} on RateMyProfessors`}
                   >
                     {course.section.instructor}
@@ -431,7 +434,10 @@ function WhyThis({
 }) {
   return (
     <details className="group/why mt-2">
-      <summary className="flex cursor-pointer list-none items-center justify-end gap-1 text-xs text-muted-foreground transition-colors hover:text-brand focus-visible:text-brand [&::-webkit-details-marker]:hidden">
+      {/* py-1 lifts this from 16px to 24px tall. WCAG 2.2 SC 2.5.8 sets 24x24
+          CSS px as the minimum target, and measured at 16px this was the
+          smallest real control on the busiest screen. */}
+      <summary className="flex cursor-pointer list-none items-center justify-end gap-1 py-1 text-xs text-muted-foreground transition-colors hover:text-brand focus-visible:text-brand [&::-webkit-details-marker]:hidden">
         Why this?
         <ChevronDown
           className="size-3 transition-transform group-open/why:rotate-180"
@@ -478,7 +484,7 @@ function WhyThis({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
-            className="font-mono underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
+            className="inline-block py-1 font-mono underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
           >
             {course.section.crn}
           </a>{" "}

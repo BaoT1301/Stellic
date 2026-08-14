@@ -1086,6 +1086,34 @@ matching the §9.1 ground truth.
   settled on a 6-credit card. `FULL_TIME_CREDITS = 12` is the floor every
   registrar's office uses.
 
+### ⚠️ pdf-parse needs `serverExternalPackages` or the upload path is dead in production
+
+Found Aug 14 by reading the server log during a Playwright run. In a **production
+build only** (`next start`, and therefore Vercel), every PDF upload threw:
+
+```
+Setting up fake worker failed: Cannot find module
+  .next/server/chunks/pdf.worker.mjs
+```
+
+Turbopack bundles pdf-parse into the server chunks but does not emit pdfjs's
+`pdf.worker.mjs` beside it. §12's catch then served the cached fixture, so the
+route returned HTTP 200 with a perfectly plausible audit and `degraded: true` —
+**the PDF path silently never parsed anything while still looking like it
+worked.** `next dev` was fine, which is why nothing caught it earlier.
+
+The fix is one line in `next.config.ts`:
+
+```ts
+serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
+```
+
+Confirmed after: `degraded: false`, 24 courses, 8 requirement blocks, correct
+catalog year. **When you deploy, POST the sample PDF to the live URL and assert
+`degraded === false`.** A 200 is not evidence the feature works — that is the
+whole hazard of the never-show-an-error rule, and it is worth one sentence in
+the write-up about how the failure was found.
+
 ### Prereq graph: SETTLED — keep the deterministic parser (Aug 14)
 
 `build-prereqs.ts --compare` has now been run against the live API. **47 of 270

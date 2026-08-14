@@ -164,8 +164,17 @@ export function DiagnosisScreen({
         <Fact label="Catalog" value={audit.catalogYear ?? "not on file"} />
       </dl>
 
+      {/*
+        min-w-0 on BOTH children is load-bearing, not tidiness. The
+        minmax(0,...) that prevents grid blowout only applies at lg:; below that
+        the implicit single column is `auto` and a grid item's default
+        `min-width: auto` refuses to shrink below its content's min-content
+        width. Measured at 390px before this fix: the column rendered 596px wide
+        and the page scrolled sideways to 620px, which also pushed a gap chip on
+        top of the "Build my semester" button so it could not be tapped.
+      */}
       <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold tracking-tight">
             What&apos;s holding up the rest of your degree
           </h2>
@@ -225,7 +234,7 @@ export function DiagnosisScreen({
           </DelayGroup>
         </div>
 
-        <GapMap gaps={gaps} postingCount={postingCount} />
+        <GapMap gaps={gaps} postingCount={postingCount} className="min-w-0" />
       </div>
 
       <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
@@ -328,7 +337,9 @@ function DelayGroup({
   const { Icon, text } = GROUP_TONE.flexible;
   return (
     <details className="group mt-8">
-      <summary className="flex list-none cursor-pointer flex-col gap-2 rounded-lg py-1 [&::-webkit-details-marker]:hidden">
+      {/* py-1.5, not py-1: measured at 22px tall, two short of the WCAG 2.2
+          SC 2.5.8 24px target minimum. */}
+      <summary className="flex list-none cursor-pointer flex-col gap-2 rounded-lg py-1.5 [&::-webkit-details-marker]:hidden">
         <span className={`eyebrow flex items-center gap-1.5 ${text}`}>
           <Icon className="size-3.5" aria-hidden />
           Still required - but nothing is waiting on them

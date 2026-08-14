@@ -68,8 +68,14 @@ async function readDiagnosis(page: Page) {
       reachedDiagnosis: /graduate late|safe to delay/i.test(text),
       distinctCourses: [...new Set(codes)].length,
       sampleCodes: [...new Set(codes)].slice(0, 6),
-      hasGapMap: /gap map/i.test(text),
-      hasNaN: /NaN|undefined|\[object/i.test(text),
+      // "The gap map" was renamed to "What the jobs asked for" in the
+      // plain-language pass — private vocabulary a student was never taught.
+      hasGapMap: /what the jobs asked for/i.test(text),
+      // Word boundaries and case-sensitive NaN. A loose /NaN|undefined/i
+      // matched the "nan" inside ordinary words — "maintenance",
+      // "governance" — which real parsed course text is full of, so the
+      // check failed on healthy data.
+      leaked: (text.match(/\bNaN\b|\bundefined\b|\[object [A-Z]/g) ?? []).slice(0, 3),
     };
   });
 }
@@ -117,7 +123,11 @@ async function main() {
       `${manual.distinctCourses} distinct codes, e.g. ${manual.sampleCodes.join(", ")}`,
     );
     check("gap map renders", manual.hasGapMap, "present");
-    check("no NaN/undefined leaked to the DOM", !manual.hasNaN, "clean");
+    check(
+      "no NaN/undefined leaked to the DOM",
+      manual.leaked.length === 0,
+      manual.leaked.join(", ") || "clean",
+    );
     await page.screenshot({
       path: path.join(outDir, "6-manual-entry.png") as `${string}.png`,
       fullPage: true,
@@ -142,7 +152,11 @@ async function main() {
         upload.distinctCourses >= 3,
         `${upload.distinctCourses} distinct codes, e.g. ${upload.sampleCodes.join(", ")}`,
       );
-      check("no NaN/undefined leaked to the DOM", !upload.hasNaN, "clean");
+      check(
+        "no NaN/undefined leaked to the DOM",
+        upload.leaked.length === 0,
+        upload.leaked.join(", ") || "clean",
+      );
       await page.screenshot({
         path: path.join(outDir, "7-pdf-upload.png") as `${string}.png`,
         fullPage: true,

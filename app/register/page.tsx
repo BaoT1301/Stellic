@@ -405,7 +405,7 @@ function RegisterWorksheet() {
               </button>
               <Link
                 href="/"
-                className="ml-2 text-[12px] text-[#0000cc] underline"
+                className="ml-2 inline-block py-1 text-[12px] text-[#0000cc] underline"
               >
                 Return to Reverse Audit
               </Link>
