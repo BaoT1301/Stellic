@@ -17,14 +17,29 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
- * State 2 — CLAUDE.md §13. Dropzone, a "download a sample audit" link, and a
+ * State 2 - CLAUDE.md §13. Dropzone, a "download a sample audit" link, and a
  * collapsed manual-entry fallback that must be completable in ~20 seconds.
  *
  * The size and MIME check here is load-bearing, not politeness. §12.1: Vercel
  * caps request bodies at 4.5 MB at the infrastructure level, so an oversized
- * file returns a raw 413 that never reaches the route handler — the route's
+ * file returns a raw 413 that never reaches the route handler, so the route's
  * try/catch and its degraded fixture structurally cannot cover it. The only
  * place this can be caught is before the fetch.
+ *
+ * WHAT CHANGED IN THE UX PASS:
+ *
+ * 1. THE DROPZONE IS UNMISTAKABLY THE PRIMARY ACTION. "Choose a file" now holds
+ *    the one filled treatment on this screen and "Use the sample audit" steps
+ *    down to outline. Previously the only filled button on the screen was the
+ *    sample shortcut in the side column, which told a student with an actual
+ *    audit in hand that the side column was the main path.
+ * 2. THE HELP TEXT INSIDE THE DROPZONE MOVED BEHIND A DISCLOSURE. Four stacked
+ *    lines of instruction were competing with the button they were explaining.
+ *    The portal path is kept exactly as written, one click away.
+ * 3. THE PRIVACY PARAGRAPH IS DEMOTED, NOT CUT. It is a claim a data-processing
+ *    audience will check, so it stays on screen, verbatim in substance, at a
+ *    smaller size so it stops being the second-largest thing on the page.
+ * 4. The em-dash in it is gone (stack rule). Same clause, plain punctuation.
  */
 
 const MAX_UPLOAD_BYTES = 4.5 * 1024 * 1024;
@@ -88,11 +103,13 @@ export function AuditUpload({
 
   return (
     <section className="animate-in fade-in duration-500">
-      <header className="max-w-3xl">
-        <p className="eyebrow text-brand">Step 2 · where you actually are</p>
-        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
-          Now the boring half.
+      <header className="max-w-2xl">
+        <h1 className="text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+          One file and you&rsquo;re done.
         </h1>
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground text-pretty">
+          We read what you still need, not your grades.
+        </p>
         {/*
           This paragraph used to end "nothing here leaves this session", which
           was FALSE: §12.1 posts the extracted text to OpenAI. A degree audit is
@@ -101,15 +118,18 @@ export function AuditUpload({
           damaging here than an honest third-party disclosure. §6 guarantees the
           second half ("Persistence: None"), so every clause below is defensible
           under questioning.
+
+          It is SMALLER now, not shorter: the claim is unchanged and still on
+          screen at rest, it has simply stopped being the second-biggest thing
+          on the page. The only edit is the em-dash, which the stack rules ban.
         */}
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
-          Drop in your degree audit. We read the requirements you have left, not
-          your grades. The text goes to OpenAI to pull those requirements out,
-          and that is it — no account, no database, nothing stored.
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+          The text goes to OpenAI to pull those requirements out, and that is
+          it. No account, no database, nothing stored.
         </p>
       </header>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+      <div className="mt-8 grid gap-5 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -122,40 +142,47 @@ export function AuditUpload({
             accept(e.dataTransfer.files[0]);
           }}
           className={cn(
-            "relative flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-16 text-center transition-colors",
+            "relative flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center transition-colors",
             dragging
               ? "border-brand bg-brand-soft"
-              : "border-foreground/20 bg-card hover:border-foreground/35",
+              : "border-foreground/25 bg-card hover:border-foreground/40",
           )}
         >
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
             <Upload className="size-5 text-muted-foreground" aria-hidden />
           </div>
-          <p className="mt-5 text-base font-medium">
-            Drop your degree audit here
-          </p>
+          <p className="mt-4 text-lg font-medium">Drop your degree audit here</p>
+          {/* The one filled control on this screen. §13's sample shortcut used
+              to hold it, which pointed a student with a real audit at the side
+              column. */}
+          <Button
+            size="lg"
+            className="mt-4 h-11 px-5 text-[0.9375rem]"
+            disabled={isWorking}
+            onClick={() => inputRef.current?.click()}
+          >
+            {isWorking ? "Reading your audit…" : "Choose a file"}
+          </Button>
           {/*
             Stellic leads deliberately: George Mason's own degree audit runs on
             Stellic (registrar.gmu.edu calls it "Mason Degree Audit"), so it is
             the export our demo student actually has. Listing DegreeWorks first
             was a §0 rule 7 error about the judges' own customer.
           */}
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-4 text-sm text-muted-foreground">
             PDF, up to 4.5 MB. Stellic, DegreeWorks and Banner exports all work.
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Not sure where to find it? Student portal → Student Services →
-            Degree Evaluation → print to PDF.
-          </p>
-          <Button
-            variant="outline"
-            size="lg"
-            className="mt-6 h-10 px-4"
-            disabled={isWorking}
-            onClick={() => inputRef.current?.click()}
-          >
-            {isWorking ? "Reading your audit…" : "Choose a file"}
-          </Button>
+          {/* The portal path, kept exactly as written, one click away instead
+              of a fourth line of instruction under the button. */}
+          <details className="mt-1 text-xs">
+            <summary className="inline-flex min-h-7 cursor-pointer items-center rounded px-1.5 py-1.5 text-muted-foreground underline underline-offset-2 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
+              Where do I find this?
+            </summary>
+            <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground">
+              Student portal → Student Services → Degree Evaluation → print to
+              PDF.
+            </p>
+          </details>
           <input
             ref={inputRef}
             type="file"
@@ -178,7 +205,7 @@ export function AuditUpload({
             <div className="flex items-start gap-3">
               <FileText className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
               <div>
-                <p className="text-sm font-medium">Don&rsquo;t have one handy?</p>
+                <p className="text-sm font-medium">Don&rsquo;t have one?</p>
                 {/*
                   86, not 89. The credit count used to disagree three ways:
                   samples/fallback-response.json said 86, samples/sample-audit.html
@@ -187,20 +214,28 @@ export function AuditUpload({
                   consistent with it: 86 credits is junior standing (60-89).
                 */}
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Use the sample student: a transfer junior in the BS in
-                  Computer Science, 86 credits in, graduating May 2027.
+                  A transfer junior in CS, 86 credits done.
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button size="sm" disabled={isWorking} onClick={onUseSample}>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {/* Outline, not filled: the dropzone is the primary action on
+                  this screen. Still the first control in the side column and
+                  still the fastest path for a judge. */}
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-10 px-4"
+                disabled={isWorking}
+                onClick={onUseSample}
+              >
                 Use the sample audit
                 <ArrowRight aria-hidden data-icon="inline-end" />
               </Button>
               <a
                 href={sampleAuditUrl}
                 download
-                className="inline-flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="inline-flex h-8 items-center gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <Download className="size-3.5" aria-hidden />
                 Download the PDF
@@ -339,14 +374,16 @@ function ManualEntry({
           {courses.map((c) => (
             <span
               key={c}
-              className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 font-mono text-xs"
+              className="inline-flex items-center gap-0.5 rounded-md bg-muted py-0.5 pr-0.5 pl-2 font-mono text-xs"
             >
               {c}
+              {/* size-6 is the WCAG 2.2 SC 2.5.8 floor. This was a bare 12px
+                  icon, which no thumb can hit. */}
               <button
                 type="button"
                 aria-label={`Remove ${c}`}
                 onClick={() => setCourses((prev) => prev.filter((x) => x !== c))}
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground"
               >
                 <X className="size-3" aria-hidden />
               </button>

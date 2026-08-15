@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
  * the frozen contract and §11.1 already computes the longest path, so shipping
  * only the string "3 courses depend on it" throws the render away.
  *
+ * This is also the one element on the diagnosis screen that requires no
+ * reading, so it gets the room. It used to draw inside a 505px column beside a
+ * wall of prose; it now draws across the full width of the hero card, up to
+ * 1024px, which is where a student can SEE that three courses sit behind one.
+ *
  * No graph library and no layout engine — §13 says hardcode horizontal
  * positions from chainDepth, and that is exactly what NODE_W/GAP do below.
  * Everything is derived from props; nothing here is hardcoded per course.
@@ -20,11 +25,11 @@ import { cn } from "@/lib/utils";
  * words. We are not claiming each arrow is a single catalog prerequisite.
  */
 
-const NODE_W = 150;
-const NODE_H = 62;
+const NODE_W = 156;
+const NODE_H = 68;
 const GAP = 42;
 const PAD = 10;
-const NODE_Y = 34;
+const NODE_Y = 36;
 const MAX_NODES = 4;
 
 type NodeKind = "done" | "head" | "blocked";
@@ -60,9 +65,12 @@ function chainDescription(
     bottleneck.dependents.length === 0
       ? "Nothing you still need is waiting behind it."
       : `${bottleneck.dependents.length} ${
-          bottleneck.dependents.length === 1 ? "course" : "courses"
+          bottleneck.dependents.length === 1 ? "class" : "classes"
         } you still need cannot be taken until it is done: ${bottleneck.dependents.join(", ")}.`;
-  return `Prerequisite chain. ${head} ${waiting}`;
+  // "What X is holding up" rather than "prerequisite chain": a student has
+  // never been taught our vocabulary, and this string is the entire diagram for
+  // anyone using a screen reader.
+  return `What ${bottleneck.code} is holding up. ${head} ${waiting}`;
 }
 
 export interface PrereqChainProps {
@@ -107,11 +115,13 @@ export function PrereqChain({
       : "var(--soon-soft)";
 
   const width = PAD * 2 + nodes.length * NODE_W + (nodes.length - 1) * GAP;
-  const height = NODE_Y + NODE_H + 34;
+  const height = NODE_Y + NODE_H + 26;
   const xOf = (i: number) => PAD + i * (NODE_W + GAP);
 
+  const blocked = bottleneck.dependents.length;
+
   return (
-    <figure className={cn("m-0", className)}>
+    <figure className={cn("m-0 max-w-4xl", className)}>
       {/*
         A scrollable region must be reachable by keyboard (WCAG 2.1.1) — axe
         flags this "serious" otherwise, because a sighted keyboard user on a
@@ -123,7 +133,7 @@ export function PrereqChain({
         className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         tabIndex={0}
         role="group"
-        aria-label="Prerequisite chain, scrollable"
+        aria-label={`What ${bottleneck.code} is holding up. Scrollable.`}
       >
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -131,12 +141,11 @@ export function PrereqChain({
           preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label={chainDescription(bottleneck, upstream)}
-          // min-w only below sm. Measured: an unconditional min-w-[520px] made
-          // the SVG 520px inside a 505px card, so the last node rendered
-          // half-clipped at the card edge on the screen the video dwells on.
-          // From sm up the viewBox scales the whole chain to fit; below sm the
-          // min-width keeps the node labels readable and the wrapper scrolls.
-          className="block w-full min-w-[520px] sm:min-w-0"
+          // min-w only below sm. From sm up the viewBox scales the whole chain
+          // to fit the card, which is now the full width of the screen rather
+          // than a 505px column; below sm the min-width keeps the node labels
+          // readable and the wrapper scrolls.
+          className="block w-full min-w-[540px] sm:min-w-0"
         >
           <defs>
             <marker
@@ -183,19 +192,20 @@ export function PrereqChain({
             return (
               <g key={node.code}>
                 {/* One string, not a fragment: React refuses array children on
-                    <title> because the DOM flattens them to a single text node. */}
-                <title>{node.title ? `${node.code} — ${node.title}` : node.code}</title>
+                    <title> because the DOM flattens them to a single text node.
+                    A middot, not an em-dash: no dash characters in user-visible
+                    strings anywhere in this app. */}
+                <title>{node.title ? `${node.code} · ${node.title}` : node.code}</title>
 
-                {/* 11px, not 9.5: this row is the only thing on the drawing
-                    that says what each box means, and at 9.5 it read as
-                    decoration. "CAN'T TAKE YET" rather than "BLOCKED" — a
+                {/* This row is the only thing on the drawing that says what
+                    each box means. "CAN'T TAKE YET" rather than "BLOCKED" — a
                     student has no reason to know that blocked is a graph term
                     and not a hold on their account. */}
                 <text
                   x={x + NODE_W / 2}
                   y={NODE_Y - 13}
                   textAnchor="middle"
-                  fontSize="11"
+                  fontSize="11.5"
                   fontWeight="600"
                   letterSpacing="0.09em"
                   fill={done ? "var(--muted-foreground)" : head ? accent : "var(--muted-foreground)"}
@@ -221,8 +231,8 @@ export function PrereqChain({
                     into the utility instead of emitting --font-mono at :root. */}
                 <text
                   x={x + 14}
-                  y={NODE_Y + 26}
-                  fontSize="14.5"
+                  y={NODE_Y + 28}
+                  fontSize="15.5"
                   fontWeight="600"
                   className="font-mono"
                   fill={done ? "var(--muted-foreground)" : "var(--foreground)"}
@@ -231,11 +241,11 @@ export function PrereqChain({
                 </text>
                 <text
                   x={x + 14}
-                  y={NODE_Y + 45}
-                  fontSize="10.5"
+                  y={NODE_Y + 48}
+                  fontSize="11"
                   fill="var(--muted-foreground)"
                 >
-                  {clip(node.title)}
+                  {clip(node.title, 20)}
                 </text>
               </g>
             );
@@ -244,22 +254,35 @@ export function PrereqChain({
           {hidden > 0 && (
             <text
               x={width - PAD}
-              y={NODE_Y + NODE_H + 22}
+              y={NODE_Y + NODE_H + 18}
               textAnchor="end"
-              fontSize="10.5"
+              fontSize="11"
               fill="var(--muted-foreground)"
             >
-              {`+ ${hidden} more still behind ${bottleneck.code}`}
+              {`+ ${hidden} more behind ${bottleneck.code}`}
             </text>
           )}
         </svg>
       </div>
-      <figcaption className="mt-3 text-xs leading-relaxed text-muted-foreground">
-        Everything to the right is a course you still need and cannot reach until{" "}
-        <span className="font-mono font-medium text-foreground">
-          {bottleneck.code}
-        </span>{" "}
-        is done. Chain read from the published prerequisites.
+
+      {/*
+        One line, not three. The drawing and its CAN'T TAKE YET labels carry the
+        rest, and the SVG's aria-label keeps the full text equivalent for
+        assistive tech. The provenance half stays: it is the claim a registrar
+        checks, and it costs four words.
+      */}
+      <figcaption className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+        {blocked > 0 ? (
+          <>
+            You can&apos;t take {blocked === 1 ? "this" : "these"} until{" "}
+            <span className="font-mono font-medium text-foreground">
+              {bottleneck.code}
+            </span>{" "}
+            is done. From the published prerequisites.
+          </>
+        ) : (
+          <>From the published prerequisites.</>
+        )}
       </figcaption>
     </figure>
   );

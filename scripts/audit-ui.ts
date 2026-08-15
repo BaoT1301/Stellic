@@ -118,7 +118,11 @@ async function layout(page: Page, viewport: string, screen: string) {
       // sr-only controls are 1x1 by construction and are never pointed at —
       // the visible button proxies for them. Counting them as tap targets is a
       // false positive in this check, not a real WCAG 2.5.8 failure.
-      if (el.classList.contains("sr-only")) continue;
+      // closest(), not classList: the 1x1 offender is an <input> nested INSIDE
+      // an sr-only wrapper rather than carrying the class itself.
+      if (el.closest(".sr-only")) continue;
+      const cs = getComputedStyle(el);
+      if (cs.clipPath !== "none" && b.width <= 1 && b.height <= 1) continue;
       if (b.width < 24 || b.height < 24) {
         small.push(`${el.tagName.toLowerCase()} "${(el.textContent ?? "").trim().slice(0, 22)}" ${Math.round(b.width)}x${Math.round(b.height)}`);
       }
@@ -214,7 +218,15 @@ async function walk(browser: Browser, vp: Viewport) {
 
   await step(page, `${vp.name} build schedules`, async () => {
     await page.getByRole("button", { name: /build my semester/i }).click();
-    await page.getByText(/tradeoff/i).first().waitFor({ timeout: 120_000 });
+    // Wait on the commit BUTTON, not on body text. The old wait was /tradeoff/i,
+    // which the student-first rebuild deliberately moved behind a disclosure, so
+    // it is no longer on screen at rest and the wait could never resolve. A role
+    // query for the one control every card must have is stable across both the
+    // pre-rebuild ("Take this schedule") and current ("Choose this") labels.
+    await page
+      .getByRole("button", { name: /choose this|take this schedule/i })
+      .first()
+      .waitFor({ timeout: 150_000 });
   });
   await visit(page, vp.name, "4-schedules");
 

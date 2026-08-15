@@ -1,13 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 
 import { Cart } from "@/components/Cart";
 import { PreferenceToggles } from "@/components/PreferenceToggles";
-import { ScheduleCard, weekBlocksFor } from "@/components/ScheduleCard";
+import {
+  ScheduleCard,
+  daysOnCampus,
+  earliestStart,
+  weekBlocksFor,
+} from "@/components/ScheduleCard";
 import { weekBounds } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
+import { normalizeCode } from "@/lib/bottlenecks";
 import { rmpUrl } from "@/lib/rmp";
 import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Preferences, ScheduleOption, Section } from "@/lib/types";
@@ -17,49 +23,113 @@ import { cn } from "@/lib/utils";
  * State 4 — CLAUDE.md §13. Three cards, one row of toggles, a regenerate
  * button, and the cart.
  *
+ * REBUILT Aug 15 around one rule: NOTHING THAT IS THE SAME ON ALL THREE OPTIONS
+ * MAY RENDER THREE TIMES. §11.3 step 2 puts the same still-required courses on
+ * every option, so the cards genuinely differ only in the elective slot — and
+ * the old screen made the student read three full columns to discover that. The
+ * shared spine, the prerequisite caveat and the blocked-skill count are now
+ * stated ONCE, above the row; each card renders only what is its own.
+ *
  * The grid adapts to how many options actually came back. §11.3 step 7: "If
  * fewer than three distinct combos exist, §13 renders FEWER cards rather than
  * duplicates" — two visually identical cards on the screen that owns the
  * largest block of the video is the failure §18 finding 4 was about.
+ *
+ * Below 768px three columns cannot exist. Stacking them (the old behaviour, four
+ * phone screens tall) forces comparison from memory. Instead: one card, a
+ * segmented control labelled by the DIFFERENCE rather than by letter, and the
+ * week held at a constant vertical offset so switching moves only the blocks.
  */
 
 const LETTERS = ["A", "B", "C", "D"];
 
 /**
- * §11.3 step 2 puts the same critical, still-required courses on every option,
- * so the cards genuinely differ only in the elective slot. Saying that once,
- * above the row, turns "the model produced three near-copies" into "here is the
- * one real decision" — and it is what the data actually shows.
+ * The courses on EVERY option, in the order option A lists them.
  *
- * Plain hyphen and plus, never a dash: this line is read next to course codes.
+ * This is computed, never asserted. The old screen carried a hardcoded sentence
+ * saying "the required courses are on every option" while Option B dropped two
+ * of them — a false claim about a student's degree printed next to real course
+ * codes, which §0 rule 7 treats as the worst class of defect in this project.
+ * Now the screen can only ever name the courses that are actually shared.
  */
-export function diffFromBase(
-  base: ScheduleOption,
+export function sharedCourseCodes(options: ScheduleOption[]): Set<string> {
+  const [first, ...rest] = options;
+  if (!first || options.length < 2) return new Set();
+
+  const shared = new Set(first.courses.map((c) => c.code));
+  for (const option of rest) {
+    const codes = new Set(option.courses.map((c) => c.code));
+    for (const code of [...shared]) if (!codes.has(code)) shared.delete(code);
+  }
+  return shared;
+}
+
+/**
+ * Still-required courses this option leaves out that another option takes.
+ *
+ * A lighter term that quietly defers two required courses is exactly the
+ * decision this product exists to make visible, and it used to be legible only
+ * inside the unified-diff string.
+ */
+export function deferredRequired(
   option: ScheduleOption,
-  baseLetter: string,
-): string | undefined {
-  const baseCodes = base.courses.map((c) => c.code);
-  const codes = option.courses.map((c) => c.code);
+  options: ScheduleOption[],
+  requiredCodes?: Set<string>,
+): string[] {
+  if (!requiredCodes || requiredCodes.size === 0) return [];
 
-  const parts = [
-    ...baseCodes.filter((c) => !codes.includes(c)).map((c) => `-${c}`),
-    ...codes.filter((c) => !baseCodes.includes(c)).map((c) => `+${c}`),
-  ];
-
-  const credits = option.totalCredits - base.totalCredits;
-  if (credits !== 0) {
-    parts.push(`${credits > 0 ? "+" : "-"}${Math.abs(credits)} credits`);
+  const mine = new Set(option.courses.map((c) => normalizeCode(c.code)));
+  const elsewhere = new Map<string, string>();
+  for (const other of options) {
+    if (other.id === option.id) continue;
+    for (const course of other.courses) {
+      elsewhere.set(normalizeCode(course.code), course.code);
+    }
   }
 
-  if (parts.length === 0) return undefined;
-  return `vs Option ${baseLetter}: ${parts.join(", ")}`;
+  return [...elsewhere.entries()]
+    .filter(([code]) => requiredCodes.has(code) && !mine.has(code))
+    .map(([, display]) => display)
+    .sort();
+}
+
+/**
+ * One to three words per card, derived from numbers already on that card, so the
+ * model's TRADEOFF paragraph can leave the header. A tag is only assigned when
+ * exactly one option holds the extreme: with a tie there is nothing true to say.
+ */
+export function tradeoffTags(
+  options: ScheduleOption[],
+): Record<string, string | undefined> {
+  const tags: Record<string, string | undefined> = {};
+  if (options.length < 2) return tags;
+
+  const soleExtreme = (
+    value: (o: ScheduleOption) => number,
+    pick: "min" | "max",
+  ): ScheduleOption | undefined => {
+    const scores = options.map(value);
+    const target =
+      pick === "min" ? Math.min(...scores) : Math.max(...scores);
+    const hits = options.filter((_, i) => scores[i] === target);
+    return hits.length === 1 ? hits[0] : undefined;
+  };
+
+  const assign = (option: ScheduleOption | undefined, label: string) => {
+    if (option && tags[option.id] === undefined) tags[option.id] = label;
+  };
+
+  assign(soleExtreme((o) => o.gapsClosed, "max"), "Most job skills");
+  assign(soleExtreme((o) => o.totalCredits, "min"), "Lightest");
+  assign(soleExtreme((o) => daysOnCampus(o), "min"), "Fewest days");
+  return tags;
 }
 
 export interface ScheduleOptionsProps {
   options: ScheduleOption[];
   /** Elective slots open across incomplete requirements (§11.3 step 3). */
   slotsAvailable: number;
-  /** skillId → skillName, so a course row can name the gap it closes. */
+  /** skillId → skillName, so the cart can name the gap a course closes. */
   skillNames?: Record<string, string>;
   /** Open gaps a course offered next term could close — the honest denominator. */
   reachableGaps?: number;
@@ -67,7 +137,7 @@ export interface ScheduleOptionsProps {
   blockedGaps?: number;
   /** Still-needed required course codes, normalised. Drives the REQUIRED tag. */
   requiredCodes?: Set<string>;
-  /** code → the still-needed courses waiting on it, for "Why this?". */
+  /** code → the still-needed courses waiting on it, for the cart's "Why this?". */
   dependentsOf?: Record<string, string[]>;
   /** skillId → how many pasted postings asked for it (SkillGap.demandCount). */
   skillDemand?: Record<string, number>;
@@ -114,6 +184,9 @@ export function ScheduleOptions({
 }: ScheduleOptionsProps) {
   const cartRef = useRef<HTMLDivElement>(null);
 
+  /** Which card the phone shows. Ignored at 768px and up, where all three show. */
+  const [active, setActive] = useState(0);
+
   /**
    * `${optionId}|${code}` → the CRN the student picked instead of the one the
    * builder chose. Held here rather than in app/page.tsx because this is where
@@ -146,8 +219,8 @@ export function ScheduleOptions({
    * the instructor and their professor link.
    *
    * The substitution is applied to the CARDS as well as the cart, deliberately.
-   * With it in the cart alone, Option A's row read "CS 262 · TR 9:00 am · 79379"
-   * while the cart six inches below read "MW 3:00 pm · 79435" — the same product
+   * With it in the cart alone, Option A's week drew CS 262 on Tuesday morning
+   * while the cart six inches below said Monday afternoon — the same product
    * stating two different meeting times for one course, which is the §0 rule 7
    * failure rather than a cosmetic one.
    */
@@ -178,6 +251,22 @@ export function ScheduleOptions({
     // yank the page while the student is comparing times inside the picker.
   }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A rebuild can return fewer options than the tab that was open.
+  const activeIndex = Math.min(active, Math.max(0, displayOptions.length - 1));
+
+  const shared = useMemo(
+    () => sharedCourseCodes(displayOptions),
+    [displayOptions],
+  );
+  const sharedList = useMemo(
+    () =>
+      displayOptions[0]?.courses
+        .map((c) => c.code)
+        .filter((code) => shared.has(code)) ?? [],
+    [displayOptions, shared],
+  );
+  const tags = useMemo(() => tradeoffTags(displayOptions), [displayOptions]);
+
   /**
    * ONE vertical scale for all three grids. Computed across every option's
    * sections, so the cards are directly comparable; see WeekGrid's header for why
@@ -191,22 +280,42 @@ export function ScheduleOptions({
     [displayOptions, requiredCodes],
   );
 
+  const groupWord =
+    displayOptions.length === 2
+      ? "both"
+      : displayOptions.length === 3
+        ? "all three"
+        : `all ${displayOptions.length}`;
+
   return (
     <section className="animate-in fade-in duration-500">
-      <header className="max-w-3xl">
-        <p className="eyebrow text-brand">Step 4 · {NEXT_TERM_LABEL}</p>
-        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+      <header className="max-w-2xl">
+        <h1 className="text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
           Three ways to spend next term.
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
-          Every course below has a real section with a real CRN. The model wrote
-          the reasoning; it did not pick the courses — the combinations are
-          generated from your requirements, the prerequisite graph and the
-          published meeting times.
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+          Every class here is a real {NEXT_TERM_LABEL} section with a real CRN.
         </p>
+        {/* The provenance claim is the reason a registrar trusts this screen, so
+            it is kept in full. It is not what a student needs in order to
+            choose, so it is one click away. */}
+        <details className="group/prov mt-2">
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-1 py-1 text-sm text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-brand focus-visible:text-brand [&::-webkit-details-marker]:hidden">
+            How were these built?
+            <ChevronDown
+              className="size-3.5 transition-transform group-open/prov:rotate-180"
+              aria-hidden
+            />
+          </summary>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+            The model wrote the summaries. It did not pick the courses. Every
+            combination is generated from your remaining requirements, the
+            published prerequisites and the published meeting times.
+          </p>
+        </details>
       </header>
 
-      <div className="mt-8">
+      <div className="mt-7">
         <PreferenceToggles
           preferences={preferences}
           onChange={onPreferencesChange}
@@ -216,17 +325,57 @@ export function ScheduleOptions({
         />
       </div>
 
-      {options.length > 1 && (
-        <div className="mt-6 max-w-2xl">
-          <p className="text-sm text-foreground">
-            The required courses are on every option. The elective slot is where{" "}
-            {options.length === 3 ? "the three" : "they"} differ.
-          </p>
-          {/* First and only place "slot" is glossed. §13's toggle row is right
-              above this, so the gloss lands before the phrase is used on a card. */}
-          <p className="mt-1 text-sm text-muted-foreground">
-            Elective slots are the classes you actually get to pick.
-          </p>
+      {/* THE SHARED STRIP. Everything on it used to render once per card. */}
+      {displayOptions.length > 1 && (
+        <div className="mt-5 rounded-xl bg-card px-4 py-4 ring-1 ring-foreground/10 sm:px-5">
+          {sharedList.length > 0 && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+              <span className="text-sm font-medium">
+                On {groupWord}
+                {": "}
+              </span>
+              {sharedList.map((code) => (
+                <span
+                  key={code}
+                  className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs font-medium"
+                >
+                  {code}
+                </span>
+              ))}
+            </div>
+          )}
+          <div
+            className={cn(
+              "space-y-1 text-xs leading-relaxed text-muted-foreground",
+              sharedList.length > 0 && "mt-2.5",
+            )}
+          >
+            {/* Never "all prereqs met": PrereqRule.minGrade is extracted but
+                StudentAudit.coursesTaken carries no grades, so the stronger
+                claim is false for a student with a D. §8, §13. */}
+            <p>
+              {"You've done the prerequisites we can see. We can't see grades."}
+            </p>
+            {/* §11.2: a skill whose only closers are prereq-blocked cannot be
+                closed next term by any schedule, so it does not belong in the
+                denominator. Saying where the rest went keeps it honest. */}
+            {blockedGaps !== undefined && blockedGaps > 0 && (
+              <p>
+                {blockedGaps} more job {blockedGaps === 1 ? "skill" : "skills"}{" "}
+                {blockedGaps === 1 ? "needs" : "need"} a class you have not taken
+                yet.
+              </p>
+            )}
+            {/* The "*" clause is gated on there actually being a shared spine:
+                with no overlap nothing is marked, and the sentence would be
+                describing a glyph that is not on screen. */}
+            <p>
+              Electives are the classes you get to pick.
+              {sharedList.length > 0
+                ? " In each week below, * marks what only that option has."
+                : ""}
+            </p>
+          </div>
         </div>
       )}
 
@@ -234,47 +383,148 @@ export function ScheduleOptions({
         // §11.3 step 8 makes this unreachable, and §0 rule 3 says build it
         // anyway: a blank screen in the demo video is worse than any feature.
         <p className="mt-8 rounded-xl bg-card px-5 py-8 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">
-          No conflict-free combination survived those preferences. Turn one off
-          and regenerate.
+          Nothing fits those settings. Turn one off and rebuild.
         </p>
       ) : (
-        // No `items-start`: the cards stretch to equal height so ScheduleCard's
-        // `mt-auto` lands all three "Take this schedule" buttons on one line.
-        <div
-          className={cn(
-            "mt-5 grid gap-5",
-            options.length === 1 && "max-w-xl",
-            options.length === 2 && "lg:grid-cols-2",
-            options.length >= 3 && "md:grid-cols-2 lg:grid-cols-3",
-            isWorking && "opacity-60 transition-opacity",
+        <>
+          {/* PHONE ONLY: pick a card by its difference, not by its letter. Plain
+              toggle buttons with aria-pressed rather than the tab/tabpanel
+              contract, which needs wiring this layout does not have. */}
+          {displayOptions.length > 1 && (
+            // top-16 clears app/page.tsx's own h-16 sticky header, and z-10
+            // sits under its z-20 so the two never fight.
+            <div className="sticky top-16 z-10 -mx-1 mt-5 bg-canvas px-1 py-2 md:hidden">
+              <div
+                role="group"
+                aria-label="Choose which schedule to look at"
+                className="flex gap-1 rounded-xl bg-muted p-1"
+              >
+                {displayOptions.map((option, i) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    aria-pressed={i === activeIndex}
+                    // The visible label is the difference, not the letter, but a
+                    // screen reader gets the letter too so the tab and the card
+                    // heading below it are the same thing.
+                    aria-label={`Option ${LETTERS[i] ?? i + 1}: ${option.totalCredits} credits, ${daysOnCampus(option)} days on campus`}
+                    onClick={() => setActive(i)}
+                    className={cn(
+                      "min-h-11 flex-1 rounded-lg px-1 py-1.5 text-center transition-colors",
+                      i === activeIndex
+                        ? "bg-card text-foreground shadow-sm ring-1 ring-foreground/10"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <span className="block text-sm leading-tight font-semibold tabular-nums">
+                      {option.totalCredits} cr
+                    </span>
+                    <span className="block text-[0.6875rem] leading-tight tabular-nums">
+                      {daysOnCampus(option)} days
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-        >
-          {displayOptions.map((option, i) => (
-            <ScheduleCard
-              key={option.id}
-              option={option}
-              letter={LETTERS[i] ?? String(i + 1)}
-              slotsAvailable={slotsAvailable}
-              skillNames={skillNames}
-              reachableGaps={reachableGaps}
-              blockedGaps={blockedGaps}
-              requiredCodes={requiredCodes}
-              dependentsOf={dependentsOf}
-              skillDemand={skillDemand}
-              postingCount={postingCount}
-              diff={
-                i === 0
-                  ? undefined
-                  : diffFromBase(displayOptions[0]!, option, LETTERS[0]!)
-              }
-              week={week}
-              selected={option.id === selectedId}
-              onSelect={() =>
-                onSelect(option.id === selectedId ? null : option.id)
-              }
-            />
-          ))}
-        </div>
+
+          <div
+            className={cn(
+              "mt-4 grid gap-5 md:mt-5",
+              options.length === 1 && "max-w-xl",
+              options.length === 2 && "md:grid-cols-2",
+              options.length >= 3 && "md:grid-cols-2 lg:grid-cols-3",
+              isWorking && "opacity-60 transition-opacity",
+            )}
+          >
+            {displayOptions.map((option, i) => (
+              <div
+                key={option.id}
+                className={cn("flex", i !== activeIndex && "hidden md:flex")}
+              >
+                <ScheduleCard
+                  option={option}
+                  letter={LETTERS[i] ?? String(i + 1)}
+                  slotsAvailable={slotsAvailable}
+                  reachableGaps={reachableGaps}
+                  requiredCodes={requiredCodes}
+                  sharedCodes={shared.size > 0 ? shared : undefined}
+                  tag={tags[option.id]}
+                  deferredRequired={deferredRequired(
+                    option,
+                    displayOptions,
+                    requiredCodes,
+                  )}
+                  week={week}
+                  selected={option.id === selectedId}
+                  onSelect={() =>
+                    onSelect(option.id === selectedId ? null : option.id)
+                  }
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* PHONE ONLY: four rows of pure numerals. A table beats cards for
+              comparing several values at once, because adjacent numbers need no
+              eye travel and no memory. */}
+          {displayOptions.length > 1 && (
+            <details className="group/cmp mt-4 md:hidden">
+              <summary className="flex w-fit cursor-pointer list-none items-center gap-1 py-1 text-sm text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-brand focus-visible:text-brand [&::-webkit-details-marker]:hidden">
+                Compare {groupWord}
+                <ChevronDown
+                  className="size-3.5 transition-transform group-open/cmp:rotate-180"
+                  aria-hidden
+                />
+              </summary>
+              <table className="mt-2 w-full table-fixed text-xs">
+                <caption className="sr-only">
+                  The three schedules compared
+                </caption>
+                <thead>
+                  <tr className="border-b border-rule">
+                    <th scope="col" className="w-2/5 py-1.5 text-left font-medium text-muted-foreground">
+                      <span className="sr-only">Measure</span>
+                    </th>
+                    {displayOptions.map((option, i) => (
+                      <th
+                        key={option.id}
+                        scope="col"
+                        className="py-1.5 text-right font-semibold"
+                      >
+                        {LETTERS[i] ?? String(i + 1)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="tabular-nums">
+                  <CompareRow
+                    label="Credits"
+                    options={displayOptions}
+                    value={(o) => String(o.totalCredits)}
+                  />
+                  <CompareRow
+                    label="Days on campus"
+                    options={displayOptions}
+                    value={(o) => String(daysOnCampus(o))}
+                  />
+                  <CompareRow
+                    label="Earliest class"
+                    options={displayOptions}
+                    value={(o) => earliestStart(o) ?? "none"}
+                  />
+                  <CompareRow
+                    label="Job skills"
+                    options={displayOptions}
+                    value={(o) =>
+                      `${o.gapsClosed} of ${reachableGaps ?? o.gapsTotal}`
+                    }
+                  />
+                </tbody>
+              </table>
+            </details>
+          )}
+        </>
       )}
 
       <div ref={cartRef} className="mt-8">
@@ -284,6 +534,12 @@ export function ScheduleOptions({
             alternatesOf={alternatesOf}
             requiredCodes={requiredCodes}
             preferences={preferences}
+            slotsAvailable={slotsAvailable}
+            reachableGaps={reachableGaps}
+            skillNames={skillNames}
+            dependentsOf={dependentsOf}
+            skillDemand={skillDemand}
+            postingCount={postingCount}
             onSwapSection={(code, crn) => {
               const key = `${selected.id}|${code}`;
               const next = { ...overrides };
@@ -300,7 +556,7 @@ export function ScheduleOptions({
         ) : (
           options.length > 0 && (
             <p className="rounded-xl border border-dashed border-foreground/20 px-5 py-6 text-center text-sm text-muted-foreground">
-              Pick one to see the CRNs you would paste into registration.
+              Pick one to get your CRNs.
             </p>
           )
         )}
@@ -315,5 +571,28 @@ export function ScheduleOptions({
         </div>
       )}
     </section>
+  );
+}
+
+function CompareRow({
+  label,
+  options,
+  value,
+}: {
+  label: string;
+  options: ScheduleOption[];
+  value: (option: ScheduleOption) => string;
+}) {
+  return (
+    <tr className="border-b border-rule/70">
+      <th scope="row" className="py-2 text-left font-normal text-muted-foreground">
+        {label}
+      </th>
+      {options.map((option) => (
+        <td key={option.id} className="py-2 text-right font-medium">
+          {value(option)}
+        </td>
+      ))}
+    </tr>
   );
 }

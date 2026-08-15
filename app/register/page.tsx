@@ -25,9 +25,20 @@
  * worksheet instead of a broken page (§0 rule 3: never break the demo path).
  *
  * The simulation notice sits directly under the h1 AND in the footer. It used to
- * be footer-only, ~788px down, which is below the fold on a 1440x900 laptop —
- * so an honest first read of a screenshot of this page was "they registered
- * him." Banner puts institutional notices under the heading anyway.
+ * be footer-only, ~788px down, which is below the fold on a 1440x900 laptop, so
+ * an honest first read of a screenshot of this page was "they registered him."
+ * Banner puts institutional notices under the heading anyway. BOTH copies stay:
+ * it is on the never-cut list, and the pass that made it larger (13px, 2px rule,
+ * 8px left bar) made it impossible to miss rather than fewer.
+ *
+ * UX pass, three changes and nothing else. The plainness is the point and was
+ * deliberately NOT harmonised with the rest of the app:
+ *   1. One plain-English line above the worksheet, "Your N CRNs are already
+ *      filled in. Press Submit Changes." N comes from the same array that fills
+ *      the rows, so the sentence cannot contradict the boxes below it.
+ *   2. Every table scrolls inside its own container, so a 390px phone never
+ *      scrolls the page sideways.
+ *   3. The simulation notice is larger, and the one em-dash on the page is gone.
  */
 
 import Link from "next/link";
@@ -124,7 +135,7 @@ function TotalCreditHours({
 function SimulationNotice({ className = "" }: { className?: string }) {
   return (
     <p
-      className={`border border-[#c9a227] bg-[#fdf7e3] px-3 py-2 text-[11px] font-bold text-[#5c4a06] ${className}`}
+      className={`border-2 border-[#c9a227] border-l-8 bg-[#fdf7e3] px-3 py-2.5 text-[13px] font-bold text-[#5c4a06] ${className}`}
     >
       Simulated registration system. Production would connect to the
       institution&rsquo;s SIS.
@@ -158,7 +169,7 @@ function BannerChrome({ children }: { children: React.ReactNode }) {
     >
       {/* Institutional header bar */}
       <div className="bg-[#1c3f5f] px-4 py-2.5 text-white">
-        <div className="mx-auto flex max-w-4xl items-baseline justify-between">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <span
             className="text-[17px] font-bold tracking-tight"
             style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
@@ -204,7 +215,24 @@ function BannerChrome({ children }: { children: React.ReactNode }) {
 
 function RegisterWorksheet() {
   const searchParams = useSearchParams();
-  const incoming = parseCrns(searchParams.get("crns") ?? "");
+  const rawCrns = searchParams.get("crns") ?? "";
+  const incoming = parseCrns(rawCrns);
+
+  // Guards the cart-to-registration handoff. If the cart sends five courses and
+  // only three rows land, this page and the cart tell a registrar two different
+  // stories. parseCrns() drops anything that is not a CRN by design (§0 rule 3:
+  // degrade rather than break); this makes the drop audible in the console
+  // instead of silent, and the count printed above the worksheet is taken from
+  // the SAME array that fills the rows, so the two can never disagree on screen.
+  useEffect(() => {
+    const tokens = rawCrns.split(/[\s,]+/).filter((t) => t !== "");
+    if (tokens.length !== incoming.length) {
+      console.warn(
+        `[register] cart sent ${tokens.length} CRN token(s); ${incoming.length} rendered.`,
+        tokens,
+      );
+    }
+  }, [rawCrns, incoming.length]);
 
   // Ten worksheet boxes, the first N prefilled from the cart. Editable, because
   // Banner's are — and because an editable field proves this is a real form and
@@ -268,8 +296,21 @@ function RegisterWorksheet() {
     <BannerChrome>
       <PageHeading />
 
-      {/* Term / student strip */}
-      <table className="mt-3 w-full border-collapse border border-[#a8b4bf] text-[12px]">
+      {/* Term / student strip. Every table on this page sits in its own
+          overflow-x container so a 390px phone scrolls the TABLE, never the
+          page. Banner itself would just overflow; that is one piece of
+          authenticity not worth a horizontal page scroll. */}
+      {/* tabIndex + role + label: a scrollable region has to be reachable by
+          keyboard or its off-screen content is unreachable without a mouse.
+          axe flags this as serious (scrollable-region-focusable, WCAG 2.1.1)
+          and it fired here at 390px, where this table really does scroll. */}
+      <div
+        className="mt-3 overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="Term and student details"
+      >
+      <table className="w-full min-w-[30rem] border-collapse border border-[#a8b4bf] text-[12px]">
         <tbody>
           <tr>
             <th className="w-[15%] border border-[#cdd6dd] bg-[#eef2f6] px-2 py-1 text-left font-bold text-[#1c3f5f]">
@@ -307,10 +348,25 @@ function RegisterWorksheet() {
           </tr>
         </tbody>
       </table>
+      </div>
 
       {registered === null ? (
         <>
-          <p className="mt-4 text-[12px] leading-relaxed">
+          {/*
+            The one line that makes this page legible to a student who has
+            never used Banner. It is printed from `incoming`, the same array
+            that prefills the rows, so the count on screen cannot disagree with
+            the number of filled boxes underneath it.
+          */}
+          {incoming.length > 0 && (
+            <p className="mt-4 border border-[#a8b4bf] bg-[#eef2f6] px-3 py-2 text-[13px] font-bold text-[#1c3f5f]">
+              Your {incoming.length} CRN{incoming.length === 1 ? "" : "s"}{" "}
+              {incoming.length === 1 ? "is" : "are"} already filled in. Press
+              Submit Changes.
+            </p>
+          )}
+
+          <p className="mt-3 text-[12px] leading-relaxed">
             To add a class, enter the Course Reference Number (CRN) in the Add
             Classes Worksheet below and select <b>Submit Changes</b>. To drop a
             class, use the Action column of your current schedule. Some courses
@@ -332,7 +388,13 @@ function RegisterWorksheet() {
               Add Classes Worksheet
             </h2>
 
-            <table className="mt-2 w-full border-collapse border border-[#a8b4bf] text-[12px]">
+            <div
+              className="mt-2 overflow-x-auto"
+              tabIndex={0}
+              role="region"
+              aria-label="Add classes worksheet"
+            >
+            <table className="w-full min-w-[26rem] border-collapse border border-[#a8b4bf] text-[12px]">
               <thead>
                 <tr>
                   <th className="w-[10%] border border-[#cdd6dd] bg-[#dde5ec] px-2 py-1 text-left font-bold text-[#1c3f5f]">
@@ -375,10 +437,11 @@ function RegisterWorksheet() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             <TotalCreditHours crns={filledRows} creditsByCrn={creditsByCrn} />
 
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               {/* Beveled grey buttons, not shadcn. See the file header. */}
               <button
                 type="submit"
@@ -436,7 +499,13 @@ function RegisterWorksheet() {
             Current Schedule
           </h2>
 
-          <table className="mt-2 w-full border-collapse border border-[#a8b4bf] text-[12px]">
+          <div
+            className="mt-2 overflow-x-auto"
+            tabIndex={0}
+            role="region"
+            aria-label="Current schedule"
+          >
+          <table className="w-full min-w-[34rem] border-collapse border border-[#a8b4bf] text-[12px]">
             <thead>
               <tr>
                 <th className="border border-[#cdd6dd] bg-[#dde5ec] px-2 py-1 text-left font-bold text-[#1c3f5f]">
@@ -478,17 +547,20 @@ function RegisterWorksheet() {
               ))}
             </tbody>
           </table>
+          </div>
 
           <TotalCreditHours crns={registered} creditsByCrn={creditsByCrn} />
 
+          {/* No em-dash anywhere in a user-visible string (stack rule). Same
+              two clauses, a full stop between them. */}
           <p className="mt-3 text-[12px] leading-relaxed">
             Course titles, meeting times, and instructors will appear on your
             detail schedule once the registration batch completes. Some courses
-            also require a linked laboratory or recitation section &mdash; check
-            your detail schedule before the add/drop deadline.
+            also require a linked laboratory or recitation section. Check your
+            detail schedule before the add/drop deadline.
           </p>
 
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={reset}
@@ -496,7 +568,12 @@ function RegisterWorksheet() {
             >
               Add or Drop More Classes
             </button>
-            <Link href="/" className="ml-2 text-[12px] text-[#0000cc] underline">
+            {/* py-1 + inline-block keeps this above the 24px floor in
+                WCAG 2.2 SC 2.5.8; without it the link measured ~18px tall. */}
+            <Link
+              href="/"
+              className="ml-2 inline-block py-1 text-[12px] text-[#0000cc] underline"
+            >
               Return to Reverse Audit
             </Link>
           </div>

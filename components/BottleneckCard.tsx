@@ -10,6 +10,10 @@ import { cn } from "@/lib/utils";
  * the reason string is shown verbatim because §11.1 step 4 generates it — the
  * card must never re-derive or re-word it, or the screen and the algorithm can
  * disagree in front of a registrar.
+ *
+ * The chip label is the only text that says how urgent this is, which is what
+ * keeps the card off a colour-alone failure (WCAG 1.4.1). The diagnosis screen
+ * therefore carries no group headings repeating it.
  */
 
 const URGENCY = {
@@ -30,8 +34,7 @@ const URGENCY = {
   /**
    * "Still required", not "Safe to delay". The old label read as permission to
    * skip Operating Systems. These courses are as required as every other one on
-   * the audit; the only thing that is flexible is when they get taken, and the
-   * group heading on the diagnosis screen says exactly that.
+   * the audit; the only thing that is flexible is when they get taken.
    */
   flexible: {
     label: "Still required",
@@ -43,19 +46,18 @@ const URGENCY = {
 } as const;
 
 /**
- * Summer is never plannable (§11.1), so it is never spoken about here. A course
- * offered in exactly one plannable term is the offering half of the urgency
- * story and gets said out loud; anything else is quiet.
+ * Summer is never plannable (§11.1), so it is never spoken about here.
+ *
+ * This now returns null for the ordinary case. A course offered every fall and
+ * every spring is not news, and printing "Offered fall and spring" on all five
+ * cards was four words of noise per card that a student had to read past to
+ * reach the one card where the offering pattern is actually the story.
  */
-function offeringNote(termsOffered: Term[]): string {
+function offeringNote(termsOffered: Term[]): string | null {
   const plannable = termsOffered.filter((t) => t !== "summer");
-  if (plannable.length === 1) {
-    return `Offered ${plannable[0]} only`;
-  }
-  if (plannable.length === 0) {
-    return "No fall or spring offering on record";
-  }
-  return "Offered fall and spring";
+  if (plannable.length === 1) return `Offered ${plannable[0]} only`;
+  if (plannable.length === 0) return "No fall or spring offering on record";
+  return null;
 }
 
 export interface BottleneckCardProps {
@@ -66,6 +68,12 @@ export interface BottleneckCardProps {
   completedPrereqs?: string[];
   /** Renders the inline SVG dependency graph. Reserve it for the hero card. */
   showChain?: boolean;
+  /**
+   * The one card the screen is about. Larger type and a heavier ring, so the
+   * urgent requirement is visibly different from the ones that can wait rather
+   * than differing only in colour.
+   */
+  hero?: boolean;
   /** §11.1's chain arithmetic, one term later. Computed in app/page.tsx. */
   delay?: DelayImpact;
   className?: string;
@@ -76,27 +84,33 @@ export function BottleneckCard({
   titles,
   completedPrereqs,
   showChain = false,
+  hero = false,
   delay,
   className,
 }: BottleneckCardProps) {
   const style = URGENCY[bottleneck.urgency];
   const { Icon } = style;
-  const single = bottleneck.termsOffered.filter((t) => t !== "summer").length <= 1;
+  const offering = offeringNote(bottleneck.termsOffered);
 
   return (
     <article
       className={cn(
         "relative overflow-hidden rounded-xl bg-card ring-1",
         style.ring,
+        hero && "ring-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
         className,
       )}
     >
       <span
         aria-hidden
-        className={cn("absolute inset-y-0 left-0 w-[3px]", style.bar)}
+        className={cn(
+          "absolute inset-y-0 left-0",
+          hero ? "w-1" : "w-[3px]",
+          style.bar,
+        )}
       />
 
-      <div className={cn("py-4 pr-5 pl-6", showChain && "pb-5")}>
+      <div className={cn("py-4 pr-5 pl-6", hero && "py-5 pr-6 pl-7")}>
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <span
             className={cn(
@@ -107,28 +121,37 @@ export function BottleneckCard({
             <Icon className="size-3" aria-hidden />
             {style.label}
           </span>
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 text-xs",
-              single ? "font-medium text-soon" : "text-muted-foreground",
-            )}
-          >
-            <Clock className="size-3" aria-hidden />
-            {offeringNote(bottleneck.termsOffered)}
-          </span>
+          {offering && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-soon">
+              <Clock className="size-3" aria-hidden />
+              {offering}
+            </span>
+          )}
         </div>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h3 className="font-mono text-xl font-semibold tracking-tight">
+          <h3
+            className={cn(
+              "font-mono font-semibold tracking-tight",
+              hero ? "text-2xl" : "text-lg",
+            )}
+          >
             {bottleneck.code}
           </h3>
-          <p className="text-base text-muted-foreground">{bottleneck.title}</p>
+          <p
+            className={cn(
+              "text-muted-foreground",
+              hero ? "text-base" : "text-sm",
+            )}
+          >
+            {bottleneck.title}
+          </p>
         </div>
 
         {/* §11.1 step 4 owns this string. Render it, never rebuild it. */}
         <p
           className={cn(
-            "mt-2.5 text-[0.9375rem] leading-snug",
+            "mt-2 text-sm leading-snug",
             bottleneck.urgency === "flexible"
               ? "text-muted-foreground"
               : "font-medium text-foreground",
@@ -138,7 +161,7 @@ export function BottleneckCard({
         </p>
 
         {showChain && bottleneck.chainDepth > 0 && (
-          <div className="mt-5 rounded-lg bg-canvas p-4 ring-1 ring-foreground/[0.07]">
+          <div className="mt-4 rounded-lg bg-canvas p-4 ring-1 ring-foreground/[0.07] sm:p-5">
             <PrereqChain
               bottleneck={bottleneck}
               titles={titles}
@@ -183,14 +206,15 @@ export function BottleneckCard({
  *     `termsRemaining` falls back to a credit-pace ESTIMATE when it is missing
  *     (lib/bottlenecks.ts), so a date here would be an invented fact on a screen
  *     full of checkable ones — §0 rule 7.
- *  2. No term is ever named. "One term later" is true whichever term this is.
+ *  2. No term is ever named. "Wait a term" is true whichever term this is.
  *  3. The last line says the assumption out loud. One course per term per chain
  *     is exactly what §11.1's urgency classification already assumes, so a
  *     registrar can check this panel against the label above it and find them
  *     consistent rather than merely adjacent.
  *
- * Native <details>, like WhyThis in ScheduleCard: no model call, no fetch, no
- * loading state, and it works before hydration.
+ * Native <details>: no model call, no fetch, no loading state, works before
+ * hydration. "What if I wait?" rather than "What if you take it later?" — five
+ * words shorter and it is the question a student actually asks.
  */
 function DelayCost({
   bottleneck,
@@ -205,10 +229,9 @@ function DelayCost({
 
   return (
     <details className="group/delay mt-3">
-      {/* py-1.5 clears the WCAG 2.2 SC 2.5.8 24px target floor, the same reason
-          DelayGroup's summary in DiagnosisScreen carries it. */}
-      <summary className="flex w-fit cursor-pointer list-none items-center gap-1 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground [&::-webkit-details-marker]:hidden">
-        What if you take it later?
+      {/* py-1.5 clears the WCAG 2.2 SC 2.5.8 24px target floor. */}
+      <summary className="flex w-fit cursor-pointer list-none items-center gap-1 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground [&::-webkit-details-marker]:hidden">
+        What if I wait?
         <ChevronDown
           className="size-3 transition-transform group-open/delay:rotate-180"
           aria-hidden
@@ -217,15 +240,14 @@ function DelayCost({
 
       <div className="mt-1 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs leading-relaxed ring-1 ring-foreground/[0.07]">
         <p className="text-foreground">
-          Taken next term,{" "}
-          <span className="font-mono font-medium">{bottleneck.code}</span> and the
-          chain behind it need {termsNeeded}{" "}
+          <span className="font-mono font-medium">{bottleneck.code}</span> and
+          what is behind it need {termsNeeded}{" "}
           {termsNeeded === 1 ? "term" : "terms"}. You have {termsAvailable}.
         </p>
 
         {atRisk.length > 0 && (
           <Codes
-            lead={`One term later, ${atRisk.length === 1 ? "this no longer fits" : "these no longer fit"}:`}
+            lead={`Wait a term and ${atRisk.length === 1 ? "this slips" : "these slip"}:`}
             codes={atRisk}
             titles={titles}
           />
@@ -236,7 +258,7 @@ function DelayCost({
             unreachable would be a false claim in the reassuring direction. */}
         {beyondWindowNow.length > 0 && (
           <Codes
-            lead={`Already past your last ${termsAvailable === 1 ? "term" : `${termsAvailable} terms`} even if you take it next term:`}
+            lead="Already out of reach:"
             codes={beyondWindowNow}
             titles={titles}
             tone="muted"
@@ -247,9 +269,8 @@ function DelayCost({
             just the already-unreachable ones — `termsRemaining` excludes summer
             outright (§11.1), so it is the same assumption behind both lists. */}
         <p className="text-muted-foreground">
-          Counted one course per term along the chain — the same arithmetic behind
-          the label on this card. Summer terms and overloads are not counted; your
-          advisor can tell you whether either is open to you.
+          Counts one class per term. Summer and overloads are not counted, so
+          ask your advisor.
         </p>
       </div>
     </details>

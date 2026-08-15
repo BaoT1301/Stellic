@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import { ArrowRight, Check, Lock } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Lock } from "lucide-react";
 
 import type { SkillGap } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -8,10 +7,10 @@ import { cn } from "@/lib/utils";
  * The gap map — CLAUDE.md §13, right column of State 3.
  *
  * "The gap map" is what the spec calls it and it stays the name in the code.
- * On screen the heading is "What the jobs asked for", because the judges are
- * registrars and the student is a first-generation senior: neither of them has
- * been taught our private vocabulary, and a heading is not the place to teach
- * it. Do not rename the file or the props to match the heading.
+ * On screen the heading names the student's own postings, because the judges
+ * are registrars and the student is a first-generation senior: neither of them
+ * has been taught our private vocabulary, and a heading is not the place to
+ * teach it. Do not rename the file or the props to match the heading.
  *
  * Two colours: already covered by courses she is taking anyway, versus open.
  * §11.2's design note is the whole point of the first colour — "you're already
@@ -22,67 +21,29 @@ import { cn } from "@/lib/utils";
  * ellipsis, NEVER by editing the string — keeping them verbatim is what keeps
  * us inside CC BY 4.0 without triggering the "indicate changes" clause. Hence
  * `truncate` plus a title attribute, and never `.slice()`.
+ *
+ * What changed in the density pass: the 32-word sentence that restated the
+ * stat tiles is gone, and the tiles went from three to four so every
+ * denominator survives as a NUMBER instead of prose. Each list shows the few
+ * that matter with the rest behind one disclosure — a phone was rendering ten
+ * long federal job-task titles in a single column.
  */
+
+/**
+ * How many chips each list shows before the disclosure.
+ *
+ * The open list gets more room than the covered list on purpose: open skills
+ * are the ones an elective can act on, and the covered list exists to say "stop
+ * thinking about these", which one glance and a count already do.
+ */
+const VISIBLE_OPEN = 5;
+const VISIBLE_COVERED = 3;
 
 export interface GapMapProps {
   gaps: SkillGap[];
   /** How many postings were pasted, for the "n of 3 asked for it" reading. */
   postingCount?: number;
   className?: string;
-}
-
-/**
- * The three numbers in the strip above, restated as one sentence that adds up.
- *
- * A registrar will do this arithmetic; being the one who did it first is worth
- * more than the number. Every count is derived from the same `gaps` array the
- * chips below are drawn from, so the sentence cannot drift from the screen.
- * "Reachable" is `closableBy.length > 0` — §11.2 step 4 only fills that field
- * with courses whose prerequisites the student has already satisfied, so an
- * empty one means the skill sits behind a prerequisite, not that no course
- * teaches it.
- */
-function arithmetic(gaps: SkillGap[]): string | null {
-  const total = gaps.length;
-  if (total === 0) return null;
-
-  const covered = gaps.filter((g) => g.covered).length;
-  const reachable = gaps.filter(
-    (g) => !g.covered && g.closableBy.length > 0,
-  ).length;
-  const blocked = gaps.filter(
-    (g) => !g.covered && g.closableBy.length === 0,
-  ).length;
-
-  const parts = [
-    `Your postings asked for ${total} ${total === 1 ? "thing" : "things"}.`,
-  ];
-
-  if (covered === 0) {
-    parts.push("None of it is taught by a course you have to take anyway.");
-  } else if (covered === 1) {
-    parts.push(
-      "You are already getting one of them from a course you have to take.",
-    );
-  } else {
-    parts.push(
-      `You are already getting ${covered} from courses you have to take.`,
-    );
-  }
-
-  if (reachable === 1) {
-    parts.push("One more you can reach with an elective next term.");
-  } else if (reachable > 1) {
-    parts.push(`${reachable} more you can reach with an elective next term.`);
-  }
-
-  if (blocked === 1) {
-    parts.push("One needs a prerequisite first.");
-  } else if (blocked > 1) {
-    parts.push(`${blocked} need a prerequisite first.`);
-  }
-
-  return parts.join(" ");
 }
 
 export function GapMap({ gaps, postingCount, className }: GapMapProps) {
@@ -95,65 +56,77 @@ export function GapMap({ gaps, postingCount, className }: GapMapProps) {
   );
   const missing = sorted.filter((g) => !g.covered);
   const covered = sorted.filter((g) => g.covered);
-  const sentence = arithmetic(gaps);
+
+  // "Reachable" is closableBy.length > 0 — §11.2 step 4 only fills that field
+  // with courses whose prerequisites the student has already satisfied, so an
+  // empty one means the skill sits behind a class she has not taken, not that
+  // no course teaches it. Both counts are honest denominators and both stay.
+  const open = missing.filter((g) => g.closableBy.length > 0).length;
+  const blocked = missing.length - open;
 
   return (
     <section className={cn("flex flex-col", className)}>
       <header>
+        {/* Names the student's own input rather than "the jobs" in the
+            abstract, and it is the only place postingCount is still spent now
+            that the "read across N postings" sentence is gone. */}
         <h2 className="text-lg font-semibold tracking-tight">
-          What the jobs asked for
+          {postingCount === 1
+            ? "What your posting asked for"
+            : postingCount
+              ? `What your ${postingCount} postings asked for`
+              : "What the jobs asked for"}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-          …and whether your remaining classes already teach it. Every skill your
-          postings asked for, ranked by how many of them asked.
-          {postingCount ? ` Read across ${postingCount} postings.` : ""}
-        </p>
-        <dl className="mt-4 flex items-stretch divide-x divide-rule overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
-          <Stat label="Asked for" value={gaps.length} />
-          <Stat label="Open" value={missing.length} tone="missing" />
+
+        <dl className="mt-4 grid grid-cols-4 divide-x divide-rule overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
+          <Stat label="Asked" value={gaps.length} />
           <Stat label="Covered" value={covered.length} tone="covered" />
+          <Stat label="Open" value={open} tone="missing" />
+          <Stat label="Blocked" value={blocked} />
         </dl>
-        {sentence && (
-          <p className="mt-3 text-sm leading-relaxed text-foreground">
-            {sentence}
-          </p>
+
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Open: an elective can cover it. Blocked: another class comes first.
+        </p>
+
+        {/* The chips below are verbatim O*NET titles (§9.3), which is why they
+            read like a federal dataset and not like a job ad. The explanation
+            is one toggle away rather than a paragraph everyone reads once. */}
+        {gaps.length > 0 && (
+          <details className="group/onet mt-1">
+            <summary className="flex w-fit cursor-pointer list-none items-center gap-1 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground [&::-webkit-details-marker]:hidden">
+              Why do these read strangely?
+              <ChevronDown
+                className="size-3 transition-transform group-open/onet:rotate-180"
+                aria-hidden
+              />
+            </summary>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              These are the U.S. Labor Department&apos;s standard names for job
+              tasks. That&apos;s why they don&apos;t read like the posting.
+            </p>
+          </details>
         )}
       </header>
 
-      {/* The chips below are verbatim O*NET titles (§9.3), which is why they
-          read like a federal dataset and not like a job ad. Say so once, here,
-          rather than letting the student assume we wrote them badly. */}
-      {gaps.length > 0 && (
-        <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-          These are the U.S. Labor Department&apos;s standard names for job
-          tasks. That&apos;s why they don&apos;t read like the posting.
-        </p>
-      )}
-
       <Group
         title="Nothing you have left teaches these"
-        note="An elective is the only way to close these."
-        count={missing.length}
+        note="An elective is how you get these."
         tone="missing"
-      >
-        {missing.map((gap) => (
-          <Chip key={gap.skillId} gap={gap} tone="missing" />
-        ))}
-      </Group>
+        gaps={missing}
+        visible={VISIBLE_OPEN}
+      />
 
-      {covered.length > 0 && (
-        <Group
-          title="Already covered by courses you have to take anyway"
-          note="You'll get these anyway. Don't spend an elective on them."
-          count={covered.length}
-          tone="covered"
-        >
-          {covered.map((gap) => (
-            <Chip key={gap.skillId} gap={gap} tone="covered" />
-          ))}
-        </Group>
-      )}
+      <Group
+        title="You're already getting these"
+        note="Don't spend an elective on them."
+        tone="covered"
+        gaps={covered}
+        visible={VISIBLE_COVERED}
+      />
 
+      {/* O*NET attribution. This is a licence condition (§9.3), not decoration:
+          it is kept verbatim and it is never collapsed. */}
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
         Skills are O*NET Detailed Work Activities, matched to course descriptions
         from the public catalog.
@@ -172,7 +145,7 @@ function Stat({
   tone?: "missing" | "covered";
 }) {
   return (
-    <div className="flex-1 px-4 py-3">
+    <div className="min-w-0 px-2.5 py-3 sm:px-4">
       <dd
         className={cn(
           "text-2xl leading-none font-semibold tabular-nums",
@@ -182,25 +155,35 @@ function Stat({
       >
         {value}
       </dd>
-      <dt className="eyebrow mt-1.5 text-muted-foreground">{label}</dt>
+      <dt className="eyebrow mt-1.5 truncate text-muted-foreground">{label}</dt>
     </div>
   );
 }
 
+/**
+ * A titled chip list, capped, with the remainder behind one native <details>.
+ *
+ * Progressive disclosure rather than deletion: every skill the postings asked
+ * for is still on the page and still verbatim, but a student sees the handful
+ * that matter first instead of scrolling past ten federal job-task titles.
+ */
 function Group({
   title,
   note,
-  count,
   tone,
-  children,
+  gaps,
+  visible,
 }: {
   title: string;
   note: string;
-  count: number;
   tone: "missing" | "covered";
-  children: ReactNode;
+  gaps: SkillGap[];
+  visible: number;
 }) {
-  if (count === 0) return null;
+  if (gaps.length === 0) return null;
+  const head = gaps.slice(0, visible);
+  const tail = gaps.slice(visible);
+
   return (
     <div className="mt-7">
       <div className="flex items-baseline gap-2">
@@ -213,11 +196,34 @@ function Group({
         />
         <h3 className="text-sm font-semibold">{title}</h3>
         <span className="text-sm tabular-nums text-muted-foreground">
-          {count}
+          {gaps.length}
         </span>
       </div>
       <p className="mt-1 ml-4 text-xs text-muted-foreground">{note}</p>
-      <ul className="mt-3 flex flex-col gap-1.5">{children}</ul>
+
+      <ul className="mt-3 flex flex-col gap-1.5">
+        {head.map((gap) => (
+          <Chip key={gap.skillId} gap={gap} tone={tone} />
+        ))}
+      </ul>
+
+      {tail.length > 0 && (
+        <details className="group/more mt-1.5">
+          {/* py-1.5 clears the WCAG 2.2 SC 2.5.8 24px target floor. */}
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-1 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground [&::-webkit-details-marker]:hidden">
+            {`Show ${tail.length} more`}
+            <ChevronDown
+              className="size-3 transition-transform group-open/more:rotate-180"
+              aria-hidden
+            />
+          </summary>
+          <ul className="mt-1.5 flex flex-col gap-1.5">
+            {tail.map((gap) => (
+              <Chip key={gap.skillId} gap={gap} tone={tone} />
+            ))}
+          </ul>
+        </details>
+      )}
     </div>
   );
 }
@@ -282,14 +288,12 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
         tone === "missing" && (
           <span
             className="inline-flex shrink-0 items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[0.6875rem] text-muted-foreground"
-            title="No course you can register for next term teaches this — it sits behind a prerequisite you haven't cleared."
+            title="No class you can take next term teaches this. It sits behind a class you have not taken yet."
           >
             <Lock className="size-2.5" aria-hidden />
-            <span className="sr-only">
-              Needs a prerequisite you have not cleared yet
-            </span>
+            <span className="sr-only">Needs another class first</span>
             <span aria-hidden className="hidden sm:inline">
-              needs a prereq first
+              another class first
             </span>
           </span>
         )
