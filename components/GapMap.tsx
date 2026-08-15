@@ -132,11 +132,16 @@ function Stat({
  * and §9.3 forbids shortening these strings by editing them, so the column has
  * to be wide enough for CSS to do it honestly.
  *
- * `gap-px` over a --rule background is what makes this a ruled table rather than
- * a scatter of tiles: one hairline between every pair of cells, horizontally and
- * vertically, with no doubled line at the edges and no `last:` rule that a
- * two-column grid would get wrong anyway. Two columns of ruled rows is the
- * layout a course-demand report has had since before it was on a screen.
+ * The rules are per-cell borders, NOT `gap-px` over a tinted container. The
+ * gap-px trick draws the same table one class shorter and then paints an empty
+ * grey block into the unfilled cell whenever a group has an odd number of rows
+ * — which is most of them, and it looked like a rendering fault. The container
+ * is --card, so an unfilled cell is simply invisible.
+ *
+ * Hence the two nth-child rules: every cell takes a top border except the ones
+ * in the first visual row, which is child 1 stacked and children 1-2 at lg.
+ * Two columns of ruled rows is the layout a course-demand report has had since
+ * long before it was on a screen.
  */
 function Group({
   title,
@@ -165,7 +170,7 @@ function Group({
           {count}
         </span>
       </div>
-      <ul className="mt-3 grid gap-px overflow-hidden rounded-md border border-rule bg-rule lg:grid-cols-2">
+      <ul className="mt-3 grid overflow-hidden rounded-md border border-rule bg-card lg:grid-cols-2">
         {children}
       </ul>
     </div>
@@ -192,7 +197,12 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
   return (
     <li
       className={cn(
-        "flex min-w-0 items-center gap-2.5 border-l-2 bg-card py-2 pr-2.5 pl-3",
+        // Per-side colours, never the `border-rule` shorthand: it would set all
+        // four sides and put the urgency colour's fate at the mercy of
+        // stylesheet order against `border-l-*`.
+        "flex min-w-0 items-center gap-2.5 border-t border-t-rule py-2 pr-2.5 pl-3",
+        "border-l-2 first:border-t-0 lg:odd:border-r lg:odd:border-r-rule",
+        "lg:[&:nth-child(2)]:border-t-0",
         tone === "missing" ? "border-l-missing" : "border-l-covered",
       )}
     >
