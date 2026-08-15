@@ -228,7 +228,10 @@ export function JobPostingInput({
             >
               <Plus className="size-4" aria-hidden />
               Add another posting
-              <span className="text-muted-foreground/80">(optional)</span>
+              {/* Not /80. --muted-foreground is tuned to sit just over the
+                  4.5:1 AA floor, so any opacity on top of it drops below —
+                  axe measured this exact span as a serious contrast failure. */}
+              <span className="text-muted-foreground">(optional)</span>
             </button>
           )}
         </div>

@@ -303,11 +303,23 @@ export function ChatPanel({
 
         {/* The readout. Institutional counts in `.data`, so the panel states
             what it is grounded in instead of claiming to be intelligent. */}
+        {/* Zero-valued stats are dropped rather than printed. On the diagnosis
+            screen no schedule has been built yet, so `sections` is genuinely 0
+            — and a readout that says "SECTIONS 0" next to three other live
+            counts reads as a broken widget, not as an honest zero. */}
         <dl className="grid min-w-0 grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-4">
-          <Stat label="Requirements" value={facts.requirements} />
-          <Stat label="Blockers" value={facts.blockers} />
-          <Stat label="Skills" value={facts.skills} />
-          <Stat label="Sections" value={facts.sections} />
+          {(
+            [
+              ["Requirements", facts.requirements],
+              ["Blockers", facts.blockers],
+              ["Skills", facts.skills],
+              ["Sections", facts.sections],
+            ] as const
+          )
+            .filter(([, value]) => value > 0)
+            .map(([label, value]) => (
+              <Stat key={label} label={label} value={value} />
+            ))}
         </dl>
       </div>
 

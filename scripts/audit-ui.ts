@@ -115,7 +115,13 @@ async function layout(page: Page, viewport: string, screen: string) {
       // sr-only controls are 1x1 by construction and are never pointed at —
       // the visible button proxies for them. Counting them as tap targets is a
       // false positive in this check, not a real WCAG 2.5.8 failure.
-      if (el.classList.contains("sr-only")) continue;
+      // closest(), not classList: the remaining 1x1 offender is an <input>
+      // nested INSIDE an sr-only wrapper rather than carrying the class itself.
+      if (el.closest(".sr-only")) continue;
+      // A control clipped to nothing by its own styles is equally untappable
+      // and equally proxied by a visible label.
+      const cs = getComputedStyle(el);
+      if (cs.clipPath !== "none" && b.width <= 1 && b.height <= 1) continue;
       if (b.width < 24 || b.height < 24) {
         small.push(`${el.tagName.toLowerCase()} "${(el.textContent ?? "").trim().slice(0, 22)}" ${Math.round(b.width)}x${Math.round(b.height)}`);
       }
@@ -211,7 +217,16 @@ async function walk(browser: Browser, vp: Viewport) {
 
   await step(page, `${vp.name} build schedules`, async () => {
     await page.getByRole("button", { name: /build my semester/i }).click();
-    await page.getByText(/tradeoff/i).first().waitFor({ timeout: 120_000 });
+    // Wait on the commit BUTTON, not on body text. /tradeoff/i matched a string
+    // inside the comparison matrix whose visibility depends on how the matrix
+    // collapses at 390px, so the phone leg failed while the app was fine — the
+    // probe reached this screen with the prose present in under 25 seconds.
+    // A role query for the one control that must exist on every card is stable
+    // at both widths.
+    await page
+      .getByRole("button", { name: /take this schedule/i })
+      .first()
+      .waitFor({ timeout: 150_000 });
   });
   await visit(page, vp.name, "4-schedules");
 

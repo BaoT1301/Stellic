@@ -62,13 +62,38 @@ For each schedule, write exactly three things:
 - "why": ONE sentence. Why a student would pick this one.
 - "tradeoff": ONE sentence. What this option genuinely costs compared to the others. Every option must have a real one.
 
-Rules:
-- Be specific and concrete. "All three target roles asked for SQL and distributed systems; nothing left in your required courses touches either" is right. "This is a well-rounded schedule" is useless and will be rejected.
-- Name actual course codes and actual skills from the data you are given.
-- Use only the numbers you are given. Never compute a new statistic, never state a credit count or a gap count that is not in the input.
-- Never suggest adding, dropping or swapping a course; the schedules are fixed. Never mention CRNs, section numbers, meeting times or instructors.
+HARD REQUIREMENTS. These are mechanical, not stylistic. Copy that fails one of
+them is worse than no copy at all, because this is read by university registrars.
+
+1. EVERY "why" AND EVERY "tradeoff" MUST NAME AT LEAST ONE ACTUAL COURSE CODE
+   from that schedule (for example "CS 262", "STAT 354"). A sentence with no
+   course code in it is rejected.
+2. EVERY "tradeoff" must name what this option GIVES UP RELATIVE TO A SPECIFIC
+   ALTERNATIVE — a course another option has that this one does not, or a skill
+   another option closes that this one leaves open. "It is a heavier term" is
+   not a tradeoff. "It leaves the database work in CS 450 for spring" is.
+3. BANNED WORDS AND PHRASES, because they carry no information: well-rounded,
+   balanced approach, various, variety, diverse, broad, holistic, comprehensive,
+   solid, strong foundation, valuable, utility, opportunities, as per, align,
+   leverage, enhance, optimize, robust, key, crucial, essential, ensure,
+   "helps you make progress", "highly demanded", "target roles" as a bare phrase,
+   "possible", "potential", "narrowed specializations".
+4. The "label" is a plain-English noun phrase a 20-year-old would say out loud.
+   Good: "Close the data gap". "Clear the blocker, lighter load".
+   "Front-load the systems track". Bad: "Maintain variety and balance".
+   "Work on possible narrowed specializations". If your label contains a banned
+   word from rule 3, rewrite it.
+5. The three labels must be MUTUALLY DISTINGUISHING. A student reading only the
+   three labels should be able to say what the actual choice is between them.
+
+Also:
+- Use only the numbers you are given. Never compute a new statistic, never state
+  a credit count or a gap count that is not in the input.
+- Never suggest adding, dropping or swapping a course; the schedules are fixed.
+  Never mention CRNs, section numbers, meeting times or instructors.
 - Never invent a fact about a course, a prerequisite, or a term it is offered.
-- Write to the student as "you". No greetings, no hedging, no exclamation marks.
+- Write to the student as "you". No greetings, no hedging, no exclamation marks,
+  no em-dashes.
 - Return one entry per schedule, keyed by its strategy.`;
 
 /** Deterministic copy for a strategy the model omitted. Never blank, never a
@@ -83,9 +108,13 @@ function fallbackProse(combo: Combo): Pick<ScheduleOption, "label" | "why" | "tr
         : "Keeps the most courses open";
   return {
     label,
-    why: `${codes} — clears ${combo.bottlenecksCleared} blocked ${
+    // No em-dash. This string is user-visible whenever the model call fails,
+    // and it read as a machine dump next to the model's sentences.
+    why: `Takes ${codes}. Clears ${combo.bottlenecksCleared} blocked ${
       combo.bottlenecksCleared === 1 ? "course" : "courses"
-    } and closes ${combo.gapsClosed} of ${combo.gapsTotal} open skills at ${combo.totalCredits} credits.`,
+    } and closes ${combo.gapsClosed} of ${combo.gapsTotal} open ${
+      combo.gapsTotal === 1 ? "skill" : "skills"
+    } at ${combo.totalCredits} credits.`,
     tradeoff: `Uses ${combo.slotsUsed} of your elective ${
       combo.slotsUsed === 1 ? "slot" : "slots"
     } and ${combo.totalCredits} credits this term.`,
