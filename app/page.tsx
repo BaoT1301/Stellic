@@ -15,10 +15,12 @@ import {
   type DelayImpact,
 } from "@/lib/bottlenecks";
 import { computeSkillGaps, type DemandedSkill } from "@/lib/gaps";
+import { fallbackProse } from "@/lib/prose";
 import {
   buildSchedules,
   explainIneligibility,
   ineligibleCriticals,
+  type Combo,
   type Ineligibility,
 } from "@/lib/schedules";
 import { NEXT_TERM, NEXT_TERM_LABEL } from "@/lib/types";
@@ -97,13 +99,38 @@ function loadCatalog(): Promise<Catalog> {
       import("@/data/courses.json"),
       import("@/data/prereqs.json"),
       import("@/data/catalog-skills.json"),
-    ]).then(([c, p, s]) => ({
-      courses: c.default as unknown as Course[],
-      prereqs: p.default as unknown as PrereqGraph,
-      catalogSkills: s.default as unknown as CatalogSkills,
-    }));
+    ])
+      .then(([c, p, s]) => ({
+        courses: c.default as unknown as Course[],
+        prereqs: p.default as unknown as PrereqGraph,
+        catalogSkills: s.default as unknown as CatalogSkills,
+      }))
+      // Drop the cache before rethrowing. Caching the promise is the point of
+      // this function, but caching a REJECTED one means a single ChunkLoadError
+      // on the 850 KB catalog — a flaky network, a deploy that moved the chunk
+      // hash out from under an open tab — permanently breaks every later
+      // transition for the life of the page, with no way back short of a
+      // reload. Clearing it makes the next call a fresh attempt.
+      .catch((err: unknown) => {
+        catalogPromise = null;
+        throw err;
+      });
   }
   return catalogPromise;
+}
+
+/**
+ * A combo becomes a renderable ScheduleOption without the model. Same merge the
+ * route performs (`{ ...combo, id, ...prose }`) and the same `fallbackProse`,
+ * so the degraded card the student sees is identical whether the model failed
+ * behind the route or the request never got there.
+ */
+function withLocalProse(combos: Combo[]): ScheduleOption[] {
+  return combos.map((combo) => ({
+    ...combo,
+    id: combo.id || combo.strategy,
+    ...fallbackProse(combo),
+  }));
 }
 
 export default function Home() {
@@ -130,9 +157,15 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Warm the catalog chunk while the student is still typing, so the diagnosis
-  // transition never waits on a 850 KB download.
+  // transition never waits on a 850 KB download. Swallow the failure here and
+  // ONLY here: nothing is on screen that depends on it yet, `loadCatalog` has
+  // already cleared its cache so the real call retries, and the step that does
+  // need it reports its own error. `void` on this promise was an unhandled
+  // rejection on mount.
   useEffect(() => {
-    void loadCatalog();
+    loadCatalog().catch((err: unknown) => {
+      console.warn("[catalog] warm-up failed; will retry on demand", err);
+    });
   }, []);
 
   const filledPostings = postings.filter((p) => p.trim() !== "").length;
@@ -403,75 +436,105 @@ export default function Home() {
     if (!currentAudit) return;
 
     setIsWorking(true);
-    const { courses, prereqs, catalogSkills } = await loadCatalog();
-
-    // §11.3 — deterministic, in TypeScript. The model does not pick courses.
-    const combos = buildSchedules(
-      currentAudit,
-      prefs,
-      gapsRef.current,
-      bottlenecksRef.current,
-      courses,
-      prereqs,
-      catalogSkills,
-    );
-
-    // Every Fall 2026 section of every course that made a card, for the cart's
-    // section picker. Straight off the catalog rather than out of the builder:
-    // §11.3 caps `getEligibleCourses` at four sections per course and pre-filters
-    // by preferences, so the pool the student may choose from is deliberately
-    // wider than the pool the search enumerated over.
-    const onCards = new Set(combos.flatMap((c) => c.courses.map((row) => row.code)));
-    setAlternates(
-      Object.fromEntries(
-        courses
-          .filter((course) => onCards.has(normalizeCode(course.code)))
-          .map((course) => [
-            normalizeCode(course.code),
-            (course.sections ?? [])
-              .filter((s) => s.term === NEXT_TERM)
-              // Same ordering getEligibleCourses uses: earliest first,
-              // asynchronous last, CRN as the deterministic tiebreak.
-              .sort(
-                (a, b) =>
-                  Number(a.startTime === "") - Number(b.startTime === "") ||
-                  a.startTime.localeCompare(b.startTime) ||
-                  a.crn.localeCompare(b.crn),
-              ),
-          ]),
-      ),
-    );
-
-    let next: ScheduleOption[] = [];
     try {
-      const res = await fetch("/api/build-schedules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          combos,
-          gaps: gapsRef.current,
-          bottlenecks: bottlenecksRef.current,
-          audit: currentAudit,
-        }),
-      });
-      const json = (await res.json()) as {
-        options: ScheduleOption[];
-        degraded: boolean;
-      };
-      next = json.options ?? [];
-      if (json.degraded) console.info("[build-schedules] prose written locally");
-    } catch (err) {
-      console.error("[build-schedules] request failed", err);
-      next = [];
-    }
+      const { courses, prereqs, catalogSkills } = await loadCatalog();
 
-    setOptions(next);
-    setAppliedPreferences(prefs);
-    setSelectedId((current) =>
-      current && next.some((o) => o.id === current) ? current : null,
-    );
-    setIsWorking(false);
-    setStep("schedules");
+      // §11.3 — deterministic, in TypeScript. The model does not pick courses.
+      const combos = buildSchedules(
+        currentAudit,
+        prefs,
+        gapsRef.current,
+        bottlenecksRef.current,
+        courses,
+        prereqs,
+        catalogSkills,
+      );
+
+      // Every Fall 2026 section of every course that made a card, for the cart's
+      // section picker. Straight off the catalog rather than out of the builder:
+      // §11.3 caps `getEligibleCourses` at four sections per course and pre-filters
+      // by preferences, so the pool the student may choose from is deliberately
+      // wider than the pool the search enumerated over.
+      const onCards = new Set(combos.flatMap((c) => c.courses.map((row) => row.code)));
+      setAlternates(
+        Object.fromEntries(
+          courses
+            .filter((course) => onCards.has(normalizeCode(course.code)))
+            .map((course) => [
+              normalizeCode(course.code),
+              (course.sections ?? [])
+                .filter((s) => s.term === NEXT_TERM)
+                // Same ordering getEligibleCourses uses: earliest first,
+                // asynchronous last, CRN as the deterministic tiebreak.
+                .sort(
+                  (a, b) =>
+                    Number(a.startTime === "") - Number(b.startTime === "") ||
+                    a.startTime.localeCompare(b.startTime) ||
+                    a.crn.localeCompare(b.crn),
+                ),
+            ]),
+        ),
+      );
+
+      let next: ScheduleOption[];
+      try {
+        const res = await fetch("/api/build-schedules", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            combos,
+            gaps: gapsRef.current,
+            bottlenecks: bottlenecksRef.current,
+            audit: currentAudit,
+          }),
+        });
+        const json = (await res.json()) as {
+          options: ScheduleOption[];
+          degraded: boolean;
+        };
+        next = json.options?.length ? json.options : withLocalProse(combos);
+        if (json.degraded) console.info("[build-schedules] prose written locally");
+      } catch (err) {
+        // The route already degrades this way on a model failure (§19 deviation
+        // 4): it keeps the student's real combos and writes the prose locally,
+        // because showing a stranger's courses is worse than real courses with
+        // plain copy. When the request never REACHES the route, the same answer
+        // is still available and still better — `combos` above was computed
+        // deterministically, offline, moments ago. This used to set `[]` and
+        // throw it all away.
+        console.error("[build-schedules] request failed; writing prose locally", err);
+        next = withLocalProse(combos);
+      }
+
+      setOptions(next);
+      setAppliedPreferences(prefs);
+      setSelectedId((current) =>
+        current && next.some((o) => o.id === current) ? current : null,
+      );
+      setStep("schedules");
+    } finally {
+      // In the `finally`, not on the happy path. `loadCatalog` and
+      // `buildSchedules` above used to sit outside any try, so a throw from
+      // either left the spinner enabled with no toast and no way forward —
+      // every button on the screen disabled for the life of the page.
+      setIsWorking(false);
+    }
+  }
+
+  /**
+   * The only way screen 4 is entered. Both call sites are click handlers, which
+   * cannot await, so without this the rejected promise went nowhere. On failure
+   * we stay on the CURRENT screen: advancing to an empty screen 4 and then
+   * explaining it is strictly worse than not advancing (§0 rule 3), and the
+   * student's diagnosis is still intact behind them.
+   */
+  async function buildOrToast(prefs: Preferences) {
+    try {
+      await runBuildSchedules(prefs);
+    } catch (err) {
+      console.error("[build-schedules] could not build a schedule", err);
+      toast.error("Could not build a schedule — try again.");
+    }
   }
 
   return (
@@ -531,7 +594,7 @@ export default function Home() {
               prereqsOf={prereqsOf}
               delays={delays}
               ineligibleCritical={ineligible}
-              onContinue={() => runBuildSchedules(preferences)}
+              onContinue={() => void buildOrToast(preferences)}
               onBack={() => setStep("audit")}
               isWorking={isWorking}
             />
@@ -551,7 +614,7 @@ export default function Home() {
               alternatesOf={alternates}
               preferences={preferences}
               onPreferencesChange={setPreferences}
-              onRegenerate={() => runBuildSchedules(preferences)}
+              onRegenerate={() => void buildOrToast(preferences)}
               selectedId={selectedId}
               onSelect={setSelectedId}
               onBack={() => setStep("diagnosis")}

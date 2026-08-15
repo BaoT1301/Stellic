@@ -242,9 +242,17 @@ export function ScheduleOptions({
       {options.length === 0 ? (
         // §11.3 step 8 makes this unreachable, and §0 rule 3 says build it
         // anyway: a blank screen in the demo video is worse than any feature.
+        //
+        // It does NOT name a cause. This used to read "No conflict-free
+        // combination survived those preferences", which is a specific,
+        // checkable claim about the search — and the client also lands here
+        // when the request fails, when the body is malformed, and (before the
+        // toggles are ever touched) with all three preferences off. Blaming a
+        // preference the student did not set is §0 rule 7 in miniature. The
+        // toggles are named as something to TRY, not as the diagnosis.
         <p className="mt-8 rounded-md border border-rule bg-card px-5 py-8 text-center text-sm text-muted-foreground">
-          No conflict-free combination survived those preferences. Turn one off
-          and regenerate.
+          No schedule came back. Try regenerating, or turn off a preference
+          below if any are on.
         </p>
       ) : (
         // No `items-start`: the cards stretch to equal height so ScheduleCard's

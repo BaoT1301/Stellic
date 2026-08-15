@@ -15,18 +15,20 @@
 // Never returns 500 — §12. On any failure, the cached fixture with degraded:true.
 
 import { callStructured } from "@/lib/openai";
+import { fallbackProse } from "@/lib/prose";
 import { scheduleProseSchema, type ScheduleProse } from "@/lib/schemas";
+import type { Combo } from "@/lib/schedules";
 import type { Bottleneck, ScheduleOption, SkillGap, StudentAudit } from "@/lib/types";
 import fallbackResponse from "@/samples/fallback-response.json";
 
 export const runtime = "nodejs";
 
-// LOCAL wire type, deliberately not exported and deliberately not in
-// lib/types.ts — §12.3: "Do not add wire types to lib/types.ts", everything the
-// UI consumes is already frozen in §8. A Combo is exactly a ScheduleOption that
-// has not been given its prose yet, which is also why the merge below cannot
-// drift: `{ ...combo, label, why, tradeoff }` is total.
-type Combo = Omit<ScheduleOption, "label" | "why" | "tradeoff">;
+// `Combo` comes from lib/schedules.ts, which is where §11.3 builds one. It is
+// still NOT in lib/types.ts — §12.3: "Do not add wire types to lib/types.ts",
+// everything the UI consumes is already frozen in §8. A Combo is exactly a
+// ScheduleOption that has not been given its prose yet, which is also why the
+// merge below cannot drift: `{ ...combo, label, why, tradeoff }` is total. This
+// file used to declare a byte-identical copy of it.
 
 interface RequestBody {
   combos: Combo[];
@@ -70,27 +72,6 @@ Rules:
 - Never invent a fact about a course, a prerequisite, or a term it is offered.
 - Write to the student as "you". No greetings, no hedging, no exclamation marks.
 - Return one entry per schedule, keyed by its strategy.`;
-
-/** Deterministic copy for a strategy the model omitted. Never blank, never a
- *  placeholder — §0 rule 3, every feature degrades to something that renders. */
-function fallbackProse(combo: Combo): Pick<ScheduleOption, "label" | "why" | "tradeoff"> {
-  const codes = combo.courses.map((c) => c.code).join(", ");
-  const label =
-    combo.strategy === "max-coverage"
-      ? "Closes the most skill gaps"
-      : combo.strategy === "balanced"
-        ? "Clears the blockers at a lighter load"
-        : "Keeps the most courses open";
-  return {
-    label,
-    why: `${codes} — clears ${combo.bottlenecksCleared} blocked ${
-      combo.bottlenecksCleared === 1 ? "course" : "courses"
-    } and closes ${combo.gapsClosed} of ${combo.gapsTotal} open skills at ${combo.totalCredits} credits.`,
-    tradeoff: `Uses ${combo.slotsUsed} of your elective ${
-      combo.slotsUsed === 1 ? "slot" : "slots"
-    } and ${combo.totalCredits} credits this term.`,
-  };
-}
 
 function isCombo(value: unknown): value is Combo {
   const c = value as Combo | null;
