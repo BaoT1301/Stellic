@@ -188,7 +188,15 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  /* 4px, not 10px. Every derived step below is a multiple of this one value, so
+     the whole app tightens from here: lg lands at 4px, xl at 5.6px, and the
+     shadcn primitives that hardcode `rounded-[min(var(--radius-md),12px)]` fall
+     to 3.2px along with everything else. A 10px radius on a 1200px-wide card is
+     the single loudest "generated app" signal in a layout that is otherwise a
+     document — a registrar's forms have corners, not lozenges. Pill shapes
+     (`rounded-full`) are not derived from this and were removed at their call
+     sites instead. */
+  --radius: 0.25rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -301,39 +309,31 @@
   --color-missing-soft: var(--missing-soft);
 
   /* ---------------------------------------------------------------- *
-   * Elevation
+   * Elevation: there isn't any, deliberately.
    *
-   * Three levels, and every container in the app is on one of them:
-   * e1 for anything resting on the page, e2 for the thing under your
-   * cursor or the one card that matters most on a screen, e3 for the
-   * cart and the selected schedule.
+   * This replaces a three-level drop-shadow scale (--shadow-e1/e2/e3)
+   * that put every container in the app on a floating plane. It was
+   * carefully built — ink-tinted rather than grey, two layers per level
+   * — and it was still the wrong instrument. Twenty-one shadowed
+   * containers across four screens is the visual grammar of a SaaS
+   * dashboard, and CLAUDE.md §3 puts registrars and provosts in the
+   * judging room. They read documents.
    *
-   * This replaces `ring-1 ring-foreground/10` used as the ONLY
-   * elevation idiom on ten different container types, which is why the
-   * screens read as flat: a stat strip, a bottleneck card and the cart
-   * all sat at exactly the same depth despite being three different
-   * kinds of object.
+   * The replacement is a hairline: `border border-rule` on anything
+   * that needs a boundary. --rule (L 0.888) against --card (L 0.995)
+   * and --canvas (L 0.972) draws a clean edge on all four sides, which
+   * is more than the shadow did — it contributed nothing along the top
+   * edge, which is why every card needed a ring underneath it anyway.
    *
-   * Tinted with the ink hue rather than pure black. --foreground is
-   * oklch(0.21 0.022 265), a blue-black, and a neutral-grey shadow
-   * under a blue-black ink on warm paper reads as dirt. Two layers per
-   * level: a tight contact shadow that draws the edge, and a wide
-   * ambient one that does the lifting.
+   * Hierarchy that used to be carried by depth is now carried by the
+   * things that actually mean something: border COLOUR (urgency on a
+   * bottleneck card, brand on the selected schedule and the cart) and
+   * the 3px left accent bar. Both survive greyscale printing, which a
+   * drop shadow does not.
    *
-   * Keep a hairline ring under these. Cards are --card (L 0.995) on
-   * --canvas (L 0.972) and the shadow contributes nothing along the top
-   * edge, so without a ring the card has no boundary where it needs one
-   * most.
+   * If you are about to add a shadow: don't. Give it a border, or give
+   * it a colour that means something.
    * ---------------------------------------------------------------- */
-  --shadow-e1:
-    0 1px 2px -1px oklch(0.21 0.022 265 / 0.09),
-    0 1px 3px oklch(0.21 0.022 265 / 0.05);
-  --shadow-e2:
-    0 2px 4px -2px oklch(0.21 0.022 265 / 0.1),
-    0 8px 18px -6px oklch(0.21 0.022 265 / 0.09);
-  --shadow-e3:
-    0 4px 8px -4px oklch(0.21 0.022 265 / 0.12),
-    0 18px 36px -10px oklch(0.21 0.022 265 / 0.11);
 }
 
 :root {

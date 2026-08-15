@@ -162,15 +162,20 @@ export function DiagnosisScreen({
         a tool screen, not a landing page, so it opens at 36/44px rather than the
         52px the entry screen uses.
       */}
+      {/* See the copy rule in JobPostingInput. The old headline — "Not every box
+          on your audit weighs the same." — was the best line of the four and
+          still the wrong thing at 36px on a screen whose whole job is to show
+          you which boxes those are. It belongs in the write-up (§16 lists it),
+          not above the data that proves it. */}
       <header className="max-w-3xl">
         <h1 className="text-3xl text-balance sm:text-4xl">
-          Not every box on your audit weighs the same.
+          Your {NEXT_TERM_LABEL} diagnosis
         </h1>
       </header>
 
       {/* flex-col + divide-y on mobile, flex-row + divide-x above sm. Using
           flex-wrap here instead would put a stray rule on the wrapped row. */}
-      <dl className="mt-8 flex flex-col divide-y divide-rule overflow-hidden rounded-xl bg-card shadow-e1 ring-1 ring-foreground/[0.06] sm:flex-row sm:divide-x sm:divide-y-0">
+      <dl className="mt-8 flex flex-col divide-y divide-rule overflow-hidden rounded-md border border-rule bg-card sm:flex-row sm:divide-x sm:divide-y-0">
         <Fact label="Program" value={audit.major} />
         <Fact
           label="Credits"
@@ -224,7 +229,7 @@ export function DiagnosisScreen({
         </Group>
 
         {ineligibleCritical.length > 0 && (
-          <ul className="mt-4 space-y-1.5 rounded-lg bg-critical-soft px-4 py-3 text-sm text-critical">
+          <ul className="mt-4 space-y-1.5 rounded-sm border border-critical/25 bg-critical-soft px-4 py-3 text-sm text-critical">
             {ineligibleCritical.map((entry) => (
               <li key={entry.code}>
                 <span className="font-mono font-semibold">{entry.code}</span>{" "}
@@ -455,7 +460,7 @@ function DelayGroup({
           {codes.map((code) => (
             <span
               key={code}
-              className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground"
+              className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground"
             >
               {code}
             </span>

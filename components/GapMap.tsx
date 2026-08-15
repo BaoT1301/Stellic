@@ -58,7 +58,7 @@ export function GapMap({ gaps, className }: GapMapProps) {
         chips below are visibly in descending count order, and every state the
         sentence described is already a badge on the chip that has it.
       */}
-      <dl className="mt-5 flex items-stretch divide-x divide-rule overflow-hidden rounded-xl bg-card shadow-e1 ring-1 ring-foreground/[0.06] sm:max-w-md">
+      <dl className="mt-5 flex items-stretch divide-x divide-rule overflow-hidden rounded-md border border-rule bg-card sm:max-w-md">
         <Stat label="Asked for" value={gaps.length} />
         <Stat label="Open" value={missing.length} tone="missing" />
         <Stat label="Covered" value={covered.length} tone="covered" />
@@ -123,14 +123,20 @@ function Stat({
 }
 
 /**
- * At full width the chips flow in columns instead of stacking. A fifteen-gap
- * list was a fifteen-row tower when this lived in a 0.9fr column; two across, it
- * is the shape of the thing it describes — a set, not a queue.
+ * At full width the rows flow in columns instead of stacking. A fifteen-gap list
+ * was a fifteen-row tower when this lived in a 0.9fr column; two across, it is
+ * the shape of the thing it describes — a set, not a queue.
  *
  * TWO columns and not three. Three fits, and it truncated the DWA titles down to
- * "Analyze data to inf…" — a set of chips nobody can read is worse than a taller
- * list, and §9.3 forbids shortening these strings by editing them, so the column
- * has to be wide enough for CSS to do it honestly.
+ * "Analyze data to inf…" — a set nobody can read is worse than a taller list,
+ * and §9.3 forbids shortening these strings by editing them, so the column has
+ * to be wide enough for CSS to do it honestly.
+ *
+ * `gap-px` over a --rule background is what makes this a ruled table rather than
+ * a scatter of tiles: one hairline between every pair of cells, horizontally and
+ * vertically, with no doubled line at the edges and no `last:` rule that a
+ * two-column grid would get wrong anyway. Two columns of ruled rows is the
+ * layout a course-demand report has had since before it was on a screen.
  */
 function Group({
   title,
@@ -150,7 +156,7 @@ function Group({
         <span
           aria-hidden
           className={cn(
-            "size-2 shrink-0 translate-y-[-1px] rounded-full",
+            "size-2 shrink-0 translate-y-[-1px]",
             tone === "missing" ? "bg-missing" : "bg-covered",
           )}
         />
@@ -159,20 +165,35 @@ function Group({
           {count}
         </span>
       </div>
-      <ul className="mt-3 grid gap-2 lg:grid-cols-2">{children}</ul>
+      <ul className="mt-3 grid gap-px overflow-hidden rounded-md border border-rule bg-rule lg:grid-cols-2">
+        {children}
+      </ul>
     </div>
   );
 }
 
+/**
+ * One demanded skill, as a ruled table row.
+ *
+ * This was a `rounded-full` pill on a pastel fill, with a filled circular
+ * counter on the end — fifteen of them wrapping in a two-column cloud. That
+ * shape is the single most recognisable component of a generated UI, and it was
+ * also doing the data a disservice: a pill says "tag, one of many, unordered",
+ * where this list is sorted by how many of the student's postings asked for the
+ * skill and the count is the whole point.
+ *
+ * The two states now separate on a 2px left edge and the text colour rather than
+ * on a wash of background tint. Colour still is not carrying the distinction
+ * alone — the badge, its icon and its screen-reader text do that (WCAG 1.4.1),
+ * which is why the badge stays at every breakpoint.
+ */
 function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
   const detail = tone === "covered" ? gap.coveredBy : gap.closableBy;
   return (
     <li
       className={cn(
-        "flex min-w-0 items-center gap-2.5 rounded-full border py-1.5 pr-2 pl-3.5",
-        tone === "missing"
-          ? "border-missing/25 bg-missing-soft"
-          : "border-covered/25 bg-covered-soft",
+        "flex min-w-0 items-center gap-2.5 border-l-2 bg-card py-2 pr-2.5 pl-3",
+        tone === "missing" ? "border-l-missing" : "border-l-covered",
       )}
     >
       <span
@@ -194,10 +215,10 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
       {detail.length > 0 ? (
         <span
           className={cn(
-            "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-xs",
-            tone === "missing"
-              ? "bg-card text-missing"
-              : "bg-card/70 text-covered",
+            // bg-muted, not bg-card: these used to sit on a tinted pill and are
+            // now on the card itself, where a card-coloured fill is invisible.
+            "inline-flex shrink-0 items-center gap-1 rounded-sm bg-muted px-2 py-0.5 font-mono text-xs",
+            tone === "missing" ? "text-missing" : "text-covered",
           )}
           title={
             tone === "covered"
@@ -223,7 +244,7 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
       ) : (
         tone === "missing" && (
           <span
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-card px-2 py-0.5 text-xs text-muted-foreground"
+            className="inline-flex shrink-0 items-center gap-1 rounded-sm bg-muted px-2 py-0.5 text-xs text-muted-foreground"
             title="No course you can register for next term teaches this — it sits behind a prerequisite you haven't cleared."
           >
             <Lock className="size-2.5" aria-hidden />
@@ -239,7 +260,7 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
 
       <span
         className={cn(
-          "flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
+          "flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-semibold tabular-nums",
           tone === "missing"
             ? "bg-missing text-white"
             : "bg-covered text-white",

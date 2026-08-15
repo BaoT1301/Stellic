@@ -9,6 +9,7 @@ import { ScheduleCard, weekBlocksFor } from "@/components/ScheduleCard";
 import { weekBounds } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
 import { rmpUrl } from "@/lib/rmp";
+import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Preferences, ScheduleOption, Section } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -194,9 +195,14 @@ export function ScheduleOptions({
     <section className="animate-in fade-in duration-500">
       {/* No step eyebrow — the Stepper above says "Schedule" and the site header
           says "Planning Fall 2026". A tool screen, so 36/44px, not 52. */}
+      {/* See the copy rule in JobPostingInput. The count is generated, not
+          written: §11.3 step 7 renders FEWER cards rather than duplicates, so a
+          hardcoded "Three" was also a claim the builder is allowed to break. */}
       <header className="max-w-3xl">
         <h1 className="text-3xl text-balance sm:text-4xl">
-          Three ways to spend next term.
+          {options.length <= 1
+            ? `Your ${NEXT_TERM_LABEL} schedule`
+            : `${options.length} ways to build ${NEXT_TERM_LABEL}`}
         </h1>
       </header>
 
@@ -236,7 +242,7 @@ export function ScheduleOptions({
       {options.length === 0 ? (
         // §11.3 step 8 makes this unreachable, and §0 rule 3 says build it
         // anyway: a blank screen in the demo video is worse than any feature.
-        <p className="mt-8 rounded-xl bg-card px-5 py-8 text-center text-sm text-muted-foreground shadow-e1 ring-1 ring-foreground/[0.06]">
+        <p className="mt-8 rounded-md border border-rule bg-card px-5 py-8 text-center text-sm text-muted-foreground">
           No conflict-free combination survived those preferences. Turn one off
           and regenerate.
         </p>
@@ -302,7 +308,7 @@ export function ScheduleOptions({
           />
         ) : (
           options.length > 0 && (
-            <p className="rounded-xl border border-dashed border-foreground/20 px-5 py-6 text-center text-sm text-muted-foreground">
+            <p className="rounded-md border border-dashed border-foreground/25 px-5 py-6 text-center text-sm text-muted-foreground">
               Pick one to see the CRNs you would paste into registration.
             </p>
           )

@@ -633,8 +633,11 @@ async function auditFromManual(entry: ManualAuditEntry): Promise<StudentAudit> {
 }
 
 function SiteHeader() {
+  // Opaque, not translucent-and-blurred. A frosted-glass header over scrolling
+  // content is the other half of the same idiom the drop shadows were: it says
+  // "app chrome" where this wants to say "page".
   return (
-    <header className="sticky top-0 z-20 border-b border-rule bg-canvas/85 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-rule bg-canvas">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-6">
         <div className="flex items-center gap-2.5">
           <ChainMark />
@@ -704,14 +707,14 @@ function Stepper({
                 onClick={() => onJump(s.id)}
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full py-1 pr-3 pl-1 transition-colors",
+                  "inline-flex items-center gap-2 rounded-sm py-1 pr-3 pl-1 transition-colors",
                   reachable && !active && "hover:bg-muted",
                   !reachable && "cursor-default",
                 )}
               >
                 <span
                   className={cn(
-                    "flex size-5 items-center justify-center rounded-full text-xs font-bold tabular-nums",
+                    "flex size-5 items-center justify-center rounded-sm text-xs font-bold tabular-nums",
                     active
                       ? "bg-foreground text-background"
                       : done

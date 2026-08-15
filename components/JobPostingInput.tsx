@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Sparkles, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 
 import { Sep } from "@/components/Sep";
 import { Button } from "@/components/ui/button";
@@ -54,9 +54,24 @@ export function JobPostingInput({
           was the screen's first line of redundancy — and it was repeated on all
           four states. This is the entry screen and keeps a hero headline; the
           two tool screens (3 and 4) do not. */}
+      {/*
+        COPY RULE for the four screen headlines, and the reason this one changed.
+
+        The old set — "Paste the job you want in two years.", "Now the boring
+        half.", "Not every box on your audit weighs the same.", "Three ways to
+        spend next term." — were aphorisms: short declarative fragments, each
+        one a small reveal. Four of them in sequence is a recognisable register,
+        and it is the register of generated marketing copy. It also fights the
+        product: this is an instrument a student uses once a term, and every
+        headline was selling rather than saying where you are.
+
+        The rule now is that a headline states the task in the student's own
+        words. The persuasive lines were not deleted — they moved into the
+        ledes, where a sentence is allowed to be a sentence.
+      */}
       <header className="max-w-3xl">
         <h1 className="text-4xl text-balance sm:text-5xl">
-          Paste the job you want in two years.
+          Which jobs are you aiming for?
         </h1>
         {/*
           ONE lede. This was two paragraphs saying the same thing at the same
@@ -65,20 +80,24 @@ export function JobPostingInput({
           the reason the second paragraph existed.
         */}
         <p className="mt-5 text-lg text-muted-foreground text-pretty">
-          Not the one you can get today. You get three Fall 2026 schedules built
-          from real sections, with the CRNs you paste into registration.
+          Paste up to three postings — the job you want in two years, not the one
+          you could get today. You get three Fall 2026 schedules built from real
+          sections, with the CRNs you paste into registration.
         </p>
       </header>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
+        {/* No icon. This button carried a <Sparkles/>, which is the most
+            recognisable AI-product signifier there is — and it is pointing at
+            two committed .txt files, which is the least magical thing in the
+            build. The label already says what it does. */}
         <Button size="xl" onClick={onLoadSamples} disabled={isWorking}>
-          <Sparkles aria-hidden />
           Load sample postings
         </Button>
         {/* "Three" was false — SAMPLE_POSTING_URLS in app/page.tsx has two, and
             the toast already said "Two sample postings loaded". */}
         <p className="text-sm text-muted-foreground">
-          Two real listings. Fastest way in.
+          Two real listings, if you don&rsquo;t have one to hand.
         </p>
       </div>
 
@@ -109,18 +128,17 @@ export function JobPostingInput({
         {SLOT_HINTS.map((slot, i) => {
           const value = postings[i] ?? "";
           const words = wordCount(value);
-          // Three elevation states, and they are the whole feedback loop on this
-          // screen: resting, being typed into, and holding something. Previously
-          // every box sat flat against the paper until it had content, at which
-          // point it gained a 1px ring you had to look for. focus-within is what
-          // makes the box you are typing in the one object that is off the page.
+          // Three states, and they are the whole feedback loop on this screen:
+          // resting, being typed into, and holding something. These used to be
+          // three drop-shadow levels; they are now three border weights, which
+          // says the same thing on a flat page and survives a greyscale print.
           return (
             <div
               key={slot.label}
               className={cn(
-                "flex flex-col rounded-xl bg-card ring-1 ring-foreground/[0.06] transition-shadow duration-200",
-                "focus-within:shadow-e2",
-                words > 0 ? "shadow-e2" : "shadow-e1",
+                "flex flex-col rounded-md border bg-card transition-colors duration-200",
+                "focus-within:border-brand",
+                words > 0 ? "border-foreground/30" : "border-rule",
               )}
             >
               <div className="flex items-center justify-between gap-2 border-b border-rule px-4 py-3">

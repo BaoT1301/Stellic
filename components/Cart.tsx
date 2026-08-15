@@ -89,8 +89,13 @@ export function Cart({
     }
   }
 
+  // The cart was the one shadow-e3 object in the app — the top of a three-level
+  // elevation scale that no longer exists. It does not need depth to stand out:
+  // it is the only brand-bordered block on the screen, it has a tinted header,
+  // and it appears where nothing was. The slide-in went with the shadow; a fade
+  // is enough to mark that it is new.
   return (
-    <aside className="overflow-hidden rounded-xl bg-card shadow-e3 ring-2 ring-brand/25 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <aside className="overflow-hidden rounded-md border border-brand bg-card animate-in fade-in duration-300">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-rule bg-brand-soft px-5 py-4">
         <div>
           <p className="eyebrow text-brand">Your cart</p>
@@ -361,7 +366,7 @@ function SectionPicker({
                 onClick={() => onPick(section.crn)}
                 aria-current={isCurrent ? "true" : undefined}
                 className={cn(
-                  "flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors",
+                  "flex w-full items-baseline gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors",
                   isCurrent && "bg-brand-soft text-brand",
                   !isCurrent && clash === undefined && "hover:bg-muted",
                   clash !== undefined && "cursor-not-allowed text-muted-foreground/70",

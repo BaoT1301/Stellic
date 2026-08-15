@@ -163,7 +163,7 @@ export function WeekGrid({
               {variant === "compact" ? day.key : day.label}
             </p>
             <div
-              className="relative overflow-hidden rounded bg-canvas ring-1 ring-foreground/[0.06]"
+              className="relative overflow-hidden rounded-sm border border-rule bg-canvas"
               style={{
                 height,
                 // Hour rules, as a gradient rather than 11 more DOM nodes.

@@ -257,12 +257,21 @@ export function ScheduleCard({
   return (
     <article
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl bg-card transition-shadow duration-200",
+        "relative flex flex-col overflow-hidden rounded-md border bg-card transition-colors duration-200",
+        // Selection used to be a two-level shadow jump plus a 2px ring. It is
+        // now the border colour plus the 3px accent bar below — the same idiom
+        // BottleneckCard uses for urgency, so the two screens mark "this one
+        // matters" the same way. Border WIDTH is deliberately not the signal: a
+        // 1px-to-2px change reflows a grid of equal-height cards by a pixel.
         selected
-          ? "shadow-e3 ring-2 ring-brand"
-          : "shadow-e1 ring-1 ring-foreground/[0.06] hover:shadow-e2",
+          ? "border-brand"
+          : "border-rule hover:border-foreground/25",
       )}
     >
+      {selected && (
+        <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-brand" />
+      )}
+
       <header className="border-b border-rule px-5 pt-4 pb-4">
         <div className="flex items-center justify-between gap-3">
           <p className="eyebrow flex min-w-0 items-center gap-x-2 text-muted-foreground">
@@ -271,7 +280,7 @@ export function ScheduleCard({
             <span className="truncate">{STRATEGY_LABEL[option.strategy]}</span>
           </p>
           {selected && (
-            <span className="eyebrow inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-1 text-brand">
+            <span className="eyebrow inline-flex items-center gap-1 rounded-sm bg-brand-soft px-2 py-1 text-brand">
               <Check className="size-3" aria-hidden />
               In cart
             </span>
@@ -343,7 +352,7 @@ export function ScheduleCard({
                     {tag && (
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-bold tracking-wide uppercase",
+                          "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-bold tracking-wide uppercase",
                           tag.className,
                         )}
                       >
@@ -548,7 +557,7 @@ function WhyThis({
         />
       </summary>
 
-      <div className="mt-2 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs ring-1 ring-foreground/[0.07]">
+      <div className="mt-2 space-y-2 rounded-sm border border-rule bg-canvas px-3 py-2.5 text-xs">
         <p className="text-foreground">
           {roleSentence(course, role, dependentsOf)}
         </p>

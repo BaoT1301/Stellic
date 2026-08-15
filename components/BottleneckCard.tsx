@@ -18,14 +18,14 @@ const URGENCY = {
     Icon: TriangleAlert,
     bar: "bg-critical",
     chip: "bg-critical-soft text-critical",
-    ring: "ring-critical/25",
+    border: "border-critical/30",
   },
   soon: {
     label: "Take this term or next",
     Icon: CircleAlert,
     bar: "bg-soon",
     chip: "bg-soon-soft text-soon",
-    ring: "ring-soon/25",
+    border: "border-soon/30",
   },
   /**
    * "Still required", not "Safe to delay". The old label read as permission to
@@ -38,7 +38,7 @@ const URGENCY = {
     Icon: Check,
     bar: "bg-calm/35",
     chip: "bg-calm-soft text-calm",
-    ring: "ring-foreground/10",
+    border: "border-rule",
   },
 } as const;
 
@@ -109,15 +109,15 @@ export function BottleneckCard({
     : style.label;
   const chipClass = isBlocked ? "bg-muted text-foreground" : style.chip;
 
-  // The hero — the one card carrying the prereq chain — sits a level higher than
-  // the rest. Everything on this screen used to be at exactly the same depth,
-  // under a headline saying not every box weighs the same.
+  // The hero — the one card carrying the prereq chain — used to be lifted a
+  // drop-shadow level above the rest. It no longer needs to be: it is the only
+  // card on the screen carrying an SVG, it spans both columns, and it is first.
+  // Depth was the least of the four things marking it.
   return (
     <article
       className={cn(
-        "relative overflow-hidden rounded-xl bg-card ring-1",
-        showChain ? "shadow-e2" : "shadow-e1",
-        style.ring,
+        "relative overflow-hidden rounded-md border bg-card",
+        style.border,
         className,
       )}
     >
@@ -130,7 +130,7 @@ export function BottleneckCard({
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <span
             className={cn(
-              "eyebrow inline-flex items-center gap-1.5 rounded-full px-2 py-1",
+              "eyebrow inline-flex items-center gap-1.5 rounded-sm px-2 py-1",
               chipClass,
             )}
           >
@@ -168,7 +168,7 @@ export function BottleneckCard({
         </p>
 
         {showChain && bottleneck.chainDepth > 0 && (
-          <div className="mt-5 rounded-lg bg-canvas p-4 ring-1 ring-foreground/[0.07]">
+          <div className="mt-5 rounded-sm border border-rule bg-canvas p-4">
             <PrereqChain
               bottleneck={bottleneck}
               titles={titles}
@@ -194,7 +194,7 @@ export function BottleneckCard({
               <span
                 key={code}
                 title={titles?.[code] ?? code}
-                className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground"
+                className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground"
               >
                 {code}
               </span>
@@ -253,7 +253,7 @@ function DelayCost({
         />
       </summary>
 
-      <div className="mt-1 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs ring-1 ring-foreground/[0.07]">
+      <div className="mt-1 space-y-2 rounded-sm border border-rule bg-canvas px-3 py-2.5 text-xs">
         {/* "Taken next term" was asserted unconditionally, which is false for a
             course with an unmet prerequisite — the soonest it can be taken is
             termsUntilEligible terms out. Both branches state the same
@@ -335,7 +335,7 @@ function Codes({
             key={code}
             title={titles?.[code] ?? code}
             className={cn(
-              "rounded-md px-1.5 py-0.5 font-mono",
+              "rounded-sm px-1.5 py-0.5 font-mono",
               tone === "critical"
                 ? "bg-critical-soft text-critical"
                 : "bg-muted text-foreground",

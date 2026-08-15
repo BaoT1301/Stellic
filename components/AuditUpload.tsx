@@ -90,8 +90,11 @@ export function AuditUpload({
     <section className="animate-in fade-in duration-500">
       {/* No step eyebrow — the Stepper above already says "Your audit". */}
       <header className="max-w-3xl">
+        {/* See the copy rule in JobPostingInput. "Now the boring half." was a
+            joke at the expense of the one screen where the student has to go
+            find a file. */}
         <h1 className="text-4xl text-balance sm:text-5xl">
-          Now the boring half.
+          Upload your degree audit
         </h1>
         {/*
           This paragraph used to end "nothing here leaves this session", which
@@ -124,13 +127,13 @@ export function AuditUpload({
             accept(e.dataTransfer.files[0]);
           }}
           className={cn(
-            "relative flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-16 text-center transition-all duration-200",
+            "relative flex flex-col items-center justify-center rounded-md border border-dashed px-6 py-16 text-center transition-colors duration-200",
             dragging
-              ? "border-brand bg-brand-soft shadow-e2"
-              : "border-foreground/20 bg-card shadow-e1 hover:border-foreground/35 hover:shadow-e2",
+              ? "border-brand bg-brand-soft"
+              : "border-foreground/25 bg-card hover:border-foreground/45",
           )}
         >
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+          <div className="flex size-12 items-center justify-center rounded-md bg-muted">
             <Upload className="size-5 text-muted-foreground" aria-hidden />
           </div>
           <p className="mt-5 text-lg font-semibold">
@@ -175,7 +178,7 @@ export function AuditUpload({
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl bg-card p-5 shadow-e1 ring-1 ring-foreground/[0.06]">
+          <div className="rounded-md border border-rule bg-card p-5">
             <div className="flex items-start gap-3">
               <FileText className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
               <div>
@@ -209,7 +212,7 @@ export function AuditUpload({
             </div>
           </div>
 
-          <div className="rounded-xl bg-card shadow-e1 ring-1 ring-foreground/[0.06]">
+          <div className="rounded-md border border-rule bg-card">
             <button
               type="button"
               onClick={() => setManualOpen((v) => !v)}
@@ -340,7 +343,7 @@ function ManualEntry({
           {courses.map((c) => (
             <span
               key={c}
-              className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 font-mono text-xs"
+              className="inline-flex items-center gap-1 rounded-sm bg-muted px-2 py-1 font-mono text-xs"
             >
               {c}
               <button
