@@ -235,13 +235,24 @@ async function walk(browser: Browser, vp: Viewport) {
 }
 
 /**
- * Try each installed-browser channel in turn, keep the first that launches.
- * "msedge" only resolves on a machine with Edge installed (the one this was
- * written on); "chrome" and "chromium" cover macOS and most Linux setups.
- * Playwright's own bundled Chromium is the last resort so this never hard-fails
- * just because none of the three named channels happen to be present.
+ * CHROME_PATH first, then each installed-browser channel in turn, keeping the
+ * first that launches. "msedge" only resolves on a machine with Edge installed
+ * (the one this was written on); "chrome" and "chromium" cover macOS and most
+ * Linux setups. Playwright's own bundled Chromium is the last resort so this
+ * never hard-fails just because none of the three named channels are present.
+ *
+ * CHROME_PATH is the same escape hatch the three puppeteer scripts already
+ * take, and for the same reason: a channel lookup searches well-known paths and
+ * cannot find a nix-store chromium, which is what this project's devshell
+ * provides. Without it the last resort is not a resort either — the bundled
+ * download is what `npx playwright install` fetches, and this repo never runs
+ * that.
  */
 async function launchBrowser(): Promise<Browser> {
+  const explicit = process.env.CHROME_PATH;
+  if (explicit) {
+    return chromium.launch({ executablePath: explicit, headless: true });
+  }
   const channels = ["msedge", "chrome", "chromium"] as const;
   for (const channel of channels) {
     try {
