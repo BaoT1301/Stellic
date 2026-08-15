@@ -24,6 +24,12 @@ import fallbackResponse from "@/samples/fallback-response.json";
 
 export const runtime = "nodejs";
 
+// The worst case in the app: TWO sequential gpt-4o calls (the empty-set retry
+// below), each over a ~1,100-name allowed list. See app/api/parse-audit for why
+// a platform timeout cannot be caught. Both calls pass `maxRetries: 0` so the
+// pair's worst case is 2 × 20s rather than 4 × 20s, which fits under this.
+export const maxDuration = 60;
+
 /** What this route puts on the wire. Not a new contract — it is the front half
  *  of §8's SkillGap, which lib/gaps.ts completes client-side. */
 type DemandedSkill = Pick<SkillGap, "skillId" | "skillName" | "demandCount"> & {
@@ -176,12 +182,19 @@ export async function POST(req: Request): Promise<Response> {
     const prompt = `${user}\n\nReturn the DWAs these postings ask for, using the zero-based POSTING INDEX values shown above.`;
     const validIndices = new Set(kept.map((p) => p.index));
 
+    // `maxRetries: 0` on both calls in this route — see the maxDuration note at
+    // the top. This is the only route that can make two of them in a row, so it
+    // is the only one that has to spend its transport-retry budget on fitting
+    // inside the platform's limit instead.
+    const budget = { maxRetries: 0 } as const;
+
     let skills = harvest(
       await callStructured<ExtractedSkills>(
         SYSTEM,
         prompt,
         extractedSkillsSchema,
         "extracted_skills",
+        budget,
       ),
       validIndices,
     );
@@ -210,6 +223,7 @@ export async function POST(req: Request): Promise<Response> {
           `${prompt}\n\nA previous attempt returned no skills at all. For postings like these that is almost certainly wrong — the allowed list above contains software, data and analysis activities. Re-read the postings and return every allowed activity that genuinely matches. Do NOT lower your standard for a match and do NOT return anything from an unrelated domain; if the honest answer really is none, an empty list is still acceptable.`,
           extractedSkillsSchema,
           "extracted_skills",
+          budget,
         ),
         validIndices,
       );

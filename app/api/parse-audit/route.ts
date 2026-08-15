@@ -18,6 +18,14 @@ import fallbackResponse from "@/samples/fallback-response.json";
 
 export const runtime = "nodejs";
 
+// A platform timeout is a 504 raised OUTSIDE this handler, so the try/catch
+// below — and therefore the whole "never returns 500, always the fixture"
+// guarantee at the top of this file — does not cover it. Vercel's default for a
+// Node function is well under one PDF parse plus one gpt-4o call on a cold
+// lambda. 60 is the ceiling on every Vercel plan without Fluid compute, and
+// lib/openai.ts's own budget (20s × 2 attempts) is sized to fit inside it.
+export const maxDuration = 60;
+
 // The JSON import types `status` as `string`, not the frozen literal union, so
 // one cast at the boundary buys a properly typed fixture everywhere below.
 const FALLBACK = fallbackResponse["parse-audit"] as unknown as {

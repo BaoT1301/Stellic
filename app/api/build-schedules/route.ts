@@ -23,6 +23,11 @@ import fallbackResponse from "@/samples/fallback-response.json";
 
 export const runtime = "nodejs";
 
+// See the note in app/api/parse-audit/route.ts: a platform timeout is a 504
+// raised outside the handler, which the catch below cannot convert into a
+// degraded response. One gpt-4o call, bounded by lib/openai.ts at 20s × 2.
+export const maxDuration = 60;
+
 // `Combo` comes from lib/schedules.ts, which is where §11.3 builds one. It is
 // still NOT in lib/types.ts — §12.3: "Do not add wire types to lib/types.ts",
 // everything the UI consumes is already frozen in §8. A Combo is exactly a

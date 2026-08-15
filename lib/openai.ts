@@ -16,6 +16,31 @@ function getClient(): OpenAI {
 }
 
 /**
+ * How long one `callStructured` may take, at worst — `timeoutMs × (maxRetries + 1)`.
+ *
+ * This exists because the SDK's own defaults are a 10-minute timeout and 2
+ * retries, i.e. a worst case of half an hour. That is not a timeout, it is the
+ * absence of one, and it outlives every `maxDuration` in this app. A request
+ * that hangs past the platform's limit is killed OUTSIDE the handler, so it
+ * surfaces as a raw 504 that the route's try/catch structurally cannot see —
+ * which is exactly the failure mode §12's "never returns 500" guarantee was
+ * written to prevent. Bounding it here means a hung call throws, reaches the
+ * catch, and degrades like every other failure.
+ *
+ * Defaults are sized against `maxDuration = 60` on every route: 20s × 2
+ * attempts = 40s worst case, leaving 20s for the PDF parse, the body, and the
+ * JSON. `/api/extract-skills` can issue TWO sequential calls, so it passes
+ * `maxRetries: 0` to keep its own worst case at 40s rather than 80s.
+ */
+export interface CallBudget {
+  timeoutMs?: number;
+  maxRetries?: number;
+}
+
+const DEFAULT_TIMEOUT_MS = 20_000;
+const DEFAULT_MAX_RETRIES = 1;
+
+/**
  * DO NOT SET `temperature: 0` HERE. It is the obvious move on an extraction
  * task and it was measured to make /api/extract-skills materially WORSE.
  *
@@ -44,16 +69,22 @@ export async function callStructured<T>(
   user: string,
   schema: ZodType<T>,
   schemaName: string,
+  opts: CallBudget = {},
 ): Promise<T> {
-  const res = await getClient().chat.completions.create({
-    // Pinned. `gpt-4o` is a floating alias and can move under us mid-build.
-    model: "gpt-4o-2024-11-20",
-    messages: [
-      { role: "system", content: system },
-      { role: "user", content: user },
-    ],
-    response_format: zodResponseFormat(schema, schemaName),
-  });
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, maxRetries = DEFAULT_MAX_RETRIES } = opts;
+
+  const res = await getClient().chat.completions.create(
+    {
+      // Pinned. `gpt-4o` is a floating alias and can move under us mid-build.
+      model: "gpt-4o-2024-11-20",
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+      response_format: zodResponseFormat(schema, schemaName),
+    },
+    { timeout: timeoutMs, maxRetries },
+  );
 
   // No `!` non-null assertion here on purpose — it hid the refusal case from
   // TypeScript. JSON.parse(null) does not throw, it returns null, so the old
