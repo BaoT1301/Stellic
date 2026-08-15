@@ -1573,7 +1573,7 @@ yields 3 / 3 / — / 2. Both are correct for their own input; do not "fix" one
 against the other.
 
 Verified after: `tsc --noEmit` clean · `next build` clean · eslint at its
-documented baseline (three pre-existing unused-var warnings, none in touched
+documented baseline (two pre-existing unused-var warnings, none in touched
 code) · `smoke-pipeline` **ALL CHECKS PASSED** with six new §11.1 assertions
 (`blockedBy` ⟺ `termsUntilEligible > 0`, no blocker is an already-taken course,
 every actionable row is registrable next term, a blocked row never outranks what
@@ -1584,6 +1584,197 @@ CLEAN · `check-mobile` at its documented baseline (the `sr-only` file input) ·
 all screens re-shot with no page errors · schedule cards unchanged, because
 `mustTake` always filtered criticals through `eligible` — the builder was never
 wrong, only the label was.
+
+### The restyle branch, and what an audit found behind it (Aug 15)
+
+Four commits landed on `restyle/flatten-ui` before this entry existed. Two are
+presentational and two are correctness, and the split is worth recording because
+the branch name only advertises the first kind.
+
+1. **`d1e321c` — the four things that made the UI read as generated.** The brief
+   was "get rid of all glow effects and gradients"; there were none — no
+   `bg-gradient-*`, no coloured `shadow-[0_0_…]`, no `drop-shadow`, no keyframes.
+   The complaint was real and the named cause was not. What produced it: the
+   three-level **elevation scale** under 21 containers across four screens
+   (deleted — `--shadow-e1/e2/e3` are gone and every container carries `border
+   border-rule`, which draws all four edges where the shadow contributed nothing
+   along the top); **`--radius` 0.625rem → 0.25rem**, one token that tightens the
+   whole scale including the shadcn primitives hardcoding
+   `rounded-[min(var(--radius-md),12px)]`; the gap map's **15 rounded-full pills
+   on pastel fills**, which is both the most recognisable generated-UI component
+   and wrong for data sorted by demand count (a pill reads as an unordered tag);
+   and **voice** — the `<Sparkles/>` on the sample-postings button, pointing at
+   two committed `.txt` files, plus four consecutive aphoristic headlines.
+   > This reverses the elevation scale introduced one entry above. Both
+   > decisions were argued from the same premise — §3 puts registrars and
+   > provosts in the room — and the second one is right: **they read documents.**
+   > The note in `globals.css` now says so at the token that used to exist.
+2. **`13015db` — the gap map painted a grey block into the unfilled cell.** A
+   regression from `d1e321c`, caught by rendering it. The new ruled table drew
+   hairlines as `gap-px` over a `--rule` background, which is correct only when
+   the row count is even; both groups on the sample audit are odd, so the last
+   slot of the two-column grid had no cell and the container tint showed through
+   as a solid rectangle, next to the real data. Per-cell borders now, with
+   per-SIDE colours (`border-t-rule`) rather than the `border-rule` shorthand,
+   which sets all four and would leave the 2px covered/missing left edge relying
+   on stylesheet order.
+3. **`aeeee0d` — screen 1 promised three schedules and the builder may return
+   one.** §11.3 step 7 skips a strategy whose best combo another already claimed,
+   and the step-8 floor returns exactly one; two cards is a correct outcome. This
+   was invisible until `d1e321c` made screen 4's headline count what actually
+   came back, at which point a two-card session had screen 1 promising three and
+   screen 4 saying "2 ways" — the product contradicting itself inside one
+   session. Screen 4's own sentence was already written defensively
+   (`options.length === 3 ? "the three" : "they"`); screen 1 had never been given
+   the same treatment.
+4. **`1e030ef` — the browser scripts could not find a nix-store chromium.**
+   `existsSync()` over hardcoded distro prefixes cannot match a content-addressed
+   store path by construction. `CHROME_PATH` takes precedence now.
+
+**Then an audit of the whole tree.** It found the build in good shape — `tsc`
+clean, zero `any`, zero `@ts-ignore`, zero TODO/FIXME markers, and every route
+degrading rather than 500ing. (Re-counted while writing this: **zero non-null
+assertions in `lib/`, `app/` and `components/`**, and 14 in `scripts/`, all of
+them indexing into an array the loop bound already guarantees. §0 rule 1 —
+offline scripts can be ugly, runtime code cannot.) The gaps clustered in three
+places.
+
+#### Screen 4 was the one flow that could strand the spinner forever
+
+`runBuildSchedules` left `loadCatalog()` and `buildSchedules()` outside its try
+and set `setIsWorking(false)` only on the happy path, and both call sites invoked
+it bare from a click handler. A throw disabled every button on the screen for the
+life of the page — no toast, no way forward. Every step-2 handler already did
+this correctly.
+
+**`loadCatalog` made that permanent.** It memoises its promise, which is the
+point, but it memoised a REJECTED one too: one `ChunkLoadError` on the 850 KB
+catalog and every later transition awaited the same rejection forever. It clears
+the cache before rethrowing now, and the mount warm-up has a real `.catch` rather
+than being an unhandled rejection.
+
+**`fallbackProse` moved to `lib/prose.ts`.** The route already degrades correctly
+on a model failure (deviation 4 above) — real combos, locally written prose —
+but that function lived inside the route, so when the FETCH failed the client set
+`options = []` and threw away combos it had computed deterministically moments
+earlier. `Combo` was already exported from `lib/schedules.ts`, so the route's
+byte-identical local copy is gone with it.
+
+The empty state no longer names a cause. *"No conflict-free combination survived
+those preferences"* is a specific claim about the search, and the client also
+reached it on a failed request, on a malformed body, and with all three toggles
+off. **`app/error.tsx` and `app/global-error.tsx` are new** — there was no error
+boundary anywhere, and `page.tsx`'s header comment reasoned that no seam needs
+one because every route degrades, which is true of the network seams and says
+nothing about a render throw. `global-error` is styled inline: it replaces the
+root layout, so `globals.css` and both `next/font` families are gone by the time
+it renders. Both use **`retry`, not `reset`** — Next 16 documents `reset` as the
+narrow case.
+
+#### An OpenAI call could outlive the platform hosting it
+
+`callStructured` set neither a timeout nor a retry count, inheriting the SDK's
+10-minute × 3-attempt default, and no route declared `maxDuration`. Those combine
+to defeat the one guarantee §12 asks of these routes: **a function killed at the
+platform's limit is a 504 raised OUTSIDE the handler**, so the try/catch never
+runs, `degraded` is never set, and the client gets the raw platform error. All
+three routes declare `maxDuration = 60` (the ceiling without Fluid compute) and
+`callStructured` takes a budget defaulting to 20s × 2 attempts.
+`/api/extract-skills` passes `maxRetries: 0` because it is the only route that
+can issue two sequential `gpt-4o` calls, and 2 × 20s fits where 4 × 20s does not.
+
+#### `/api/parse-audit` served a stranger's degree progress under the student's name
+
+See the §12 carve-out, which is where this is recorded rather than here, because
+it reverses a product decision. Short version: the route degrades correctly, the
+client read `degraded: true` and logged it, and the fixture behind THIS route is
+a person's academic record rather than a list of skills. Gated on the entry
+point, so the judge's path cannot reach it. `parseAuditPdf` also checks `res.ok`
+now — Vercel's 4.5 MB cap raises a 413 above the handler and that body has no
+`audit` at all.
+
+#### A critical course could reach no card and no advisor list either
+
+§11.3 step 2 promises a critical bottleneck makes every card or is named as "see
+your advisor". `ineligibleCriticals` only reads the `rejected` map, which
+`computeEligibility` fills at eligibility time. Three later paths in
+`buildSchedules` drop an ELIGIBLE critical into neither place: the mustTake
+prefix `break` (criticals sort chainDepth desc, so one bulky course can push
+cheaper ones past the target), the group-credits `continue`, and `seatGreedily`
+returning null.
+
+**Measured against the committed data it does not fire** — the sample audit
+yields one unblocked eligible critical at 3 credits, which fits under both
+targets and seats against an empty `base` — so `unplacedCriticals` is
+**report-only** and the `break` is untouched. It takes the combos rather than
+reaching into the builder, so `buildSchedules`' signature does not move.
+
+> The new reason is **`"did-not-fit"` and not a reuse of `"no-section"`**,
+> because the course demonstrably HAS sections next term. That is the entire
+> point of it, and it is the same bug class already fixed once for the red
+> banner, in front of an audience that checks it from Patriot Web in 30 seconds.
+
+It renders on **screen 4, not the diagnosis screen.** `ineligible` there is
+computed with the DEFAULT preferences on purpose, and these drops are only
+knowable with the live toggles — screen 4 is where those toggles are.
+`ineligibilityCopy` and `joinCodes` moved to `lib/prose.ts` so two screens cannot
+grow two voices for one verdict; the exhaustive switch is what forces the new
+branch to be written rather than defaulted.
+
+#### Three submission deliverables the repo said it had and did not
+
+- **`.env.example` did not exist**, and `README`'s Setup block opens with
+  `cp .env.example .env.local` — the documented first step of a fresh clone
+  failed. It was also uncommittable: `.gitignore`'s blanket `.env*` would have
+  swallowed it. Both fixed.
+- **`TOOLS.md` omitted eleven shipped packages**, including the entire
+  axe/Playwright harness that backs this section's own accessibility claims.
+  Leaving out the tool that produced a claim we make in the write-up is the worst
+  of the eleven to be missing (§3 makes the list a submission requirement). Also
+  corrects `puppeteer-core` `^24` → `^25.7.0`.
+- **`README` documented `build-prereqs.ts` as pipeline step 3**, which the entry
+  above settled against. The runbook runs `parse-prereqs.ts` now and keeps the
+  model version as the comparison harness. It also documented 6 of 17 scripts,
+  with the eight gates — the actual test suite — absent entirely; they are a
+  table now.
+
+#### Housekeeping
+
+`npm run verify` chains typecheck + lint + the three offline gates; the browser
+gates get named `gate:*` entries because they need a running `npm start`. All
+eight were hand-run with `npx tsx` and nothing in `package.json` mentioned any of
+them. The unread `demanded` state is gone from `app/page.tsx`. `audit-ui.ts` was
+the one browser script `1e030ef` missed — a Playwright channel lookup cannot find
+a nix store path either, and its documented last resort is a bundled download
+this repo never fetches.
+
+**Verified after, against a PRODUCTION build (`npm run build && npm start`):**
+`tsc --noEmit` clean · `next build` clean · **eslint down to ONE warning**
+(`scripts/scrape-catalog.ts` `_subject`; `demanded` was the other) ·
+`smoke-pipeline` **ALL CHECKS PASSED** with eight new §11.3 assertions — per
+preference variant, every critical is on every card or in the advisor list, and
+no `"did not fit"` claim is made about a course with no section · `verify-prereqs`
+exits 0 · `check-contrast` **PALETTE CLEAN**, 46 tokens in gamut · `audit-ui`
+**AUDIT CLEAN**, zero axe violations at any impact level at 1440px and 390px
+across all six screens, no layout problems · `check-mobile` at its documented
+baseline (the `sr-only` file input, on the two screens it stays mounted for) ·
+all six screens re-shot with no page errors.
+
+Two things a gate cannot cover were driven by hand in a real browser:
+
+- **POST `public/sample-audit.pdf` to the live `/api/parse-audit`** →
+  `degraded: false`, 24 courses, correct catalog year. This path fails *only* in
+  a production build, so a `next dev` pass is not evidence.
+- **The two new failure paths.** Aborting `/api/build-schedules` mid-click still
+  renders full cards from local prose, with no "No schedule came back" state and
+  regenerate live again. An unreadable upload renders a complete diagnosis AND
+  the new "we could not read your file" line; "use the sample audit" on the same
+  build does not show it.
+
+> **`unplacedCriticals`' new branch was confirmed non-vacuous** rather than
+> assumed: stripping the criticals out of the combos returns CS 310 and CS 330 as
+> `did-not-fit`, and both have live Fall 2026 sections, so the sentence it
+> generates is true.
 
 ---
 
