@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run lint && tsx scripts/smoke-pipeline.ts && tsx scripts/verify-prereqs.ts && tsx scripts/check-contrast.ts",
+    "gate:ui": "tsx scripts/audit-ui.ts",
+    "gate:mobile": "tsx scripts/check-mobile.ts",
+    "gate:screens": "tsx scripts/shoot-screens.ts",
+    "gate:schemas": "tsx scripts/check-openai.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

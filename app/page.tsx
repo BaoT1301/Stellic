@@ -139,7 +139,6 @@ export default function Home() {
   const [isWorking, setIsWorking] = useState(false);
 
   const [postings, setPostings] = useState<string[]>(["", "", ""]);
-  const [demanded, setDemanded] = useState<DemandedSkill[]>([]);
   const [audit, setAudit] = useState<StudentAudit | null>(null);
   // True only when the student uploaded their OWN file and got the fixture
   // back. See handleFile — handleUseSample never sets it, which is what keeps
@@ -391,7 +390,6 @@ export default function Home() {
       loadCatalog(),
       skillsPromise.current ?? Promise.resolve<DemandedSkill[]>([]),
     ]);
-    setDemanded(skills);
 
     // §11.1 and §11.2 — both local, no API call.
     const nextBottlenecks = computeBottlenecks(nextAudit, prereqs, courses);
