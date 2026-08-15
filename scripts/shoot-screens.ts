@@ -43,8 +43,10 @@ const EDGE_CANDIDATES = [
 ];
 
 function findBrowser(): string {
-  const hit = EDGE_CANDIDATES.find((p) => existsSync(p));
-  if (!hit) throw new Error("No Edge or Chrome found — set executablePath by hand.");
+  // CHROME_PATH first — see the note in check-mobile.ts. The list below cannot
+  // find a nix-store chromium, which is what this project's devshell provides.
+  const hit = process.env.CHROME_PATH ?? EDGE_CANDIDATES.find((p) => existsSync(p));
+  if (!hit) throw new Error("No Edge or Chrome found — set CHROME_PATH.");
   return hit;
 }
 

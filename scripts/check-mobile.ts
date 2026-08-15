@@ -128,8 +128,12 @@ async function audit(page: Page, name: string) {
 
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  const exe = BROWSERS.find((p) => existsSync(p));
-  if (!exe) throw new Error("no Edge or Chrome found");
+  // CHROME_PATH first. The hardcoded list below only covers browsers installed
+  // at a distro's standard prefix, so it finds nothing inside the nix devshell
+  // this project is actually developed in — a store path is content-addressed
+  // and unguessable. Same override in shoot-screens.ts.
+  const exe = process.env.CHROME_PATH ?? BROWSERS.find((p) => existsSync(p));
+  if (!exe) throw new Error("no Edge or Chrome found — set CHROME_PATH");
 
   let browser: Browser | undefined;
   try {
