@@ -1,0 +1,35 @@
+{
+  "_note": "Captured from a live /api/extract-skills call on the two committed sample postings. Regenerate with scripts/build-sample-skills.ts. Serves the sample path deterministically; a pasted posting still calls the model.",
+  "postings": [
+    "software engineer ii — backend & distributed systems northlake systems, inc. — reston, va (hybrid, 3 days on-site) full-time · entry to mid-level (0-2 years) · requisition be-2284 about the team northlake's platform infrastructure group owns the ingest, storage, and query layer behind our logistics analytics product. we move roughly 40 billion events a day off a fleet of customer edge devices, land them in a partitioned store, and serve them back under a 200 ms p99 read budget. you would be the third engineer on the ingest pod. what you will do - design, build, and operate backend services in go and java that run as replicated, horizontally scaled deployments across three regions. - extend our event pipeline: partitioning, consumer group rebalancing, at-least- once delivery, idempotent writes, and backpressure handling under load spikes. - model and evolve relational schemas in postgresql. you will write a lot of sql and you will be expected to read a query plan and explain why an index is or is not being used. - own the correctness of concurrent code: locking strategy, race conditions, thread pools, and the failure modes that only show up when a node dies mid-write. - participate in design review. we write short design documents before we write code, and every engineer is expected to critique other people's designs. - instrument what you ship. dashboards, structured logs, and alert thresholds are part of the deliverable. minimum qualifications - bachelor's degree in computer science, computer engineering, or a related field, or equivalent practical experience. - working knowledge of data structures and algorithm analysis. you should be able to reason about the time and space cost of your own code and justify a choice between two data structures. - demonstrated understanding of operating systems fundamentals: processes and threads, virtual memory, scheduling, and file i/o. - experience writing concurrent or parallel programs, and an understanding of what makes distributed systems hard: partial failure, replication lag, consistency models, and consensus. - proficiency with sql and relational database design, including normalization, transactions, and isolation levels. - familiarity with software design practice: version control, code review, automated testing, and incremental delivery. preferred qualifications - coursework or project experience in computer systems or computer architecture. - exposure to containerized deployment and infrastructure-as-code. - prior internship building a service that other people depended on. northlake systems is an equal opportunity employer.",
+    "data scientist / machine learning engineer — risk analytics meridian health analytics — arlington, va (hybrid) full-time · early career (0-3 years) · requisition ds-1147 about the role meridian builds readmission-risk and utilization models for regional hospital systems. you will own a model end to end: framing the question with a clinical partner, pulling and cleaning the data, choosing an approach, validating it honestly, and shipping it as a service that runs nightly against live claims feeds. what you will do - write substantial sql against a 30-terabyte claims warehouse. most of the work in this role is data extraction, joining across poorly documented source systems, and reconciling records that disagree. - perform exploratory data analysis and communicate what you found: distributions, missingness, leakage risk, and confounding. we would rather hear that a signal is spurious than ship it. - apply statistical inference correctly. you will be asked to defend a confidence interval, choose a hypothesis test, explain why a p-value is not an effect size, and design an evaluation that survives class imbalance. - build and tune supervised models — regularized regression, gradient-boosted trees, and where it is warranted, neural approaches — and apply clustering and other unsupervised methods to segment populations. - do the data mining work that precedes modeling: feature construction, dimension reduction, outlier detection, and pattern discovery over sparse records. - write production-quality python. models here are code that other engineers must run, test, and modify. you will use version control, write unit tests, and go through code review the same way the platform team does. - present findings to clinicians and hospital operations leaders. clear visualization and plain-language explanation are graded as heavily as model performance. minimum qualifications - bachelor's degree in statistics, data science, computer science, applied mathematics, or a related quantitative field. - formal coursework in probability and statistics: distributions, estimation, hypothesis testing, and regression. - demonstrated ability to analyze data and identify trends in a real dataset, not only a cleaned classroom one. - strong sql and comfort with relational database concepts and schema design. - practical machine learning experience: model selection, cross-validation, overfitting, and evaluation metrics beyond accuracy. - programming proficiency in python and familiarity with linear algebra. preferred qualifications - coursework in data mining, machine learning, or artificial intelligence. - experience with distributed data processing frameworks. - interest in healthcare; no clinical background required. meridian health analytics is an equal opportunity employer."
+  ],
+  "skills": [
+    {
+      "skillId": "4.A.2.a.4.I04.D02",
+      "skillName": "Analyze data to identify trends or relationships among variables.",
+      "postings": [
+        0,
+        1
+      ],
+      "demandCount": 2
+    },
+    {
+      "skillId": "4.A.2.a.4.I07.D12",
+      "skillName": "Analyze data to inform operational decisions or activities.",
+      "postings": [
+        0,
+        1
+      ],
+      "demandCount": 2
+    },
+    {
+      "skillId": "4.A.4.b.6.I05.D05",
+      "skillName": "Advise others on analytical techniques.",
+      "postings": [
+        1
+      ],
+      "demandCount": 1
+    }
+  ]
+}
