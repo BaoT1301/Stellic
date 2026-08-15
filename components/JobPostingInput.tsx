@@ -78,11 +78,20 @@ export function JobPostingInput({
           size — the mechanism, then the outcome. Only the outcome earns the
           space above the fold, and it still glosses CRN once, in place, which is
           the reason the second paragraph existed.
+
+          "UP TO three schedules", never "three". §11.3 step 7 walks the three
+          strategies and skips any whose best surviving combo is one another
+          strategy already took, rather than rendering a duplicate — so two
+          cards is a correct outcome, and the step-8 floor returns exactly one.
+          ScheduleOptions' headline counts what actually came back, so a flat
+          "three" here would have the first screen contradicting the fourth
+          inside one session. The sentence beside those cards was already
+          written this way (`options.length === 3 ? "the three" : "they"`).
         */}
         <p className="mt-5 text-lg text-muted-foreground text-pretty">
           Paste up to three postings — the job you want in two years, not the one
-          you could get today. You get three Fall 2026 schedules built from real
-          sections, with the CRNs you paste into registration.
+          you could get today. You get up to three Fall 2026 schedules built from
+          real sections, with the CRNs you paste into registration.
         </p>
       </header>
 
