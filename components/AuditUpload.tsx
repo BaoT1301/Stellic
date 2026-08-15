@@ -20,6 +20,18 @@ import { cn } from "@/lib/utils";
  * State 2 — CLAUDE.md §13. Dropzone, a "download a sample audit" link, and a
  * collapsed manual-entry fallback that must be completable in ~20 seconds.
  *
+ * ---------------------------------------------------------------------------
+ * REDESIGN NOTES. This screen used to be three equal-weight bordered cards in a
+ * 1.4fr/1fr split, so the dropzone — the one thing this step is for — competed
+ * with two side panels for attention.
+ *
+ * Now there is one hierarchy: a single full-width dropzone that is the loudest
+ * object on the page, and the two escape hatches sit underneath it in a quiet
+ * hairline-divided pair on paper rather than in cards. Screen 2 stays on the
+ * PAPER surface on purpose — paper is for input, ink is for analysis, and this
+ * is the last input screen before the diagnosis band.
+ * ---------------------------------------------------------------------------
+ *
  * The size and MIME check here is load-bearing, not politeness. §12.1: Vercel
  * caps request bodies at 4.5 MB at the infrastructure level, so an oversized
  * file returns a raw 413 that never reaches the route handler — the route's
@@ -88,19 +100,23 @@ export function AuditUpload({
 
   return (
     <section className="animate-in fade-in duration-500">
-      <header className="max-w-3xl">
-        <p className="eyebrow text-brand">Step 2 · where you actually are</p>
-        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+      <header className="max-w-2xl">
+        <p className="eyebrow flex items-center gap-2.5 text-muted-foreground">
+          <span className="data text-foreground">02</span>
+          <span aria-hidden className="h-px w-7 bg-foreground/25" />
+          Where you actually are
+        </p>
+        <h1 className="display mt-5 text-[2.625rem] font-semibold sm:text-[3.25rem]">
           Now the boring half.
         </h1>
         {/*
-          This paragraph used to end "nothing here leaves this session", which
-          was FALSE: §12.1 posts the extracted text to OpenAI. A degree audit is
-          a FERPA education record and the judging audience signs data-processing
-          agreements for a living, so an inaccurate privacy claim is far more
-          damaging here than an honest third-party disclosure. §6 guarantees the
-          second half ("Persistence: None"), so every clause below is defensible
-          under questioning.
+          DO NOT EDIT THE PARAGRAPH BELOW. It used to end "nothing here leaves
+          this session", which was FALSE: §12.1 posts the extracted text to
+          OpenAI. A degree audit is a FERPA education record and the judging
+          audience signs data-processing agreements for a living, so an
+          inaccurate privacy claim is far more damaging here than an honest
+          third-party disclosure. §6 guarantees the second half ("Persistence:
+          None"), so every clause is defensible under questioning.
         */}
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
           Drop in your degree audit. We read the requirements you have left, not
@@ -109,53 +125,57 @@ export function AuditUpload({
         </p>
       </header>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            accept(e.dataTransfer.files[0]);
-          }}
-          className={cn(
-            "relative flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-16 text-center transition-colors",
-            dragging
-              ? "border-brand bg-brand-soft"
-              : "border-foreground/20 bg-card hover:border-foreground/35",
-          )}
-        >
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-            <Upload className="size-5 text-muted-foreground" aria-hidden />
+      {/* ------------------------------------------------------------------ *
+       * The one action. Full width, tall, and the only white surface above the
+       * fold, so nothing on the screen competes with it.
+       * ------------------------------------------------------------------ */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          accept(e.dataTransfer.files[0]);
+        }}
+        className={cn(
+          "relative mt-9 rounded-2xl border border-dashed px-6 py-14 transition-colors sm:py-20",
+          dragging
+            ? "border-brand bg-brand-soft"
+            : "border-foreground/20 bg-card hover:border-foreground/35",
+        )}
+      >
+        <div className="mx-auto flex max-w-md flex-col items-center text-center">
+          <div className="flex size-14 items-center justify-center rounded-full bg-muted">
+            <Upload className="size-6 text-muted-foreground" aria-hidden />
           </div>
-          <p className="mt-5 text-base font-medium">
+          <p className="display mt-6 text-2xl font-semibold sm:text-[1.75rem]">
             Drop your degree audit here
           </p>
           {/*
-            Stellic leads deliberately: George Mason's own degree audit runs on
-            Stellic (registrar.gmu.edu calls it "Mason Degree Audit"), so it is
-            the export our demo student actually has. Listing DegreeWorks first
-            was a §0 rule 7 error about the judges' own customer.
+            DO NOT EDIT THE LINE BELOW. Stellic leads deliberately: George
+            Mason's own degree audit runs on Stellic (registrar.gmu.edu calls it
+            "Mason Degree Audit"), so it is the export our demo student actually
+            has. Listing DegreeWorks first was a §0 rule 7 error about the
+            judges' own customer.
           */}
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-2.5 text-sm text-muted-foreground">
             PDF, up to 4.5 MB. Stellic, DegreeWorks and Banner exports all work.
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Not sure where to find it? Student portal → Student Services →
-            Degree Evaluation → print to PDF.
-          </p>
           <Button
-            variant="outline"
             size="lg"
-            className="mt-6 h-10 px-4"
+            className="mt-7 h-11 px-5 text-[0.9375rem]"
             disabled={isWorking}
             onClick={() => inputRef.current?.click()}
           >
             {isWorking ? "Reading your audit…" : "Choose a file"}
           </Button>
+          <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
+            Not sure where to find it? Student portal → Student Services →
+            Degree Evaluation → print to PDF.
+          </p>
           <input
             ref={inputRef}
             type="file"
@@ -172,70 +192,100 @@ export function AuditUpload({
             }}
           />
         </div>
+      </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="rounded-xl bg-card p-5 ring-1 ring-foreground/10">
-            <div className="flex items-start gap-3">
-              <FileText className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
-              <div>
-                <p className="text-sm font-medium">Don&rsquo;t have one handy?</p>
-                {/*
-                  86, not 89. The credit count used to disagree three ways:
-                  samples/fallback-response.json said 86, samples/sample-audit.html
-                  said 84, and this file said 89. 86 is now the one number, and it
-                  is the number the sample PDF actually parses to. "Junior" is
-                  consistent with it: 86 credits is junior standing (60-89).
-                */}
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Use the sample student: a transfer junior in the BS in
-                  Computer Science, 86 credits in, graduating May 2027.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button size="sm" disabled={isWorking} onClick={onUseSample}>
-                Use the sample audit
-                <ArrowRight aria-hidden data-icon="inline-end" />
-              </Button>
-              <a
-                href={sampleAuditUrl}
-                download
-                className="inline-flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <Download className="size-3.5" aria-hidden />
-                Download the PDF
-              </a>
-            </div>
+      {/* ------------------------------------------------------------------ *
+       * The two escape hatches, deliberately subordinate: paper surface, no
+       * card, separated only by hairlines. They are alternatives to the action
+       * above, not peers of it.
+       * ------------------------------------------------------------------ */}
+      <div className="mt-5 grid gap-px overflow-hidden rounded-2xl bg-rule ring-1 ring-rule sm:grid-cols-2">
+        <div className="bg-canvas p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-medium">Don&rsquo;t have one handy?</p>
+            <FileText
+              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+              aria-hidden
+            />
           </div>
-
-          <div className="rounded-xl bg-card ring-1 ring-foreground/10">
-            <button
-              type="button"
-              onClick={() => setManualOpen((v) => !v)}
-              aria-expanded={manualOpen}
-              className="flex w-full items-center justify-between gap-2 px-5 py-4 text-left text-sm font-medium transition-colors hover:bg-muted/60"
+          {/*
+            86, not 89. The credit count used to disagree three ways:
+            samples/fallback-response.json said 86, samples/sample-audit.html
+            said 84, and this file said 89. 86 is now the one number, and it is
+            the number the sample PDF actually parses to. "Junior" is consistent
+            with it: 86 credits is junior standing (60-89).
+          */}
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+            Use the sample student: a transfer junior in the BS in Computer
+            Science, <span className="data text-foreground">86</span> credits
+            in, graduating{" "}
+            <span className="data text-foreground">May 2027</span>.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <Button
+              className="h-9 px-3.5"
+              disabled={isWorking}
+              onClick={onUseSample}
             >
-              Or enter it manually
-              <ChevronDown
-                className={cn(
-                  "size-4 text-muted-foreground transition-transform",
-                  manualOpen && "rotate-180",
-                )}
-                aria-hidden
-              />
-            </button>
-            {manualOpen && (
-              <ManualEntry
-                onSubmit={onManualSubmit}
-                disabled={isWorking}
-              />
-            )}
+              Use the sample audit
+              <ArrowRight aria-hidden data-icon="inline-end" />
+            </Button>
+            <a
+              href={sampleAuditUrl}
+              download
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[0.8125rem] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Download className="size-3.5" aria-hidden />
+              Download the PDF
+            </a>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setManualOpen((v) => !v)}
+          aria-expanded={manualOpen}
+          aria-controls="manual-entry"
+          className="flex flex-col items-start bg-canvas p-5 text-left transition-colors hover:bg-card focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:p-6"
+        >
+          <span className="flex w-full items-start justify-between gap-3">
+            <span className="text-sm font-medium">Or enter it manually</span>
+            <ChevronDown
+              className={cn(
+                "mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform",
+                manualOpen && "rotate-180",
+              )}
+              aria-hidden
+            />
+          </span>
+          <span className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+            No PDF at all? Major, credits completed, and the courses you have
+            already taken. About twenty seconds.
+          </span>
+        </button>
+      </div>
+
+      {/* Kept mounted so the prefilled defaults survive a collapse, and so
+          aria-controls always resolves to a real element. */}
+      <div
+        id="manual-entry"
+        className={cn(
+          "mt-5 rounded-2xl bg-card p-5 shadow-sm ring-1 ring-foreground/10 sm:p-6",
+          !manualOpen && "hidden",
+        )}
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-rule pb-3">
+          <h2 className="text-sm font-semibold">Enter it manually</h2>
+          <p className="text-xs text-muted-foreground">
+            Roughly <span className="data text-foreground">20</span> seconds.
+            Everything is prefilled, so edit rather than type.
+          </p>
+        </div>
+        <ManualEntry onSubmit={onManualSubmit} disabled={isWorking} />
       </div>
 
       {onBack && (
-        <div className="mt-8 border-t border-rule pt-6">
+        <div className="mt-10 border-t border-rule pt-6">
           <Button variant="ghost" size="lg" onClick={onBack} disabled={isWorking}>
             <ArrowLeft aria-hidden data-icon="inline-start" />
             Back to postings
@@ -293,7 +343,7 @@ function ManualEntry({
     // the GMU catalog brings U+00A0 between subject and number, and every regex
     // after it fails silently if it survives.
     const code = raw
-      .replace(/ /g, " ")
+      .replace(/ /g, " ")
       .trim()
       .toUpperCase()
       .replace(/^([A-Z]{2,4})\s*[- ]?\s*(\d{3})$/, "$1 $2");
@@ -303,17 +353,19 @@ function ManualEntry({
   }
 
   return (
-    <div className="space-y-5 border-t border-rule px-5 pt-5 pb-5">
+    <div className="space-y-5 pt-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Major">
           <Input value={major} onChange={(e) => setMajor(e.target.value)} />
         </Field>
+        {/* Credits, term codes and course codes are institutional data, so they
+            are set in mono with tabular figures wherever they appear. */}
         <Field label="Credits completed">
           <Input
             inputMode="numeric"
             value={creditsCompleted}
             onChange={(e) => setCreditsCompleted(e.target.value)}
-            className="tabular-nums"
+            className="data"
           />
         </Field>
         <Field label="Expected graduation">
@@ -321,7 +373,7 @@ function ManualEntry({
             type="month"
             value={expectedGraduation}
             onChange={(e) => setExpectedGraduation(e.target.value)}
-            className="tabular-nums"
+            className="data"
           />
         </Field>
         <Field label="Elective slots left">
@@ -329,7 +381,7 @@ function ManualEntry({
             inputMode="numeric"
             value={electivesRemaining}
             onChange={(e) => setElectivesRemaining(e.target.value)}
-            className="tabular-nums"
+            className="data"
           />
         </Field>
       </div>
@@ -339,7 +391,7 @@ function ManualEntry({
           {courses.map((c) => (
             <span
               key={c}
-              className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 font-mono text-xs"
+              className="data inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs"
             >
               {c}
               <button
@@ -365,7 +417,7 @@ function ManualEntry({
               }
             }}
             onBlur={() => addCourse(draft)}
-            className="min-w-24 flex-1 bg-transparent px-1 py-1 font-mono text-xs outline-none placeholder:font-sans placeholder:text-muted-foreground"
+            className="data min-w-24 flex-1 bg-transparent px-1 py-1 text-xs outline-none placeholder:font-sans placeholder:text-muted-foreground"
           />
         </div>
       </Field>
@@ -376,8 +428,7 @@ function ManualEntry({
       </p>
 
       <Button
-        className="w-full"
-        size="lg"
+        className="h-11 w-full text-[0.9375rem]"
         disabled={disabled || courses.length === 0}
         onClick={() =>
           onSubmit({

@@ -4,9 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AuditUpload, type ManualAuditEntry } from "@/components/AuditUpload";
+import { ChatPanel } from "@/components/ChatPanel";
 import { DiagnosisScreen } from "@/components/DiagnosisScreen";
 import { JobPostingInput } from "@/components/JobPostingInput";
 import { ScheduleOptions } from "@/components/ScheduleOptions";
+import type { ChatContext } from "@/lib/chat-context";
 import {
   computeBottlenecks,
   normalizeCode,
@@ -171,6 +173,23 @@ export default function Home() {
   const skillDemand = useMemo(
     () => Object.fromEntries(gaps.map((g) => [g.skillId, g.demandCount])),
     [gaps],
+  );
+
+  /**
+   * Everything the assistant is allowed to know. It answers ONLY from this, and
+   * the route forbids inventing a course code, CRN or prerequisite — so the
+   * grounding object IS the safety mechanism, not the prompt.
+   */
+  const chatContext = useMemo<ChatContext>(
+    () => ({
+      audit,
+      bottlenecks,
+      gaps,
+      options,
+      titles,
+      postingCount: filledPostings || undefined,
+    }),
+    [audit, bottlenecks, gaps, options, titles, filledPostings],
   );
 
   const preferencesDirty =
@@ -494,6 +513,13 @@ export default function Home() {
               isWorking={isWorking}
               dirty={preferencesDirty}
             />
+          )}
+
+          {/* The assistant sits UNDER the schedules, never over them. §0 rule 3:
+              it renders itself away when there is nothing to ground an answer
+              in, so it cannot show an empty box on either analysis screen. */}
+          {(step === "diagnosis" || step === "schedules") && (
+            <ChatPanel context={chatContext} className="mt-12" />
           )}
         </div>
       </div>

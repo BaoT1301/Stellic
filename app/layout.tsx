@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
 
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,14 +9,26 @@ import "./globals.css";
 // app/globals.css maps --font-sans and --font-mono in its @theme block, so the
 // CSS variable names here have to match those exactly or `font-sans` resolves to
 // nothing. Tailwind v4 has no config file to catch this for us (CLAUDE.md §6).
-const geistSans = Geist({
+//
+// TYPE SYSTEM. Geist was the create-next-app default and it is the reason every
+// screen read as a template: it is the same face half the web ships. Instrument
+// Sans is tighter and more editorial, holds up at display sizes without looking
+// like a landing page, and stays serious enough for a registrar.
+const sans = Instrument_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
+// Every number in this product is institutional data a student will copy by
+// hand: CRNs, course codes, credit hours, meeting times. Those belong in a mono
+// face, and setting them in one makes the whole app read as an instrument
+// rather than as marketing. IBM Plex Mono has real character and pairs cleanly.
+const mono = IBM_Plex_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {children}

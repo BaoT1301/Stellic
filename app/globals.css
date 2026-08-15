@@ -169,11 +169,36 @@
   --color-covered-soft: var(--covered-soft);
   --color-missing: var(--missing);
   --color-missing-soft: var(--missing-soft);
+  /* INK — the dark instrument surface. See the note in :root. */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-rule: var(--ink-rule);
+  --color-ink-fg: var(--ink-fg);
+  --color-ink-muted: var(--ink-muted);
 }
 
 :root {
   --canvas: oklch(0.979 0.004 95);
   --rule: oklch(0.902 0.004 95);
+
+  /* ------------------------------------------------------------------
+   * INK. A dark surface for the bands that carry the actual analysis.
+   *
+   * The palette already spends four hues on MEANING (red = you graduate
+   * late, ochre = act next term, slate = safe to delay, green = already
+   * covered), so adding a fifth decorative brand hue would either collide
+   * with one of those or dilute all of them. The confidence has to come
+   * from SURFACE CONTRAST and TYPE instead, which is also what makes the
+   * app read as an instrument rather than as a marketing page: paper for
+   * input, ink for analysis. Semantic colours stay untouched and are the
+   * only colour on either surface.
+   * ------------------------------------------------------------------ */
+  --ink: oklch(0.205 0.012 260);
+  --ink-2: oklch(0.262 0.014 260);
+  --ink-rule: oklch(0.34 0.016 260);
+  --ink-fg: oklch(0.971 0.004 95);
+  --ink-muted: oklch(0.76 0.012 260);
+
   --brand: oklch(0.435 0.115 262);
   --brand-soft: oklch(0.958 0.018 262);
   --critical: oklch(0.505 0.175 26);
@@ -197,6 +222,34 @@
 }
 
 @layer components {
+  /* ------------------------------------------------------------------
+   * DATA. Every institutional number a student copies by hand — CRNs,
+   * course codes, credit hours, meeting times — is set in mono with
+   * tabular figures so columns of them line up and none of it can be
+   * mistaken for prose. This single class is what makes the product look
+   * like a registrar's tool instead of a landing page.
+   * ------------------------------------------------------------------ */
+  .data {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* Display type. Instrument Sans needs negative tracking at large sizes or
+     it reads loose; below ~24px it needs none. */
+  .display {
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  /* An ink band that bleeds past the page gutter. The layout family that
+     makes the analysis screens feel different from the input screens. */
+  .ink-band {
+    background-color: var(--ink);
+    color: var(--ink-fg);
+  }
+
   /* Section eyebrow. Used on every screen so the four states feel like one
      document rather than four pages. */
   .eyebrow {

@@ -10,8 +10,15 @@ import { cn } from "@/lib/utils";
  * only the string "3 courses depend on it" throws the render away.
  *
  * No graph library and no layout engine — §13 says hardcode horizontal
- * positions from chainDepth, and that is exactly what NODE_W/GAP do below.
- * Everything is derived from props; nothing here is hardcoded per course.
+ * positions from chainDepth, and that is exactly what the geometry table below
+ * does. Everything is derived from props; nothing here is hardcoded per course.
+ *
+ * TWO SURFACES. `surface="paper"` is the original light rendering and stays the
+ * default, so any other caller is untouched. `surface="ink"` draws the same
+ * graph on the dark analysis band at roughly a third larger, because on the
+ * diagnosis screen this drawing IS the screen rather than a footnote inside a
+ * card. Only geometry and colour change — the node model, the reading order and
+ * the text equivalent are identical on both.
  *
  * Honesty note on what the edges mean: `dependents` is the TRANSITIVE set of
  * still-needed courses reachable from this one (§11.1), not an ordered path. So
@@ -20,12 +27,114 @@ import { cn } from "@/lib/utils";
  * words. We are not claiming each arrow is a single catalog prerequisite.
  */
 
-const NODE_W = 150;
-const NODE_H = 62;
-const GAP = 42;
-const PAD = 10;
-const NODE_Y = 34;
+export type ChainSurface = "paper" | "ink";
+
+interface Geometry {
+  nodeW: number;
+  nodeH: number;
+  gap: number;
+  pad: number;
+  /** Top of the node box; the state label sits above it. */
+  nodeY: number;
+  /** Room under the node box for the "+n more" note. */
+  below: number;
+  labelSize: number;
+  codeSize: number;
+  titleSize: number;
+  noteSize: number;
+  /** SVG cannot ellipsis text in CSS, so titles are clipped at this length. */
+  clipAt: number;
+}
+
+const GEOMETRY: Record<ChainSurface, Geometry> = {
+  paper: {
+    nodeW: 150,
+    nodeH: 62,
+    gap: 42,
+    pad: 10,
+    nodeY: 34,
+    below: 34,
+    labelSize: 11,
+    codeSize: 14.5,
+    titleSize: 10.5,
+    noteSize: 10.5,
+    clipAt: 22,
+  },
+  ink: {
+    nodeW: 200,
+    nodeH: 92,
+    gap: 60,
+    pad: 14,
+    nodeY: 48,
+    below: 46,
+    labelSize: 12,
+    codeSize: 19,
+    titleSize: 12.5,
+    noteSize: 12,
+    clipAt: 26,
+  },
+};
+
+/**
+ * An ink chain scales to its band, but a two-node chain in a 1100px band would
+ * otherwise render course codes at 40px. Cap the upscale and let the drawing sit
+ * left-aligned in the band instead of ballooning.
+ */
+const INK_MAX_SCALE = 1.3;
+
 const MAX_NODES = 4;
+
+/** Urgency is the only thing that picks a hue. Never decorative. */
+const ACCENT: Record<Bottleneck["urgency"], { solid: string; soft: string }> = {
+  critical: { solid: "var(--critical)", soft: "var(--critical-soft)" },
+  soon: { solid: "var(--soon)", soft: "var(--soon-soft)" },
+  flexible: { solid: "var(--calm)", soft: "var(--calm-soft)" },
+};
+
+/**
+ * On paper the accent is the ink-dark hue and the surface is white. On the dark
+ * band that inverts: the -soft tint is the readable "urgent" colour (it measures
+ * ~11:1 on --ink, where the solid measures 2.5:1 and must never carry text), and
+ * the solid is used only as text ON a soft fill, which is the same pairing the
+ * paper chips already use.
+ */
+function palette(surface: ChainSurface, urgency: Bottleneck["urgency"]) {
+  const accent = ACCENT[urgency];
+  if (surface === "ink") {
+    return {
+      edge: accent.soft,
+      doneEdge: "var(--ink-rule)",
+      headFill: accent.soft,
+      headStroke: accent.soft,
+      headCode: accent.solid,
+      headTitle: accent.solid,
+      headLabel: accent.soft,
+      blockedFill: "var(--ink-2)",
+      blockedStroke: accent.soft,
+      blockedStrokeOpacity: 0.45,
+      code: "var(--ink-fg)",
+      title: "var(--ink-muted)",
+      muted: "var(--ink-muted)",
+      doneStroke: "var(--ink-rule)",
+    };
+  }
+  return {
+    edge: accent.solid,
+    doneEdge: "var(--rule)",
+    headFill: accent.soft,
+    headStroke: accent.solid,
+    headCode: "var(--foreground)",
+    headTitle: "var(--muted-foreground)",
+    headLabel: accent.solid,
+    blockedFill: "var(--card)",
+    blockedStroke: accent.solid,
+    blockedStrokeOpacity: 0.45,
+    code: "var(--foreground)",
+    title: "var(--muted-foreground)",
+    muted: "var(--muted-foreground)",
+    doneStroke: "var(--rule)",
+  };
+}
 
 type NodeKind = "done" | "head" | "blocked";
 
@@ -35,8 +144,7 @@ interface ChainNode {
   kind: NodeKind;
 }
 
-/** SVG cannot ellipsis text in CSS, so titles are clipped here with a tooltip. */
-function clip(text: string, max = 22) {
+function clip(text: string, max: number) {
   return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
@@ -71,6 +179,11 @@ export interface PrereqChainProps {
   titles?: Record<string, string>;
   /** Direct prerequisites the student has already cleared, for left context. */
   completedPrereqs?: string[];
+  /**
+   * "paper" (default) is the original light rendering — unchanged, so existing
+   * callers keep working. "ink" draws the chain larger for the dark band.
+   */
+  surface?: ChainSurface;
   className?: string;
 }
 
@@ -78,8 +191,12 @@ export function PrereqChain({
   bottleneck,
   titles = {},
   completedPrereqs = [],
+  surface = "paper",
   className,
 }: PrereqChainProps) {
+  const g = GEOMETRY[surface];
+  const c = palette(surface, bottleneck.urgency);
+  const ink = surface === "ink";
   const titleOf = (code: string) => titles[code] ?? "";
 
   const upstream = completedPrereqs[0];
@@ -99,16 +216,10 @@ export function PrereqChain({
     })),
   ];
 
-  const accent =
-    bottleneck.urgency === "critical" ? "var(--critical)" : "var(--soon)";
-  const accentSoft =
-    bottleneck.urgency === "critical"
-      ? "var(--critical-soft)"
-      : "var(--soon-soft)";
-
-  const width = PAD * 2 + nodes.length * NODE_W + (nodes.length - 1) * GAP;
-  const height = NODE_Y + NODE_H + 34;
-  const xOf = (i: number) => PAD + i * (NODE_W + GAP);
+  const width = g.pad * 2 + nodes.length * g.nodeW + (nodes.length - 1) * g.gap;
+  const height = g.nodeY + g.nodeH + g.below;
+  const xOf = (i: number) => g.pad + i * (g.nodeW + g.gap);
+  const markerId = `ra-arrow-${surface}-${bottleneck.code.replace(/\s/g, "")}`;
 
   return (
     <figure className={cn("m-0", className)}>
@@ -118,9 +229,15 @@ export function PrereqChain({
         narrow viewport cannot pan the chain. tabIndex 0 plus a name and a role
         makes it a real, announced, focusable region. The SVG inside keeps its
         own aria-label, which is the text equivalent of the whole diagram.
+
+        The focus ring has to change with the surface: --ring is a mid grey that
+        is invisible against --ink.
       */}
       <div
-        className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        className={cn(
+          "overflow-x-auto focus-visible:ring-2 focus-visible:outline-none",
+          ink ? "focus-visible:ring-ink-fg" : "focus-visible:ring-ring",
+        )}
         tabIndex={0}
         role="group"
         aria-label="Prerequisite chain, scrollable"
@@ -128,19 +245,23 @@ export function PrereqChain({
         <svg
           viewBox={`0 0 ${width} ${height}`}
           width="100%"
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio="xMinYMid meet"
           role="img"
           aria-label={chainDescription(bottleneck, upstream)}
-          // min-w only below sm. Measured: an unconditional min-w-[520px] made
-          // the SVG 520px inside a 505px card, so the last node rendered
-          // half-clipped at the card edge on the screen the video dwells on.
-          // From sm up the viewBox scales the whole chain to fit; below sm the
-          // min-width keeps the node labels readable and the wrapper scrolls.
-          className="block w-full min-w-[520px] sm:min-w-0"
+          // min-w only below sm. Measured: an unconditional min-w made the SVG
+          // wider than its card, so the last node rendered half-clipped at the
+          // card edge on the screen the video dwells on. From sm up the viewBox
+          // scales the whole chain to fit; below sm the min-width keeps the node
+          // labels readable and the wrapper scrolls.
+          className={cn(
+            "block w-full sm:min-w-0",
+            ink ? "min-w-[620px]" : "min-w-[520px]",
+          )}
+          style={ink ? { maxWidth: Math.round(width * INK_MAX_SCALE) } : undefined}
         >
           <defs>
             <marker
-              id={`ra-arrow-${bottleneck.code.replace(/\s/g, "")}`}
+              id={markerId}
               viewBox="0 0 8 8"
               refX="7"
               refY="4"
@@ -148,14 +269,14 @@ export function PrereqChain({
               markerHeight="7"
               orient="auto-start-reverse"
             >
-              <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill={accent} />
+              <path d="M0,0.5 L7.5,4 L0,7.5 Z" fill={c.edge} />
             </marker>
           </defs>
 
           {nodes.slice(0, -1).map((node, i) => {
-            const from = xOf(i) + NODE_W;
+            const from = xOf(i) + g.nodeW;
             const to = xOf(i + 1) - 3;
-            const y = NODE_Y + NODE_H / 2;
+            const y = g.nodeY + g.nodeH / 2;
             const done = node.kind === "done";
             return (
               <line
@@ -164,14 +285,10 @@ export function PrereqChain({
                 y1={y}
                 x2={to}
                 y2={y}
-                stroke={done ? "var(--rule)" : accent}
-                strokeWidth={done ? 1.5 : 2}
+                stroke={done ? c.doneEdge : c.edge}
+                strokeWidth={done ? 1.5 : ink ? 2.5 : 2}
                 strokeDasharray={done ? "4 4" : undefined}
-                markerEnd={
-                  done
-                    ? undefined
-                    : `url(#ra-arrow-${bottleneck.code.replace(/\s/g, "")})`
-                }
+                markerEnd={done ? undefined : `url(#${markerId})`}
               />
             );
           })}
@@ -184,58 +301,58 @@ export function PrereqChain({
               <g key={node.code}>
                 {/* One string, not a fragment: React refuses array children on
                     <title> because the DOM flattens them to a single text node. */}
-                <title>{node.title ? `${node.code} — ${node.title}` : node.code}</title>
+                <title>{node.title ? `${node.code} · ${node.title}` : node.code}</title>
 
-                {/* 11px, not 9.5: this row is the only thing on the drawing
-                    that says what each box means, and at 9.5 it read as
-                    decoration. "CAN'T TAKE YET" rather than "BLOCKED" — a
-                    student has no reason to know that blocked is a graph term
-                    and not a hold on their account. */}
+                {/* This row is the only thing on the drawing that says what each
+                    box means. "CAN'T TAKE YET" rather than "BLOCKED" — a student
+                    has no reason to know that blocked is a graph term and not a
+                    hold on their account. */}
                 <text
-                  x={x + NODE_W / 2}
-                  y={NODE_Y - 13}
+                  x={x + g.nodeW / 2}
+                  y={g.nodeY - (ink ? 16 : 13)}
                   textAnchor="middle"
-                  fontSize="11"
+                  fontSize={g.labelSize}
                   fontWeight="600"
                   letterSpacing="0.09em"
-                  fill={done ? "var(--muted-foreground)" : head ? accent : "var(--muted-foreground)"}
+                  fill={head ? c.headLabel : c.muted}
                 >
                   {done ? "DONE" : head ? "TAKE THIS TERM" : "CAN'T TAKE YET"}
                 </text>
 
                 <rect
                   x={x}
-                  y={NODE_Y}
-                  width={NODE_W}
-                  height={NODE_H}
-                  rx="10"
-                  fill={head ? accentSoft : done ? "transparent" : "var(--card)"}
-                  stroke={done ? "var(--rule)" : accent}
+                  y={g.nodeY}
+                  width={g.nodeW}
+                  height={g.nodeH}
+                  rx={ink ? 12 : 10}
+                  fill={head ? c.headFill : done ? "transparent" : c.blockedFill}
+                  stroke={done ? c.doneStroke : head ? c.headStroke : c.blockedStroke}
                   strokeWidth={head ? 2 : 1}
                   strokeDasharray={done ? "5 4" : undefined}
-                  strokeOpacity={done ? 1 : head ? 1 : 0.45}
+                  strokeOpacity={done || head ? 1 : c.blockedStrokeOpacity}
                 />
 
-                {/* font-mono as a class, not a fontFamily string: globals.css
-                    declares the token with `@theme inline`, which inlines it
-                    into the utility instead of emitting --font-mono at :root. */}
+                {/* .data is the mono + tabular-figure class from globals.css.
+                    Every course code in the product is set in it, including the
+                    ones inside this drawing — they are the same institutional
+                    strings a student copies into Patriot Web. */}
                 <text
-                  x={x + 14}
-                  y={NODE_Y + 26}
-                  fontSize="14.5"
+                  x={x + (ink ? 18 : 14)}
+                  y={g.nodeY + (ink ? 38 : 26)}
+                  fontSize={g.codeSize}
                   fontWeight="600"
-                  className="font-mono"
-                  fill={done ? "var(--muted-foreground)" : "var(--foreground)"}
+                  className="data"
+                  fill={head ? c.headCode : done ? c.muted : c.code}
                 >
                   {node.code}
                 </text>
                 <text
-                  x={x + 14}
-                  y={NODE_Y + 45}
-                  fontSize="10.5"
-                  fill="var(--muted-foreground)"
+                  x={x + (ink ? 18 : 14)}
+                  y={g.nodeY + (ink ? 63 : 45)}
+                  fontSize={g.titleSize}
+                  fill={head ? c.headTitle : done ? c.muted : c.title}
                 >
-                  {clip(node.title)}
+                  {clip(node.title, g.clipAt)}
                 </text>
               </g>
             );
@@ -243,20 +360,26 @@ export function PrereqChain({
 
           {hidden > 0 && (
             <text
-              x={width - PAD}
-              y={NODE_Y + NODE_H + 22}
-              textAnchor="end"
-              fontSize="10.5"
-              fill="var(--muted-foreground)"
+              x={g.pad}
+              y={g.nodeY + g.nodeH + g.noteSize * 2}
+              fontSize={g.noteSize}
+              fill={c.muted}
             >
               {`+ ${hidden} more still behind ${bottleneck.code}`}
             </text>
           )}
         </svg>
       </div>
-      <figcaption className="mt-3 text-xs leading-relaxed text-muted-foreground">
+      <figcaption
+        className={cn(
+          "mt-3 leading-relaxed",
+          ink ? "text-sm text-ink-muted" : "text-xs text-muted-foreground",
+        )}
+      >
         Everything to the right is a course you still need and cannot reach until{" "}
-        <span className="font-mono font-medium text-foreground">
+        <span
+          className={cn("data font-medium", ink ? "text-ink-fg" : "text-foreground")}
+        >
           {bottleneck.code}
         </span>{" "}
         is done. Chain read from the published prerequisites.
