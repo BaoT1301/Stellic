@@ -2,13 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Copy, ExternalLink, Info, X } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Info,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
-import { bannerSectionUrl, formatMeeting } from "@/components/ScheduleCard";
+import {
+  bannerCourseUrl,
+  bannerSectionUrl,
+  formatMeeting,
+  weekBlocksFor,
+} from "@/components/ScheduleCard";
+import { WeekGrid, weekBounds } from "@/components/WeekGrid";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { preferenceNotes, sectionsConflict } from "@/lib/schedules";
 import { NEXT_TERM_LABEL } from "@/lib/types";
-import type { ScheduleOption } from "@/lib/types";
+import type { Preferences, ScheduleOption, Section } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,12 +41,40 @@ import { cn } from "@/lib/utils";
 
 export interface CartProps {
   option: ScheduleOption;
+  /** code → every Fall 2026 section of that course. Enables the section picker. */
+  alternatesOf?: Record<string, Section[]>;
+  /**
+   * Still-needed required course codes. Only the grid uses it, and only so a
+   * course is the same colour here as it is on the card six inches above —
+   * without it every non-bottleneck block fell back to the neutral tone and the
+   * elective changed colour between the two grids.
+   */
+  requiredCodes?: Set<string>;
+  /** The live toggles, so a section that contradicts one can say so. */
+  preferences?: Preferences;
+  onSwapSection?: (code: string, crn: string) => void;
   onClear?: () => void;
 }
 
-export function Cart({ option, onClear }: CartProps) {
+export function Cart({
+  option,
+  alternatesOf,
+  requiredCodes,
+  preferences,
+  onSwapSection,
+  onClear,
+}: CartProps) {
   const [copied, setCopied] = useState(false);
   const crns = option.courses.map((c) => c.section.crn);
+  // The cart draws its own scale rather than sharing the cards'. There is only
+  // one grid here, so there is no cross-grid comparison to get wrong — and a
+  // swapped section can legitimately fall outside the bounds the three cards
+  // shared.
+  const blocks = weekBlocksFor(option, requiredCodes);
+  const week = weekBounds(blocks);
+  const asyncCodes = option.courses
+    .filter((c) => c.section.days === "" || c.section.startTime === "")
+    .map((c) => c.code);
 
   async function copy() {
     const text = crns.join(", ");
@@ -72,34 +115,75 @@ export function Cart({ option, onClear }: CartProps) {
         </div>
       </header>
 
+      {(week || asyncCodes.length > 0) && (
+        <div className="border-b border-rule px-5 py-4">
+          {week && (
+            <WeekGrid
+              blocks={blocks}
+              startHour={week.startHour}
+              endHour={week.endHour}
+              variant="full"
+            />
+          )}
+          {/* Outside the `week` condition on purpose. An all-asynchronous cart
+              makes weekBounds return null, and hiding this line with the grid
+              would drop the one sentence explaining the missing week. */}
+          {asyncCodes.length > 0 && (
+            <p
+              className={cn(
+                "text-xs leading-relaxed text-muted-foreground",
+                week && "mt-2.5",
+              )}
+            >
+              <span className="font-mono">{asyncCodes.join(", ")}</span>{" "}
+              {asyncCodes.length === 1 ? "is" : "are"} asynchronous — no set
+              meeting time.
+            </p>
+          )}
+        </div>
+      )}
+
       <ul className="divide-y divide-rule">
         {option.courses.map((course) => (
-          <li
-            key={course.section.crn}
-            className="flex items-center gap-4 px-5 py-3"
-          >
-            {/* The CRN links to the section's own page on the public schedule
-                of classes — no login — so "are these real?" is one click, not a
-                claim. The trailing slash after the procedure name is required
-                or Banner 404s; see bannerSectionUrl and §9.1. */}
-            <a
-              href={bannerSectionUrl(course.section.crn)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
-              className="w-16 shrink-0 font-mono text-lg leading-none font-semibold tabular-nums underline decoration-dotted underline-offset-4 transition-colors hover:text-brand"
-            >
-              {course.section.crn}
-            </a>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm">
-                <span className="font-mono font-medium">{course.code}</span>
-                <span className="text-muted-foreground"> {course.title}</span>
-              </p>
-              <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular-nums">
-                {formatMeeting(course.section)}
-              </p>
+          <li key={course.code} className="px-5 py-3">
+            <div className="flex items-center gap-4">
+              {/* The CRN links to the section's own page on the public schedule
+                  of classes — no login — so "are these real?" is one click, not a
+                  claim. The trailing slash after the procedure name is required
+                  or Banner 404s; see bannerSectionUrl and §9.1. */}
+              <a
+                href={bannerSectionUrl(course.section.crn)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
+                className="w-16 shrink-0 font-mono text-lg leading-none font-semibold tabular-nums underline decoration-dotted underline-offset-4 transition-colors hover:text-brand"
+              >
+                {course.section.crn}
+              </a>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm">
+                  <span className="font-mono font-medium">{course.code}</span>
+                  <span className="text-muted-foreground"> {course.title}</span>
+                </p>
+                <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular-nums">
+                  {formatMeeting(course.section)}
+                  {course.section.instructor ? ` · ${course.section.instructor}` : ""}
+                </p>
+              </div>
             </div>
+
+            {onSwapSection && (
+              <SectionPicker
+                code={course.code}
+                current={course.section}
+                sections={alternatesOf?.[course.code] ?? []}
+                others={option.courses
+                  .filter((c) => c.code !== course.code)
+                  .map((c) => ({ code: c.code, section: c.section }))}
+                preferences={preferences}
+                onPick={(crn) => onSwapSection(course.code, crn)}
+              />
+            )}
           </li>
         ))}
       </ul>
@@ -125,6 +209,11 @@ export function Cart({ option, onClear }: CartProps) {
 
       <div className="space-y-1.5 border-t border-rule bg-canvas px-5 py-3 text-xs leading-relaxed text-muted-foreground">
         <p className="flex items-start gap-2">
+          <Check className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          Swapping a section never changes your credits or what the schedule
+          covers — only when you sit in the room.
+        </p>
+        <p className="flex items-start gap-2">
           <ExternalLink className="mt-0.5 size-3.5 shrink-0" aria-hidden />
           Every CRN above opens that section on Patriot Web, the public schedule
           of classes, where the seat count is listed.
@@ -136,5 +225,192 @@ export function Cart({ option, onClear }: CartProps) {
         </p>
       </div>
     </aside>
+  );
+}
+
+/**
+ * Swap to another Fall 2026 section of the same course.
+ *
+ * This is the one real registration decision the toggles cannot express: "the
+ * course is right, the 9 a.m. is not." 117 of the committed courses have more
+ * than one Fall section, and until now the builder's pick was final.
+ *
+ * Three rules:
+ *  1. A conflicting section is SHOWN AND DISABLED, naming the course it collides
+ *     with, rather than hidden. It is the conflict checker doing visible work, and
+ *     it keeps `ScheduleOption.conflicts === []` (§8) true by construction —
+ *     nothing selectable here can create a clash.
+ *  2. A section that contradicts a live toggle is still selectable, and says so.
+ *     The student is clicking it on purpose; silently hiding it would make a
+ *     preference feel like a lock.
+ *  3. `sectionsConflict` and `preferenceNotes` are imported from lib/schedules,
+ *     never reimplemented. §11.3 compares minutes-since-midnight and treats
+ *     asynchronous sections as never conflicting; a second copy of either here is
+ *     exactly how the cart and the builder start disagreeing. The first draft of
+ *     this component DID reimplement the morning test as `startTime < "10:00"`,
+ *     which is a string compare that ranks 9 a.m. after 10 a.m. and only worked
+ *     because §9.1 happens to zero-pad the hour.
+ *  4. The list is CAPPED. Rendering every section is fine for CS 405 (11 next
+ *     term) and absurd for ENGH 101 (74) or ENGH 302 (140), both of which are
+ *     eligible for a student under `JUNIOR_STANDING_CREDITS` — the level floor in
+ *     lib/bottlenecks.ts is the only thing keeping them off a card today, so this
+ *     is one manual-entry audit away from a 140-button list inside the cart.
+ */
+
+/** Sections listed inline before the Patriot Web link takes over. */
+const MAX_VISIBLE_SECTIONS = 6;
+/**
+ * How many CLASHING sections may occupy those slots. Rule 1 wants the conflict
+ * checker visibly doing work, but ordering purely by time put four disabled rows
+ * in CS 405's six — the sections nearest your current time are exactly the ones
+ * most likely to collide with the rest of your week. Two is enough to show the
+ * check happening without spending the list on rows nobody can pick.
+ */
+const MAX_VISIBLE_CLASHES = 2;
+
+/** "13:30" → 810; null for an asynchronous section. Ordering only. */
+function startMinutes(section: Section): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(section.startTime);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+}
+
+function SectionPicker({
+  code,
+  current,
+  sections,
+  others,
+  preferences,
+  onPick,
+}: {
+  code: string;
+  current: Section;
+  sections: Section[];
+  others: { code: string; section: Section }[];
+  preferences?: Preferences;
+  onPick: (crn: string) => void;
+}) {
+  if (sections.length < 2) return null;
+
+  // Which alternatives to show: the ones meeting nearest your current time, with
+  // clashes capped so they cannot crowd out the sections you can actually pick.
+  const currentStart = startMinutes(current);
+  const nearestFirst = (a: Section, b: Section) => {
+    const da = startMinutes(a);
+    const db = startMinutes(b);
+    if (da === null && db === null) return a.crn.localeCompare(b.crn);
+    if (da === null) return 1; // asynchronous sorts last
+    if (db === null) return -1;
+    if (currentStart === null) return da - db || a.crn.localeCompare(b.crn);
+    return (
+      Math.abs(da - currentStart) - Math.abs(db - currentStart) ||
+      a.crn.localeCompare(b.crn)
+    );
+  };
+
+  const rest = sections.filter((s) => s.crn !== current.crn);
+  const clashes = (s: Section) => others.some((o) => sectionsConflict(o.section, s));
+  const clashing = rest.filter(clashes).sort(nearestFirst).slice(0, MAX_VISIBLE_CLASHES);
+  const usable = rest
+    .filter((s) => !clashes(s))
+    .sort(nearestFirst)
+    .slice(0, MAX_VISIBLE_SECTIONS - 1 - clashing.length);
+
+  // Chronological below the pinned current row — a time-ordered list is what a
+  // student is scanning for, even though "nearest yours" is what chose it.
+  const byStart = (a: Section, b: Section) => {
+    const da = startMinutes(a);
+    const db = startMinutes(b);
+    if (da === null && db === null) return a.crn.localeCompare(b.crn);
+    if (da === null) return 1;
+    if (db === null) return -1;
+    return da - db || a.crn.localeCompare(b.crn);
+  };
+  const visible = [current, ...[...usable, ...clashing].sort(byStart)];
+  const hidden = sections.length - visible.length;
+  const allUrl = bannerCourseUrl(code);
+
+  return (
+    <details className="group/sec mt-1.5">
+      {/* py-1.5 keeps the WCAG 2.2 SC 2.5.8 24px target floor. */}
+      <summary className="ml-20 flex w-fit cursor-pointer list-none items-center gap-1 py-1.5 text-xs text-muted-foreground transition-colors hover:text-brand focus-visible:text-brand [&::-webkit-details-marker]:hidden">
+        {/* Counts the sections, not the alternatives: the list below includes the
+            one already in the cart, marked as such. */}
+        Change section · {sections.length} offered
+        <ChevronDown
+          className="size-3 transition-transform group-open/sec:rotate-180"
+          aria-hidden
+        />
+      </summary>
+
+      <ul className="mt-1 ml-20 flex flex-col gap-1">
+        {visible.map((section) => {
+          const isCurrent = section.crn === current.crn;
+          const clash = others.find((o) => sectionsConflict(o.section, section));
+          const notes = preferences ? preferenceNotes(section, preferences) : [];
+
+          return (
+            <li key={section.crn}>
+              <button
+                type="button"
+                disabled={isCurrent || clash !== undefined}
+                onClick={() => onPick(section.crn)}
+                aria-current={isCurrent ? "true" : undefined}
+                className={cn(
+                  "flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors",
+                  isCurrent && "bg-brand-soft text-brand",
+                  !isCurrent && clash === undefined && "hover:bg-muted",
+                  clash !== undefined && "cursor-not-allowed text-muted-foreground/70",
+                )}
+              >
+                <span className="w-12 shrink-0 font-mono tabular-nums">
+                  {section.crn}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="font-mono tabular-nums">
+                    {formatMeeting(section)}
+                  </span>
+                  {section.instructor && (
+                    <span className="text-muted-foreground"> · {section.instructor}</span>
+                  )}
+                  {notes.length > 0 && !isCurrent && clash === undefined && (
+                    <span className="block text-[0.6875rem] text-soon">
+                      against your preferences: {notes.join(", ")}
+                    </span>
+                  )}
+                </span>
+                <span className="shrink-0 text-[0.6875rem]">
+                  {isCurrent
+                    ? "in your cart"
+                    : clash
+                      ? `clashes with ${clash.code}`
+                      : "use this one"}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Never silently truncate. The count is the honest statement of what is
+          not shown, and Patriot Web is where the rest actually live. */}
+      {hidden > 0 && (
+        <p className="mt-1.5 ml-20 text-[0.6875rem] leading-relaxed text-muted-foreground">
+          Showing the {visible.length} closest to your current time.{" "}
+          {allUrl ? (
+            <a
+              href={allUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
+            >
+              All {sections.length} sections of {code} on Patriot Web
+            </a>
+          ) : (
+            <>All {sections.length} are listed on Patriot Web</>
+          )}
+          .
+        </p>
+      )}
+    </details>
   );
 }

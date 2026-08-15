@@ -13,6 +13,7 @@ import {
 import { BottleneckCard } from "@/components/BottleneckCard";
 import { GapMap } from "@/components/GapMap";
 import { Button } from "@/components/ui/button";
+import type { DelayImpact } from "@/lib/bottlenecks";
 import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Bottleneck, SkillGap, StudentAudit } from "@/lib/types";
 
@@ -77,6 +78,11 @@ export interface DiagnosisScreenProps {
   titles?: Record<string, string>;
   /** course code → its direct prerequisites, for the chain's left-hand node. */
   prereqsOf?: Record<string, string[]>;
+  /**
+   * course code → what one term of delay costs it (§11.1's chain arithmetic).
+   * Computed in app/page.tsx, which is the only place holding the prereq graph.
+   */
+  delays?: Record<string, DelayImpact>;
   postingCount?: number;
   /**
    * Critical bottlenecks with no section next term. §11.3 step 2 requires these
@@ -94,6 +100,7 @@ export function DiagnosisScreen({
   gaps,
   titles,
   prereqsOf,
+  delays,
   postingCount,
   unofferedCritical = [],
   onContinue,
@@ -195,6 +202,7 @@ export function DiagnosisScreen({
                 titles={titles}
                 completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
                 showChain={heroHasChain && b.code === hero?.code}
+                delay={delays?.[b.code]}
               />
             ))}
           </Group>
@@ -223,6 +231,7 @@ export function DiagnosisScreen({
                 titles={titles}
                 completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
                 showChain={heroHasChain && b.code === hero?.code}
+                delay={delays?.[b.code]}
               />
             ))}
           </Group>

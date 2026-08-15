@@ -304,6 +304,138 @@ function transitiveDependents(node: string, adj: Map<string, string[]>): string[
 }
 
 // ---------------------------------------------------------------------------
+// Cost of delay
+// ---------------------------------------------------------------------------
+
+/** Guard for the path walk below. The scope is `remainingRequired` (single
+ *  digits for a real audit), so this only fires on a catalog we have not seen. */
+const MAX_WALK_STEPS = 50_000;
+
+/**
+ * Longest distance IN EDGES from `start` to every node reachable from it, over
+ * the same restricted reverse graph §11.1 uses.
+ *
+ * `longestChain` answers "how deep is the deepest path" — one number. This
+ * answers "how far back is each individual course", which is what tells us
+ * WHICH dependents fall outside the window when a course slips a term.
+ *
+ * Relaxation, not enumeration: a node is only re-walked when we reach it by a
+ * strictly longer path, so the work is bounded by the number of improvements
+ * rather than by the number of paths. `onPath` is the same back-edge guard
+ * `longestChain` carries, for the same reason — §6 runs this inside a React
+ * render, so a cycle in data we did not author is a white screen.
+ */
+function longestDistancesFrom(
+  start: string,
+  adj: Map<string, string[]>,
+): Map<string, number> {
+  const best = new Map<string, number>();
+  const onPath = new Set<string>();
+  let steps = 0;
+
+  const walk = (node: string, depth: number): void => {
+    if (steps++ > MAX_WALK_STEPS) return;
+    if (onPath.has(node)) return; // back edge
+    onPath.add(node);
+    for (const next of adj.get(node) ?? []) {
+      if (next === start) continue; // a cycle back onto the head is not a dependent
+      const prev = best.get(next);
+      if (prev !== undefined && prev >= depth + 1) continue;
+      best.set(next, depth + 1);
+      walk(next, depth + 1);
+    }
+    onPath.delete(node);
+  };
+
+  walk(start, 0);
+  return best;
+}
+
+export interface DelayImpact {
+  /** Terms the course plus everything behind it occupies, taken NEXT term. */
+  termsNeeded: number;
+  /** Fall and spring terms the student has left — `termsRemaining`. */
+  termsAvailable: number;
+  /**
+   * Still-needed courses that no longer fit if this course slips ONE term, and
+   * that DO fit if it is taken next term. This is the cost of the delay itself.
+   * Deepest first. Always a subset of `Bottleneck.dependents`.
+   */
+  atRisk: string[];
+  /**
+   * Still-needed courses already outside the window even if this course is taken
+   * next term. Kept separate from `atRisk` deliberately: telling a student a
+   * course "breaks if you delay" when it is already unreachable is a false claim
+   * in the reassuring direction, and it is the sentence that sends them to an
+   * advisor a term too late. Disjoint from `atRisk`.
+   */
+  beyondWindowNow: string[];
+}
+
+/**
+ * What one term of delay actually costs, per course.
+ *
+ * §2's thesis is "a prereq missed in fall pushes an entire downstream sequence
+ * back a full year", and §11.1 already computes everything needed to say that
+ * about THIS student's own courses rather than in general. A course at distance
+ * `d` behind this one is taken in term `1 + d` if this one is taken next term,
+ * and in term `2 + d` if it slips — so it falls outside the window exactly when
+ * `2 + d > termsAvailable`.
+ *
+ * Chain arithmetic only. `offeringPenalty` is deliberately not folded in here:
+ * it would need each dependent's own offering pattern, and the honest version of
+ * that claim is the one `Bottleneck.reason` already makes. This is the same
+ * inequality §11.1 classifies urgency with, spelled out per course — not a
+ * second opinion about the same course.
+ *
+ * Pure and injectable on `now`, like `computeBottlenecks`.
+ */
+export function delayImpact(
+  code: string,
+  audit: StudentAudit,
+  prereqs: PrereqGraph,
+  now: Date = new Date(),
+): DelayImpact {
+  const head = normalizeCode(code);
+  const scope = new Set(remainingRequired(audit));
+  const termsAvailable = termsRemaining(audit, now);
+
+  if (!scope.has(head)) {
+    return { termsNeeded: 1, termsAvailable, atRisk: [], beyondWindowNow: [] };
+  }
+
+  const adj = buildReverseGraph(scope, prereqs);
+  const distances = longestDistancesFrom(head, adj);
+
+  let deepest = 0;
+  const atRisk: { code: string; distance: number }[] = [];
+  const beyondWindowNow: { code: string; distance: number }[] = [];
+
+  for (const [dependent, distance] of distances) {
+    if (distance > deepest) deepest = distance;
+    // Taken next term, this dependent lands in term 1 + distance; a term later,
+    // in term 2 + distance.
+    if (1 + distance > termsAvailable) {
+      beyondWindowNow.push({ code: dependent, distance });
+    } else if (2 + distance > termsAvailable) {
+      atRisk.push({ code: dependent, distance });
+    }
+  }
+
+  const deepestFirst = (
+    a: { code: string; distance: number },
+    b: { code: string; distance: number },
+  ) => b.distance - a.distance || a.code.localeCompare(b.code);
+
+  return {
+    termsNeeded: 1 + deepest,
+    termsAvailable,
+    atRisk: atRisk.sort(deepestFirst).map((a) => a.code),
+    beyondWindowNow: beyondWindowNow.sort(deepestFirst).map((a) => a.code),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Reason copy
 // ---------------------------------------------------------------------------
 

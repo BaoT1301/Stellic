@@ -24,10 +24,21 @@ const outDir = path.join(root, ".cache", "screens");
 const WIDTH = 390;
 const HEIGHT = 844;
 
+// Windows first (the machine this was written on), then macOS, then Linux.
+// existsSync() only ever matches one platform's paths, so the order is cosmetic.
 const BROWSERS = [
   "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
   "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  "/usr/bin/microsoft-edge",
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium",
+  "/usr/bin/chromium-browser",
+  "/snap/bin/chromium",
 ];
 
 let failures = 0;

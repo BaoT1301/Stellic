@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 
 import { Cart } from "@/components/Cart";
 import { PreferenceToggles } from "@/components/PreferenceToggles";
-import { ScheduleCard } from "@/components/ScheduleCard";
+import { ScheduleCard, weekBlocksFor } from "@/components/ScheduleCard";
+import { weekBounds } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
+import { rmpUrl } from "@/lib/rmp";
 import { NEXT_TERM_LABEL } from "@/lib/types";
-import type { Preferences, ScheduleOption } from "@/lib/types";
+import type { Preferences, ScheduleOption, Section } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -71,6 +73,14 @@ export interface ScheduleOptionsProps {
   skillDemand?: Record<string, number>;
   /** How many postings the student actually pasted. */
   postingCount?: number;
+  /**
+   * course code → every Fall 2026 section of that course, for the cart's section
+   * picker. Comes from the raw catalog in app/page.tsx, NOT from the builder's
+   * set: §11.3's `getEligibleCourses` caps at four sections per course and
+   * pre-filters by preferences, so the pool the student should be able to see is
+   * wider than the pool the search used.
+   */
+  alternatesOf?: Record<string, Section[]>;
   preferences: Preferences;
   onPreferencesChange: (next: Preferences) => void;
   onRegenerate: () => void;
@@ -92,6 +102,7 @@ export function ScheduleOptions({
   dependentsOf,
   skillDemand,
   postingCount,
+  alternatesOf,
   preferences,
   onPreferencesChange,
   onRegenerate,
@@ -102,13 +113,83 @@ export function ScheduleOptions({
   dirty = false,
 }: ScheduleOptionsProps) {
   const cartRef = useRef<HTMLDivElement>(null);
-  const selected = options.find((o) => o.id === selectedId) ?? null;
+
+  /**
+   * `${optionId}|${code}` → the CRN the student picked instead of the one the
+   * builder chose. Held here rather than in app/page.tsx because this is where
+   * `selected` already lives.
+   *
+   * The `builtFrom` field is what expires it. A regenerate replaces the `options`
+   * array, and an override that outlived the schedule it belonged to would put a
+   * CRN in the cart that no card on screen offers. Storing the array it was
+   * captured against and comparing by identity DERIVES that, rather than clearing
+   * it from an effect — a setState inside an effect body cascades a second render
+   * pass on every rebuild, and React's lint rule rejects it outright.
+   */
+  const [overrideState, setOverrideState] = useState<{
+    builtFrom: ScheduleOption[];
+    map: Record<string, string>;
+  }>({ builtFrom: options, map: {} });
+  // useMemo, not a bare conditional: a fresh {} on the falsy branch every render
+  // would change the identity of the derived-cart memo's dependencies each pass.
+  const overrides = useMemo(
+    () => (overrideState.builtFrom === options ? overrideState.map : {}),
+    [overrideState, options],
+  );
+
+  const baseSelected = options.find((o) => o.id === selectedId) ?? null;
+
+  /**
+   * Every option with swapped sections substituted. Credits, gaps closed,
+   * bottlenecks cleared and slots used are all section-independent, so nothing
+   * numeric can drift when a section changes — only the CRN, the meeting time,
+   * the instructor and their professor link.
+   *
+   * The substitution is applied to the CARDS as well as the cart, deliberately.
+   * With it in the cart alone, Option A's row read "CS 262 · TR 9:00 am · 79379"
+   * while the cart six inches below read "MW 3:00 pm · 79435" — the same product
+   * stating two different meeting times for one course, which is the §0 rule 7
+   * failure rather than a cosmetic one.
+   */
+  const displayOptions = useMemo(
+    () =>
+      options.map((option) => {
+        const swapped = option.courses.map((course) => {
+          const crn = overrides[`${option.id}|${course.code}`];
+          if (!crn) return course;
+          const section = (alternatesOf?.[course.code] ?? []).find((s) => s.crn === crn);
+          if (!section) return course;
+          return { ...course, section, rmpUrl: rmpUrl(section.instructor) };
+        });
+        return swapped.some((c, i) => c !== option.courses[i])
+          ? { ...option, courses: swapped }
+          : option;
+      }),
+    [options, overrides, alternatesOf],
+  );
+
+  const selected = displayOptions.find((o) => o.id === selectedId) ?? null;
 
   useEffect(() => {
     if (selected) {
       cartRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-  }, [selected]);
+    // Only on which card is selected — re-running on every section swap would
+    // yank the page while the student is comparing times inside the picker.
+  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * ONE vertical scale for all three grids. Computed across every option's
+   * sections, so the cards are directly comparable; see WeekGrid's header for why
+   * per-card bounds would be worse than no grid at all.
+   */
+  const week = useMemo(
+    () =>
+      weekBounds(
+        displayOptions.flatMap((option) => weekBlocksFor(option, requiredCodes)),
+      ) ?? undefined,
+    [displayOptions, requiredCodes],
+  );
 
   return (
     <section className="animate-in fade-in duration-500">
@@ -168,7 +249,7 @@ export function ScheduleOptions({
             isWorking && "opacity-60 transition-opacity",
           )}
         >
-          {options.map((option, i) => (
+          {displayOptions.map((option, i) => (
             <ScheduleCard
               key={option.id}
               option={option}
@@ -184,8 +265,9 @@ export function ScheduleOptions({
               diff={
                 i === 0
                   ? undefined
-                  : diffFromBase(options[0]!, option, LETTERS[0]!)
+                  : diffFromBase(displayOptions[0]!, option, LETTERS[0]!)
               }
+              week={week}
               selected={option.id === selectedId}
               onSelect={() =>
                 onSelect(option.id === selectedId ? null : option.id)
@@ -197,7 +279,24 @@ export function ScheduleOptions({
 
       <div ref={cartRef} className="mt-8">
         {selected ? (
-          <Cart option={selected} onClear={() => onSelect(null)} />
+          <Cart
+            option={selected}
+            alternatesOf={alternatesOf}
+            requiredCodes={requiredCodes}
+            preferences={preferences}
+            onSwapSection={(code, crn) => {
+              const key = `${selected.id}|${code}`;
+              const next = { ...overrides };
+              // Picking the builder's own section back out removes the override
+              // rather than pinning it, so "no override" and "the same CRN" stay
+              // the same state.
+              const original = baseSelected?.courses.find((c) => c.code === code);
+              if (!original || original.section.crn === crn) delete next[key];
+              else next[key] = crn;
+              setOverrideState({ builtFrom: options, map: next });
+            }}
+            onClear={() => onSelect(null)}
+          />
         ) : (
           options.length > 0 && (
             <p className="rounded-xl border border-dashed border-foreground/20 px-5 py-6 text-center text-sm text-muted-foreground">

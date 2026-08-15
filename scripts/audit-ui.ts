@@ -8,8 +8,11 @@
  * claim, and "targets WCAG 2.1 AA" is only sayable in the write-up if something
  * actually checked.
  *
- * Uses the Microsoft Edge already installed on the machine via Playwright's
- * `channel`, so there is no bundled-browser download and nothing ships to prod.
+ * Uses a browser already installed on the machine via Playwright's `channel`,
+ * so there is no bundled-browser download and nothing ships to prod. Tries
+ * Edge first (the machine this was written on), then Chrome, then Chromium —
+ * `channel` has no "does this exist" check, so launchBrowser() below just
+ * attempts each in order and keeps the first that starts.
  *
  * Server must be running.  Then:  npx tsx scripts/audit-ui.ts
  * Screens land in .cache/screens/ (gitignored). Exits non-zero on a serious
@@ -231,9 +234,28 @@ async function walk(browser: Browser, vp: Viewport) {
   await context.close();
 }
 
+/**
+ * Try each installed-browser channel in turn, keep the first that launches.
+ * "msedge" only resolves on a machine with Edge installed (the one this was
+ * written on); "chrome" and "chromium" cover macOS and most Linux setups.
+ * Playwright's own bundled Chromium is the last resort so this never hard-fails
+ * just because none of the three named channels happen to be present.
+ */
+async function launchBrowser(): Promise<Browser> {
+  const channels = ["msedge", "chrome", "chromium"] as const;
+  for (const channel of channels) {
+    try {
+      return await chromium.launch({ channel, headless: true });
+    } catch {
+      // try the next channel
+    }
+  }
+  return chromium.launch({ headless: true });
+}
+
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  const browser = await chromium.launch({ channel: "msedge", headless: true });
+  const browser = await launchBrowser();
   try {
     for (const vp of VIEWPORTS) await walk(browser, vp);
   } finally {

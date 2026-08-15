@@ -15,7 +15,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-import { computeBottlenecks } from "../lib/bottlenecks";
+import { computeBottlenecks, delayImpact } from "../lib/bottlenecks";
 import { computeSkillGaps, type DemandedSkill } from "../lib/gaps";
 import {
   buildSchedules,
@@ -91,6 +91,47 @@ check(
   "reason strings carry no NaN",
   bottlenecks.every((b) => !b.reason.includes("NaN")),
   bottlenecks[0]?.reason ?? "n/a",
+);
+
+// --- §11.1, cost of delay --------------------------------------------------
+// The "What if you take it later?" panel on a critical BottleneckCard. Its
+// arithmetic has to stay consistent with the urgency label sitting right above
+// it, or the card argues with itself in front of a registrar.
+const delays = bottlenecks.map((b) => ({ b, d: delayImpact(b.code, audit, prereqs) }));
+check(
+  "termsNeeded is chainDepth + 1 for every row",
+  delays.every(({ b, d }) => d.termsNeeded === b.chainDepth + 1),
+  "the distance map and longestChain agree on depth",
+);
+check(
+  "atRisk and beyondWindowNow are subsets of dependents",
+  delays.every(({ b, d }) =>
+    [...d.atRisk, ...d.beyondWindowNow].every((c) => b.dependents.includes(c)),
+  ),
+  "no invented course on the delay panel",
+);
+check(
+  "atRisk and beyondWindowNow are disjoint",
+  delays.every(({ d }) => d.atRisk.every((c) => !d.beyondWindowNow.includes(c))),
+  "a course is never both 'breaks if you delay' and 'already unreachable'",
+);
+check(
+  "flexible rows have nothing at risk",
+  delays
+    .filter(({ b }) => b.urgency === "flexible")
+    .every(({ d }) => d.atRisk.length === 0 && d.beyondWindowNow.length === 0),
+  "delay panel only appears where urgency is in question",
+);
+check(
+  "at least one urgent row shows a real cost of delay",
+  delays.some(({ b, d }) => b.urgency !== "flexible" && d.atRisk.length > 0),
+  delays
+    .filter(({ d }) => d.atRisk.length > 0 || d.beyondWindowNow.length > 0)
+    .map(
+      ({ b, d }) =>
+        `${b.code} needs ${d.termsNeeded}/has ${d.termsAvailable}: delay risks [${d.atRisk.join(" ") || "-"}], already past [${d.beyondWindowNow.join(" ") || "-"}]`,
+    )
+    .join(" · ") || "none — the panel would never render",
 );
 
 // --- §11.2 -----------------------------------------------------------------

@@ -1139,6 +1139,113 @@ deterministic parser beat the model on the real data, and we have the diff.
 Note: `tsx` does not read `.env.local`; only `next dev` does. Scripts needing a
 key take it from the environment (`$env:OPENAI_API_KEY="..."` in pwsh).
 
+### Three additions on Aug 14, all UI-only
+
+No re-scrape, no re-embed, no change to `lib/types.ts` or `data/*.json`. Two of the
+five judging criteria are design/experience and how-well-it's-built, and all three
+of these render data the committed JSON already carried and nothing showed.
+
+1. **`components/WeekGrid.tsx` — the week, drawn.** Compact on each option card,
+   full size in the cart. It answers §16's "the three option cards are
+   self-similar": three near-identical course lists become three visibly different
+   weeks. It also makes the card's existing "✓ No time conflicts" claim checkable
+   at a glance instead of taken on trust.
+   **The vertical scale is computed once across every option and passed in.**
+   Per-card bounds would draw three grids that look comparable while using three
+   different scales. Async sections are never placed (§9.1 — 221 of 985 have no
+   meeting time); they are named under the grid. The grid is `aria-hidden`: every
+   surface that renders it already prints each meeting through `formatMeeting`, so
+   exposing it would read the schedule twice. Block colour is
+   `ScheduleCard.rowRole` (now exported), so grid and row tag cannot disagree.
+2. **Section swap in the cart.** 117 committed courses have more than one Fall
+   2026 section and the builder's pick used to be final — "the course is right,
+   the 9 a.m. is not" is the one real decision the toggles cannot express.
+   Alternates come from the raw catalog, not from `getEligibleCourses` (which caps
+   at four sections and pre-filters by preferences). A conflicting alternate is
+   shown DISABLED and names the course it collides with, using
+   `sectionsConflict` — so `conflicts === []` (§8) stays true by construction and
+   the checker is visibly doing work. A section that contradicts a live toggle is
+   selectable and says so. The override is applied to the selected CARD as well as
+   the cart: with it in the cart alone, the card read "TR 9:00 am · 79379" while
+   the cart read "MW 3:00 pm · 79435" for the same course.
+3. **"What if you take it later?" on urgent bottleneck cards.** `delayImpact` in
+   `lib/bottlenecks.ts` reuses the restricted reverse graph and adds a
+   longest-distance map beside `longestChain` (same back-edge guard, same reason).
+   §2's thesis was stated in general while every number needed to say it about
+   this audit already existed. On the sample student: CS 262 needs 3 terms and she
+   has 2 — CS 367 breaks if it slips, and CS 471 is already outside the window.
+   `atRisk` and `beyondWindowNow` are deliberately separate fields: saying "this
+   breaks if you delay" about a course that is already unreachable is a false claim
+   in the reassuring direction. No graduation date and no term name is ever
+   asserted, because `expectedGraduation` is nullable and `termsRemaining` falls
+   back to a credit-pace estimate.
+
+Verified: `smoke-pipeline.ts` passes with four new §11.1 assertions
+(`termsNeeded === chainDepth + 1`, both lists ⊆ `dependents`, the two lists
+disjoint, flexible rows empty) · `next build` clean · axe WCAG 2.1 AA reports
+**zero violations at any impact level** at 1440px and 390px across the diagnosis,
+schedules and cart screens with both new disclosures open · no horizontal overflow
+at 390px · every new control ≥ 24×24 (SC 2.5.8) · a swap changes the CRN and the
+`/register` link, and leaves credits and gap counts untouched.
+
+axe found one real defect in this work and it is worth keeping in mind: a 10px
+time label at `opacity-70` over `--critical-soft` fails SC 1.4.3. Weight, not
+opacity, carries secondary hierarchy in the grid now. Note also that scanning
+mid-`animate-in` reports the entire screen as low contrast — let the 500ms fade
+settle before believing an axe run.
+
+The harness is now cross-platform. `scripts/audit-ui.ts` tries
+`msedge → chrome → chromium →` Playwright's bundled Chromium in turn; the three
+puppeteer scripts carry macOS and Linux paths beside the Windows ones. `audit-ui`
+reports **AUDIT CLEAN** on macOS — no axe violations, no layout problems — and
+`check-mobile` reports no horizontal scroll and no overflow anywhere.
+
+Both harnesses flag one tap target under 24×24: the **`sr-only` `<input
+type="file">`** in `AuditUpload.tsx`, which stays mounted after step 2 and so
+appears on the schedules screen too. It is not a real SC 2.5.8 failure — the
+visible target is the "Choose a file" button beside it — and `audit-ui` correctly
+files it as a NOTE rather than a violation. `check-mobile` counts it as a FAIL;
+that is the harness lacking an `sr-only` exemption, not a defect. Do not "fix" it
+by making the input visible.
+
+### Four follow-ups to the Aug 14 additions
+
+Found by re-verifying the three additions above against the committed data.
+
+1. **The cart's section picker is capped at 6** (`MAX_VISIBLE_SECTIONS`), of which
+   at most 2 may be clashing (`MAX_VISIBLE_CLASHES`), with the current section
+   pinned first and the rest chronological. It previously rendered EVERY section:
+   fine for CS 405 (11 next term) and absurd for **ENGH 101 (74)** or **ENGH 302
+   (140)**, both of which are in `getEligibleCourses` for the sample audit and held
+   off a card only by `electiveLevelOk`'s 300-level floor — one manual-entry audit
+   under `JUNIOR_STANDING_CREDITS` away from a 140-button list inside the cart. The
+   clash cap exists because ordering by time distance alone put four disabled rows
+   in CS 405's six: the sections nearest your current time are the ones most likely
+   to collide with the rest of your week. Overflow goes to `bannerCourseUrl`, a new
+   helper for Banner's `bwckctlg.p_disp_listcrse/` — ✅ verified live, HTTP 200,
+   and it returns exactly the 11 CRNs `data/courses.json` carries for CS 405.
+2. **`preferenceNotes` in `lib/schedules.ts`** now backs both `matchesPreferences`
+   and the picker's "against your preferences" line. The picker had reimplemented
+   the morning test as `section.startTime < "10:00"` — a STRING compare, which ranks
+   9 a.m. after 10 a.m. and worked only because §9.1 happens to zero-pad the hour.
+   This is the defect the picker's own doc comment warns about for
+   `sectionsConflict`, committed one line below it.
+3. **The asynchronous note no longer hides with the grid.** On a card, `week` is the
+   scale shared across all options, so an all-async option rendered an empty
+   bordered box; in the cart, `weekBounds` returns null for that set and took the
+   "these are asynchronous" sentence down with it — exactly when the student most
+   needs to be told why the week is empty. Both now gate the grid and the note
+   separately.
+4. **`DelayCost`'s summer/overload caveat always shows.** It was conditional on
+   `beyondWindowNow`, but `termsRemaining` excludes summer outright (§11.1), so it
+   is the same assumption behind `atRisk` too.
+
+Re-verified after: `next build` clean · `smoke-pipeline.ts` ALL CHECKS PASSED ·
+`audit-ui` AUDIT CLEAN · the picker renders 6 of 11 for CS 405 with a working
+Patriot Web link, disables the two clashing rows and names what they collide with,
+and a swap moves the CRN on the card, in the cart and in the `/register` link at
+once · no horizontal overflow at 390px with every picker open · no page errors.
+
 ---
 
 **The biggest remaining risk is `sample-audit.pdf`.** It is authored on Aug 14, before the pipeline that consumes it exists, and it silently determines whether the never-cut feature is visible at all. Zero critical bottlenecks → the bottleneck story vanishes from the schedule cards. Four or more → `mustTake` exceeds `targetCredits`, the combo set is empty, and State 4 renders nothing — a blank screen in the demo video. `slots = 0` → all three strategies score identically. The mitigation is already folded in: §11.3 steps 2/3/8 make an empty result unreachable, and Aug 17 carries a 30-minute checkpoint to tune **the PDF, not the algorithm**. Build the floor, then tune the input against it.

@@ -1,5 +1,6 @@
 import { Check, ChevronDown, ExternalLink, TriangleAlert } from "lucide-react";
 
+import { WeekGrid, weekBounds, type WeekBlock } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
 import { normalizeCode } from "@/lib/bottlenecks";
 import { NEXT_TERM_BANNER_CODE, NEXT_TERM_LABEL } from "@/lib/types";
@@ -76,14 +77,30 @@ export function bannerSectionUrl(crn: string): string {
 }
 
 /**
+ * EVERY section of one course on Banner 8 — the escape hatch for the cart's
+ * section picker, which caps how many it lists.
+ *
+ * Same trailing-slash rule as above; without it this procedure 404s too.
+ * ✅ Verified live against `bwckctlg.p_disp_listcrse/` for CS 405: HTTP 200 and
+ * exactly the 11 CRNs `data/courses.json` carries for it.
+ *
+ * A code that is not "DEPT NNN" yields no URL rather than a broken link.
+ */
+export function bannerCourseUrl(code: string): string | null {
+  const m = /^([A-Z]{2,4}) (\d{3})$/.exec(normalizeCode(code));
+  if (!m) return null;
+  return `https://patriotweb.gmu.edu/pls/prod/bwckctlg.p_disp_listcrse/?term_in=${NEXT_TERM_BANNER_CODE}&subj_in=${m[1]}&crse_in=${m[2]}&schd_in=`;
+}
+
+/**
  * Which of the three things a row can be. "unknown" is the honest state before
  * `requiredCodes` is threaded: labelling a required course "elective" would be
  * a false claim about the student's degree (§0 rule 7), so we print no tag at
  * all rather than guess.
  */
-type RowRole = "waiting" | "required" | "elective" | "unknown";
+export type RowRole = "waiting" | "required" | "elective" | "unknown";
 
-function rowRole(course: CourseRow, requiredCodes?: Set<string>): RowRole {
+export function rowRole(course: CourseRow, requiredCodes?: Set<string>): RowRole {
   if (course.isBottleneck) return "waiting";
   if (!requiredCodes || requiredCodes.size === 0) return "unknown";
   return requiredCodes.has(normalizeCode(course.code))
@@ -111,6 +128,33 @@ const ROLE_TAG: Record<
     icon: false,
   },
 };
+
+/**
+ * Grid block colour follows the row tag exactly, so the week and the list cannot
+ * tell the student two different things about the same course. "unknown" is the
+ * pre-`requiredCodes` state and takes the neutral tone rather than guessing.
+ */
+const ROLE_TONE: Record<RowRole, WeekBlock["tone"]> = {
+  waiting: "critical",
+  required: "required",
+  elective: "elective",
+  unknown: "required",
+};
+
+/** Every course on the card as a placeable (or async, hence skipped) block. */
+export function weekBlocksFor(
+  option: ScheduleOption,
+  requiredCodes?: Set<string>,
+): WeekBlock[] {
+  return option.courses.map((course) => ({
+    code: course.code,
+    days: course.section.days,
+    startTime: course.section.startTime,
+    endTime: course.section.endTime,
+    tone: ROLE_TONE[rowRole(course, requiredCodes)],
+    label: course.section.startTime ? formatTime(course.section.startTime) : undefined,
+  }));
+}
 
 /**
  * Line 1 of the disclosure: why this course is on the card at all. Every branch
@@ -179,6 +223,13 @@ export interface ScheduleCardProps {
   postingCount?: number;
   /** "vs Option A: -CS 484, +STAT 354". Computed by ScheduleOptions. */
   diff?: string;
+  /**
+   * The vertical scale for the week grid, computed ONCE across every option by
+   * ScheduleOptions. Three cards on one screen must share it or the grids invite
+   * a comparison they get wrong — see the note in WeekGrid. Omit it and the grid
+   * simply does not render.
+   */
+  week?: { startHour: number; endHour: number };
   selected?: boolean;
   onSelect: () => void;
 }
@@ -195,10 +246,20 @@ export function ScheduleCard({
   skillDemand,
   postingCount,
   diff,
+  week,
   selected = false,
   onSelect,
 }: ScheduleCardProps) {
   const cleared = option.bottlenecksCleared;
+  const blocks = weekBlocksFor(option, requiredCodes);
+  // `week` is the scale shared across ALL options, so it is defined even for a
+  // card whose own courses are every one of them asynchronous — and WeekGrid
+  // then renders nothing, leaving an empty bordered box. weekBounds returns null
+  // for exactly that set, so it is the honest test of "is there a week to draw".
+  const hasWeek = week !== undefined && weekBounds(blocks) !== null;
+  const asyncCodes = option.courses
+    .filter((c) => c.section.days === "" || c.section.startTime === "")
+    .map((c) => c.code);
 
   return (
     <article
@@ -230,6 +291,40 @@ export function ScheduleCard({
           <p className="mt-2 font-mono text-xs text-muted-foreground">{diff}</p>
         )}
       </header>
+
+      {/* The week, above the list. The card already claims "No time conflicts"
+          in the stat block below; this is where that claim becomes checkable at
+          a glance, and it is what makes three cards look like three different
+          semesters rather than three copies of one. */}
+      {(hasWeek || asyncCodes.length > 0) && (
+        <div className="border-b border-rule px-5 py-3.5">
+          {hasWeek && week && (
+            <WeekGrid
+              blocks={blocks}
+              startHour={week.startHour}
+              endHour={week.endHour}
+            />
+          )}
+          {/* Outside the grid condition on purpose: an all-asynchronous option
+              draws no grid at all, and that is precisely when the student most
+              needs to be told why the week is empty. */}
+          {asyncCodes.length > 0 && (
+            <p
+              className={cn(
+                "text-[0.6875rem] leading-relaxed text-muted-foreground",
+                hasWeek && "mt-2",
+              )}
+            >
+              <span className="font-mono">{asyncCodes.join(", ")}</span>{" "}
+              {asyncCodes.length === 1 ? "is" : "are"} asynchronous — no set
+              meeting time
+              {hasWeek
+                ? `, so ${asyncCodes.length === 1 ? "it is" : "they are"} not on the grid.`
+                : ", so there is no week to draw."}
+            </p>
+          )}
+        </div>
+      )}
 
       <ul className="divide-y divide-rule">
         {option.courses.map((course) => {

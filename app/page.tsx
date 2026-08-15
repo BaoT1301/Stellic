@@ -9,8 +9,10 @@ import { JobPostingInput } from "@/components/JobPostingInput";
 import { ScheduleOptions } from "@/components/ScheduleOptions";
 import {
   computeBottlenecks,
+  delayImpact,
   normalizeCode,
   remainingRequired,
+  type DelayImpact,
 } from "@/lib/bottlenecks";
 import { computeSkillGaps, type DemandedSkill } from "@/lib/gaps";
 import {
@@ -18,7 +20,7 @@ import {
   getEligibleCourses,
   unofferedCriticals,
 } from "@/lib/schedules";
-import { NEXT_TERM_LABEL } from "@/lib/types";
+import { NEXT_TERM, NEXT_TERM_LABEL } from "@/lib/types";
 import type {
   Bottleneck,
   CatalogSkills,
@@ -27,6 +29,7 @@ import type {
   PrereqGraph,
   Requirement,
   ScheduleOption,
+  Section,
   SkillGap,
   StudentAudit,
 } from "@/lib/types";
@@ -114,10 +117,12 @@ export default function Home() {
 
   const [titles, setTitles] = useState<Record<string, string>>({});
   const [prereqsOf, setPrereqsOf] = useState<Record<string, string[]>>({});
+  const [delays, setDelays] = useState<Record<string, DelayImpact>>({});
   const [unoffered, setUnoffered] = useState<string[]>([]);
   const [electiveSlots, setElectiveSlots] = useState(1);
 
   const [options, setOptions] = useState<ScheduleOption[]>([]);
+  const [alternates, setAlternates] = useState<Record<string, Section[]>>({});
   const [preferences, setPreferences] = useState<Preferences>(defaultPreferences);
   const [appliedPreferences, setAppliedPreferences] =
     useState<Preferences>(defaultPreferences);
@@ -326,6 +331,17 @@ export default function Home() {
       ),
     );
 
+    // What one term of delay costs, per course. Only the courses whose urgency
+    // is actually in question — a "flexible" row has nothing behind it, so
+    // `atRisk` would be empty and the disclosure would not render anyway.
+    setDelays(
+      Object.fromEntries(
+        nextBottlenecks
+          .filter((b) => b.urgency !== "flexible")
+          .map((b) => [b.code, delayImpact(b.code, nextAudit, prereqs)]),
+      ),
+    );
+
     // §11.3 step 1 decides registrability from SECTIONS, so a critical course
     // with no Fall 2026 section belongs on the diagnosis screen as "see your
     // advisor", never on a schedule card.
@@ -377,6 +393,32 @@ export default function Home() {
       courses,
       prereqs,
       catalogSkills,
+    );
+
+    // Every Fall 2026 section of every course that made a card, for the cart's
+    // section picker. Straight off the catalog rather than out of the builder:
+    // §11.3 caps `getEligibleCourses` at four sections per course and pre-filters
+    // by preferences, so the pool the student may choose from is deliberately
+    // wider than the pool the search enumerated over.
+    const onCards = new Set(combos.flatMap((c) => c.courses.map((row) => row.code)));
+    setAlternates(
+      Object.fromEntries(
+        courses
+          .filter((course) => onCards.has(normalizeCode(course.code)))
+          .map((course) => [
+            normalizeCode(course.code),
+            (course.sections ?? [])
+              .filter((s) => s.term === NEXT_TERM)
+              // Same ordering getEligibleCourses uses: earliest first,
+              // asynchronous last, CRN as the deterministic tiebreak.
+              .sort(
+                (a, b) =>
+                  Number(a.startTime === "") - Number(b.startTime === "") ||
+                  a.startTime.localeCompare(b.startTime) ||
+                  a.crn.localeCompare(b.crn),
+              ),
+          ]),
+      ),
     );
 
     let next: ScheduleOption[] = [];
@@ -466,6 +508,7 @@ export default function Home() {
               gaps={gaps}
               titles={titles}
               prereqsOf={prereqsOf}
+              delays={delays}
               postingCount={filledPostings || undefined}
               unofferedCritical={unoffered}
               onContinue={() => runBuildSchedules(preferences)}
@@ -485,6 +528,7 @@ export default function Home() {
               dependentsOf={dependentsOf}
               skillDemand={skillDemand}
               postingCount={filledPostings || undefined}
+              alternatesOf={alternates}
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onRegenerate={() => runBuildSchedules(preferences)}

@@ -142,14 +142,33 @@ function heavinessOf(course: Course): number {
 }
 
 function matchesPreferences(section: Section, prefs: Preferences): boolean {
-  if (prefs.inPersonOnly && section.modality !== "in-person") return false;
+  return preferenceNotes(section, prefs).length === 0;
+}
+
+/**
+ * Every way this section contradicts the live toggles, in words.
+ *
+ * `matchesPreferences` is the boolean the search filters on; the cart's section
+ * picker needs the same test but has to SAY which preference a section breaks,
+ * because §13 keeps such a section selectable rather than hiding it. Deriving
+ * both from one list is the point: a second copy of "before 10:00" in the UI
+ * would compare `"9:00" < "10:00"` as strings and rank 9 a.m. as late, and it
+ * only stayed correct because §9.1 happens to zero-pad the hour.
+ */
+export function preferenceNotes(section: Section, prefs: Preferences): string[] {
+  const notes: string[] = [];
+  if (prefs.inPersonOnly && section.modality !== "in-person") {
+    notes.push(section.modality);
+  }
   if (prefs.noMornings) {
     const start = toMinutes(section.startTime);
     // An asynchronous section has no meeting time, so it cannot be a morning
     // class. Dropping it here would make "no mornings" delete online courses.
-    if (start !== null && start < MORNING_CUTOFF_MINUTES) return false;
+    if (start !== null && start < MORNING_CUTOFF_MINUTES) {
+      notes.push("starts before 10:00");
+    }
   }
-  return true;
+  return notes;
 }
 
 /**
