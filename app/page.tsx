@@ -140,6 +140,10 @@ export default function Home() {
   const [postings, setPostings] = useState<string[]>(["", "", ""]);
   const [demanded, setDemanded] = useState<DemandedSkill[]>([]);
   const [audit, setAudit] = useState<StudentAudit | null>(null);
+  // True only when the student uploaded their OWN file and got the fixture
+  // back. See handleFile — handleUseSample never sets it, which is what keeps
+  // §12's no-badge rule intact on the path a judge actually takes.
+  const [auditIsFixture, setAuditIsFixture] = useState(false);
   const [bottlenecks, setBottlenecks] = useState<Bottleneck[]>([]);
   const [gaps, setGaps] = useState<SkillGap[]>([]);
 
@@ -294,20 +298,49 @@ export default function Home() {
 
   // -- Step 2 --------------------------------------------------------------
 
-  /** Shared by the dropzone and the "use the sample audit" shortcut. */
+  /**
+   * Shared by the dropzone and the "use the sample audit" shortcut.
+   *
+   * Returns `degraded` rather than logging it. When the route degrades on this
+   * particular endpoint, the fixture it serves is a whole other person's
+   * academic record — major, credits, courses taken — and the screens that
+   * follow present it as the student's own without qualification. Every caller
+   * has to decide what that means for it; see the note above `handleFile`.
+   */
   async function parseAuditPdf(file: Blob, filename: string) {
     const form = new FormData();
     form.append("file", file, filename);
     const res = await fetch("/api/parse-audit", { method: "POST", body: form });
+    // §12 says this route never returns a non-2xx, so this is defence against
+    // the layer ABOVE it: a 413 from Vercel's 4.5 MB body cap is raised before
+    // the handler runs, and its body has no `audit` at all. Without this the
+    // `undefined` travelled on and threw somewhere inside runDiagnosis, where
+    // the toast blamed the file for a size limit.
+    if (!res.ok) throw new Error(`parse-audit returned ${res.status}`);
     const json = (await res.json()) as { audit: StudentAudit; degraded: boolean };
-    if (json.degraded) console.info("[parse-audit] served cached fixture");
-    return json.audit;
+    if (!json?.audit) throw new Error("parse-audit returned no audit");
+    return { audit: json.audit, degraded: json.degraded === true };
   }
 
+  /**
+   * The student's OWN transcript. This is the one entry point that surfaces
+   * `degraded`, and §12's "no cached-sample badge" rule is why the other two do
+   * not — the rule exists so a judge clicking the live link never meets
+   * something that reads as a broken app, and the judge's path is
+   * `handleUseSample`, which structurally cannot reach this.
+   *
+   * Here the calculus inverts. A real student on a dead key uploaded their real
+   * transcript and got back a stranger's degree progress labelled as theirs.
+   * Staying quiet about that is not politeness, it is the app asserting facts
+   * about someone's degree that it made up (§0 rule 7) — and unlike the other
+   * two fixtures, this one is a person's record rather than a list of skills.
+   */
   async function handleFile(file: File) {
     setIsWorking(true);
     try {
-      await runDiagnosis(await parseAuditPdf(file, file.name));
+      const { audit: parsed, degraded } = await parseAuditPdf(file, file.name);
+      if (degraded) console.info("[parse-audit] served cached fixture");
+      await runDiagnosis(parsed, { auditIsFixture: degraded });
     } catch (err) {
       console.error("[parse-audit] request failed", err);
       setIsWorking(false);
@@ -319,7 +352,9 @@ export default function Home() {
     setIsWorking(true);
     try {
       const blob = await fetch(SAMPLE_AUDIT_URL).then((r) => r.blob());
-      await runDiagnosis(await parseAuditPdf(blob, "sample-audit.pdf"));
+      // No `auditIsFixture` here even when the route degrades: the fixture IS
+      // the sample student, so it is exactly what this button promised.
+      await runDiagnosis((await parseAuditPdf(blob, "sample-audit.pdf")).audit);
     } catch (err) {
       console.error("[parse-audit] sample failed", err);
       setIsWorking(false);
@@ -340,7 +375,10 @@ export default function Home() {
 
   // -- Step 3 --------------------------------------------------------------
 
-  async function runDiagnosis(nextAudit: StudentAudit) {
+  async function runDiagnosis(
+    nextAudit: StudentAudit,
+    opts: { auditIsFixture?: boolean } = {},
+  ) {
     // The skills call was fired back on step 1; this is where we finally need it.
     const [{ courses, prereqs, catalogSkills }, skills] = await Promise.all([
       loadCatalog(),
@@ -421,6 +459,7 @@ export default function Home() {
     gapsRef.current = nextGaps;
 
     setAudit(nextAudit);
+    setAuditIsFixture(opts.auditIsFixture === true);
     setBottlenecks(nextBottlenecks);
     setGaps(nextGaps);
     setOptions([]);
@@ -594,6 +633,7 @@ export default function Home() {
               prereqsOf={prereqsOf}
               delays={delays}
               ineligibleCritical={ineligible}
+              auditIsFixture={auditIsFixture}
               onContinue={() => void buildOrToast(preferences)}
               onBack={() => setStep("audit")}
               isWorking={isWorking}

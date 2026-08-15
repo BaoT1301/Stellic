@@ -760,6 +760,31 @@ Every route: wrap in try/catch, log the error server-side, and return the matchi
 
 **No "showing cached sample results" badge.** §16 records with sample data and no live calls, so the badge can only ever fire in front of a judge clicking the live link, where it reads as a broken app rather than as honesty.
 
+> **ONE carve-out, added Aug 15: an audit the student uploaded themselves.** The
+> rule above is right about the other two fixtures and right about the judge's
+> path, and it stays. But the parse-audit fixture is not a list of skills — it is
+> **another person's academic record**, and the screens downstream present it as
+> the student's own: their major, their credits, their courses taken, their
+> graduation date. A real student who uploads a real transcript against a dead
+> key is not being shown a degraded feature, they are being shown someone else's
+> degree progress with their name on it. That is §0 rule 7 at its worst, and the
+> no-badge rule was never weighing this case, because §16 films the sample path.
+>
+> So the signal is gated on the ENTRY POINT, not on the route:
+>
+> | Entry point | On degrade shows | Signal |
+> |---|---|---|
+> | "use the sample audit" — the judge's path | the sample student, i.e. what the button promised | **no** |
+> | the dropzone — a real transcript | a stranger's record labelled as theirs | **yes** |
+> | manual entry — never hits the route | their own data | n/a |
+>
+> The judge cannot reach it, which is what keeps §16's concern satisfied
+> structurally rather than by hoping. Copy is a quiet inline line on the
+> diagnosis screen, in the "soon" ochre rather than critical red, and it names no
+> cause — the route degrades on six different failures and the client cannot tell
+> them apart. Implemented at `app/page.tsx` (`parseAuditPdf` / `handleFile`) and
+> `DiagnosisScreen`'s `auditIsFixture` prop.
+
 ### 12.1 `POST /api/parse-audit`
 
 Body: `multipart/form-data` with the PDF.

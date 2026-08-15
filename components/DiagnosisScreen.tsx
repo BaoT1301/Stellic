@@ -99,6 +99,14 @@ export interface DiagnosisScreenProps {
    * appear here as "see your advisor" and NEVER on a card.
    */
   ineligibleCritical?: Ineligibility[];
+  /**
+   * The student uploaded their own file, it could not be read, and everything
+   * on this screen is therefore computed from the sample student instead.
+   * §12 forbids a "showing cached sample results" badge, and app/page.tsx sets
+   * this on exactly ONE of the three entry points — see the note on
+   * `handleFile` there for why this case is the carve-out.
+   */
+  auditIsFixture?: boolean;
   onContinue: () => void;
   onBack?: () => void;
   isWorking?: boolean;
@@ -112,6 +120,7 @@ export function DiagnosisScreen({
   prereqsOf,
   delays,
   ineligibleCritical = [],
+  auditIsFixture = false,
   onContinue,
   onBack,
   isWorking = false,
@@ -172,6 +181,30 @@ export function DiagnosisScreen({
           Your {NEXT_TERM_LABEL} diagnosis
         </h1>
       </header>
+
+      {/*
+        Everything below this line describes a different student. It has to say
+        so before the student reads a single number, which is why it sits above
+        the facts strip rather than in a corner of it.
+
+        Deliberately not a red banner and not a toast: this is not an alarm and
+        it is not transient — the sample is still a working demonstration of the
+        product, and the student can carry on through it if they want to. It is
+        also deliberately silent about the CAUSE. The route degrades on a
+        missing key, a scanned PDF with no text layer, a refusal, a timeout and
+        a malformed model response, and the client cannot tell those apart; §0
+        rule 7 is exactly the habit of not guessing which one it was.
+      */}
+      {auditIsFixture && (
+        <p
+          role="status"
+          className="mt-6 rounded-sm border border-soon/25 bg-soon-soft px-4 py-3 text-sm text-soon"
+        >
+          We could not read your file, so this is our sample student&apos;s
+          audit — not yours. The numbers below are real, but they are not about
+          you. Go back and try the manual form for your own.
+        </p>
+      )}
 
       {/* flex-col + divide-y on mobile, flex-row + divide-x above sm. Using
           flex-wrap here instead would put a stray rule on the wrapped row. */}
