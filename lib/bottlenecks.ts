@@ -525,7 +525,10 @@ export function computeBottlenecks(
       termsOffered,
       termsRemaining: terms,
       urgency,
-      reason: parts.join(" · "),
+      // Comma, not a middot. This is the one display string lib/ produces and
+      // BottleneckCard renders it verbatim; it is a sentence about a course, and
+      // it was the only place the app's separator glyph appeared inside prose.
+      reason: parts.join(", "),
     };
   });
 

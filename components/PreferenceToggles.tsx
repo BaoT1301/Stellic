@@ -61,7 +61,7 @@ export function PreferenceToggles({
     onChange({ ...preferences, [key]: value });
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl bg-card px-5 py-4 ring-1 ring-foreground/10 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-4 rounded-xl bg-card px-5 py-4 shadow-e1 ring-1 ring-foreground/[0.06] lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-2 lg:w-44 lg:shrink-0">
         <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden />
         <p className="text-sm font-medium">Adjust and rebuild</p>

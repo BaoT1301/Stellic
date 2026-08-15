@@ -5,7 +5,11 @@ import type { SkillGap } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
- * The gap map — CLAUDE.md §13, right column of State 3.
+ * The gap map — CLAUDE.md §13. This is now the FIRST section of State 3, full
+ * width, above the bottleneck list. It used to be the right-hand column of a
+ * two-column grid that only existed at lg:, so on anything narrower it was
+ * already a second screen of scrolling after every bottleneck card. One column
+ * for everyone means the desktop read and the phone read are the same read.
  *
  * "The gap map" is what the spec calls it and it stays the name in the code.
  * On screen the heading is "What the jobs asked for", because the judges are
@@ -16,7 +20,8 @@ import { cn } from "@/lib/utils";
  * Two colours: already covered by courses she is taking anyway, versus open.
  * §11.2's design note is the whole point of the first colour — "you're already
  * getting this, don't waste an elective on it" is a more useful message than a
- * longer gap list.
+ * longer gap list, and it is carried by the group heading itself rather than by
+ * a caption underneath it.
  *
  * skillName is a verbatim O*NET 20.1 DWA title. §9.3: truncate with CSS
  * ellipsis, NEVER by editing the string — keeping them verbatim is what keeps
@@ -26,66 +31,10 @@ import { cn } from "@/lib/utils";
 
 export interface GapMapProps {
   gaps: SkillGap[];
-  /** How many postings were pasted, for the "n of 3 asked for it" reading. */
-  postingCount?: number;
   className?: string;
 }
 
-/**
- * The three numbers in the strip above, restated as one sentence that adds up.
- *
- * A registrar will do this arithmetic; being the one who did it first is worth
- * more than the number. Every count is derived from the same `gaps` array the
- * chips below are drawn from, so the sentence cannot drift from the screen.
- * "Reachable" is `closableBy.length > 0` — §11.2 step 4 only fills that field
- * with courses whose prerequisites the student has already satisfied, so an
- * empty one means the skill sits behind a prerequisite, not that no course
- * teaches it.
- */
-function arithmetic(gaps: SkillGap[]): string | null {
-  const total = gaps.length;
-  if (total === 0) return null;
-
-  const covered = gaps.filter((g) => g.covered).length;
-  const reachable = gaps.filter(
-    (g) => !g.covered && g.closableBy.length > 0,
-  ).length;
-  const blocked = gaps.filter(
-    (g) => !g.covered && g.closableBy.length === 0,
-  ).length;
-
-  const parts = [
-    `Your postings asked for ${total} ${total === 1 ? "thing" : "things"}.`,
-  ];
-
-  if (covered === 0) {
-    parts.push("None of it is taught by a course you have to take anyway.");
-  } else if (covered === 1) {
-    parts.push(
-      "You are already getting one of them from a course you have to take.",
-    );
-  } else {
-    parts.push(
-      `You are already getting ${covered} from courses you have to take.`,
-    );
-  }
-
-  if (reachable === 1) {
-    parts.push("One more you can reach with an elective next term.");
-  } else if (reachable > 1) {
-    parts.push(`${reachable} more you can reach with an elective next term.`);
-  }
-
-  if (blocked === 1) {
-    parts.push("One needs a prerequisite first.");
-  } else if (blocked > 1) {
-    parts.push(`${blocked} need a prerequisite first.`);
-  }
-
-  return parts.join(" ");
-}
-
-export function GapMap({ gaps, postingCount, className }: GapMapProps) {
+export function GapMap({ gaps, className }: GapMapProps) {
   // §11.2 step 5 already sorts covered asc then demandCount desc. Re-sorting
   // here costs nothing and means the column is right even if a caller hands us
   // an unsorted array.
@@ -95,44 +44,28 @@ export function GapMap({ gaps, postingCount, className }: GapMapProps) {
   );
   const missing = sorted.filter((g) => !g.covered);
   const covered = sorted.filter((g) => g.covered);
-  const sentence = arithmetic(gaps);
 
   return (
     <section className={cn("flex flex-col", className)}>
-      <header>
-        <h2 className="text-lg font-semibold tracking-tight">
-          What the jobs asked for
-        </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-          …and whether your remaining classes already teach it. Every skill your
-          postings asked for, ranked by how many of them asked.
-          {postingCount ? ` Read across ${postingCount} postings.` : ""}
-        </p>
-        <dl className="mt-4 flex items-stretch divide-x divide-rule overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
-          <Stat label="Asked for" value={gaps.length} />
-          <Stat label="Open" value={missing.length} tone="missing" />
-          <Stat label="Covered" value={covered.length} tone="covered" />
-        </dl>
-        {sentence && (
-          <p className="mt-3 text-sm leading-relaxed text-foreground">
-            {sentence}
-          </p>
-        )}
-      </header>
+      <h2 className="text-2xl">What the jobs asked for</h2>
 
-      {/* The chips below are verbatim O*NET titles (§9.3), which is why they
-          read like a federal dataset and not like a job ad. Say so once, here,
-          rather than letting the student assume we wrote them badly. */}
-      {gaps.length > 0 && (
-        <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-          These are the U.S. Labor Department&apos;s standard names for job
-          tasks. That&apos;s why they don&apos;t read like the posting.
-        </p>
-      )}
+      {/*
+        The strip IS the summary. There used to be a sentence directly beneath it
+        restating the same two numbers in words ("5 already covered by courses
+        you have to take · 3 reachable with an elective · 2 behind prereqs"),
+        plus a caption above it explaining the sort order. Both are gone: three
+        numbers at 30px do not need a paragraph telling you what they are, the
+        chips below are visibly in descending count order, and every state the
+        sentence described is already a badge on the chip that has it.
+      */}
+      <dl className="mt-5 flex items-stretch divide-x divide-rule overflow-hidden rounded-xl bg-card shadow-e1 ring-1 ring-foreground/[0.06] sm:max-w-md">
+        <Stat label="Asked for" value={gaps.length} />
+        <Stat label="Open" value={missing.length} tone="missing" />
+        <Stat label="Covered" value={covered.length} tone="covered" />
+      </dl>
 
       <Group
         title="Nothing you have left teaches these"
-        note="An elective is the only way to close these."
         count={missing.length}
         tone="missing"
       >
@@ -143,8 +76,7 @@ export function GapMap({ gaps, postingCount, className }: GapMapProps) {
 
       {covered.length > 0 && (
         <Group
-          title="Already covered by courses you have to take anyway"
-          note="You'll get these anyway. Don't spend an elective on them."
+          title="Already covered by courses you have to take"
           count={covered.length}
           tone="covered"
         >
@@ -154,9 +86,12 @@ export function GapMap({ gaps, postingCount, className }: GapMapProps) {
         </Group>
       )}
 
-      <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-        Skills are O*NET Detailed Work Activities, matched to course descriptions
-        from the public catalog.
+      {/* The DWA titles are rendered verbatim (§9.3), so naming O*NET here is
+          the CC BY 4.0 attribution — not a caption, and not removable. */}
+      <p className="mt-6 text-xs text-muted-foreground">
+        O*NET Detailed Work Activities — U.S. Labor Department names, matched to
+        public catalog descriptions. That&apos;s why they don&apos;t read like
+        the posting.
       </p>
     </section>
   );
@@ -172,37 +107,45 @@ function Stat({
   tone?: "missing" | "covered";
 }) {
   return (
-    <div className="flex-1 px-4 py-3">
+    <div className="flex-1 px-5 py-4">
       <dd
         className={cn(
-          "text-2xl leading-none font-semibold tabular-nums",
+          "text-2xl leading-none font-bold tabular-nums",
           tone === "missing" && "text-missing",
           tone === "covered" && "text-covered",
         )}
       >
         {value}
       </dd>
-      <dt className="eyebrow mt-1.5 text-muted-foreground">{label}</dt>
+      <dt className="eyebrow mt-2 text-muted-foreground">{label}</dt>
     </div>
   );
 }
 
+/**
+ * At full width the chips flow in columns instead of stacking. A fifteen-gap
+ * list was a fifteen-row tower when this lived in a 0.9fr column; two across, it
+ * is the shape of the thing it describes — a set, not a queue.
+ *
+ * TWO columns and not three. Three fits, and it truncated the DWA titles down to
+ * "Analyze data to inf…" — a set of chips nobody can read is worse than a taller
+ * list, and §9.3 forbids shortening these strings by editing them, so the column
+ * has to be wide enough for CSS to do it honestly.
+ */
 function Group({
   title,
-  note,
   count,
   tone,
   children,
 }: {
   title: string;
-  note: string;
   count: number;
   tone: "missing" | "covered";
   children: ReactNode;
 }) {
   if (count === 0) return null;
   return (
-    <div className="mt-7">
+    <div className="mt-8">
       <div className="flex items-baseline gap-2">
         <span
           aria-hidden
@@ -211,13 +154,12 @@ function Group({
             tone === "missing" ? "bg-missing" : "bg-covered",
           )}
         />
-        <h3 className="text-sm font-semibold">{title}</h3>
+        <h3 className="text-base">{title}</h3>
         <span className="text-sm tabular-nums text-muted-foreground">
           {count}
         </span>
       </div>
-      <p className="mt-1 ml-4 text-xs text-muted-foreground">{note}</p>
-      <ul className="mt-3 flex flex-col gap-1.5">{children}</ul>
+      <ul className="mt-3 grid gap-2 lg:grid-cols-2">{children}</ul>
     </div>
   );
 }
@@ -227,7 +169,7 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
   return (
     <li
       className={cn(
-        "flex max-w-full items-center gap-2.5 rounded-full border py-1.5 pr-2 pl-3.5",
+        "flex min-w-0 items-center gap-2.5 rounded-full border py-1.5 pr-2 pl-3.5",
         tone === "missing"
           ? "border-missing/25 bg-missing-soft"
           : "border-covered/25 bg-covered-soft",
@@ -235,7 +177,7 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
     >
       <span
         className={cn(
-          "min-w-0 flex-1 truncate text-[0.8125rem] leading-5",
+          "min-w-0 flex-1 truncate text-sm leading-5",
           tone === "missing" ? "text-foreground" : "text-covered",
         )}
         title={gap.skillName}
@@ -252,7 +194,7 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
       {detail.length > 0 ? (
         <span
           className={cn(
-            "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[0.6875rem]",
+            "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-xs",
             tone === "missing"
               ? "bg-card text-missing"
               : "bg-card/70 text-covered",
@@ -274,14 +216,14 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
               : `Can be closed by ${detail.join(" or ")}`}
           </span>
           <span aria-hidden className="hidden sm:inline">
-            {detail.slice(0, 2).join(" · ")}
+            {detail.slice(0, 2).join(", ")}
             {detail.length > 2 ? ` +${detail.length - 2}` : ""}
           </span>
         </span>
       ) : (
         tone === "missing" && (
           <span
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[0.6875rem] text-muted-foreground"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-card px-2 py-0.5 text-xs text-muted-foreground"
             title="No course you can register for next term teaches this — it sits behind a prerequisite you haven't cleared."
           >
             <Lock className="size-2.5" aria-hidden />
@@ -297,7 +239,7 @@ function Chip({ gap, tone }: { gap: SkillGap; tone: "missing" | "covered" }) {
 
       <span
         className={cn(
-          "flex size-5 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-semibold tabular-nums",
+          "flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
           tone === "missing"
             ? "bg-missing text-white"
             : "bg-covered text-white",

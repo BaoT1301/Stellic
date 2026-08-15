@@ -1246,6 +1246,166 @@ Patriot Web link, disables the two clashing rows and names what they collide wit
 and a swap moves the CRN on the card, in the cart and in the `/register` link at
 once · no horizontal overflow at 390px with every picker open · no page errors.
 
+### Design system: one mono family, a real type scale, a palette with chroma
+
+Three complaints, all about the same underlying thing — the screens were legible
+but undifferentiated. Every change is presentational; no algorithm, no contract,
+no `data/*.json`, and `lib/` is untouched except where a string is printed.
+
+1. **JetBrains Mono, everywhere.** `--font-sans`, `--font-mono` and
+   `--font-heading` all point at one variable font. The ~40 existing `font-mono`
+   call sites on course codes and CRNs are now no-ops rather than font switches,
+   which is why they did not need editing. `/register` is unaffected: its
+   `BannerChrome` wrapper sets Arial inline, and a legacy SIS mock should not be
+   in the product's typeface. **sonner needed an explicit override** — it injects
+   `[data-sonner-toaster] { font-family: ui-sans-serif … }` at runtime, unlayered,
+   so the toast was the last surface still rendering in the system sans. Beating
+   it takes both an unlayered rule and specificity above 0,1,0.
+2. **The type scale overrides Tailwind's own `--text-*` keys** rather than adding
+   new names, so every existing `text-sm` / `text-lg` moved onto it without being
+   touched. Six levels — 11 / 13 / 15 / 18 / 22 / 46 — each paired with a weight
+   and a colour in `@layer base`, because the old ramp put body at 16 and a
+   section heading at 18 and no reader perceives a 1.13x step as a level. Every
+   size is *smaller* than its stock equivalent and tracking goes negative as size
+   rises: mono sets every glyph on a 0.6em advance, so matching the old sizes
+   literally would have overflowed the card headers.
+3. **The palette.** Neutrals carry a little chroma now (blue-black ink at hue 265,
+   warm paper at hue 92) instead of sitting at chroma 0. The bigger fix is the
+   `-soft` fills: they were L 0.964–0.969, which against a 0.979 canvas is a
+   difference you have to be *told* about, so the urgency tint on a bottleneck
+   card and the covered/missing split on the gap chips both read as one pale grey.
+
+> **Getting colour out of those fills is a LIGHTNESS move, not a chroma move,**
+> and this is the part worth remembering. At L 0.945 sRGB holds only 0.026 chroma
+> at the brand's hue — so the obvious fix of doubling chroma in place is silently
+> clipped by the browser, which shifts the hue and can collapse two tokens into
+> the same rendered colour. `scripts/check-contrast.ts` (new) caught exactly that
+> on four of six. It parses the tokens straight out of `globals.css`, so it cannot
+> drift from it, and asserts contrast, sRGB gamut, and fill separation. **Exits
+> non-zero**, like `verify-prereqs.ts`.
+
+**Two real regressions, both caught by the existing gates rather than by eye:**
+
+- **`hover:bg-primary/80` on the primary button.** shadcn's default variant
+  composites the primary at 80% over whatever is behind it. Fine when `--primary`
+  is near-black; against the mid-lightness blue it lifts the fill toward the
+  canvas and takes the white label to 3.2:1. axe flagged it serious. Fixed with a
+  `--primary-hover` token that *darkens*, now asserted in `check-contrast.ts`.
+- **The 24px tap-target floor.** `--text-xs--line-height: 1.45` made several
+  `py-1 text-xs` links (CRN, instructor, "Why this?") compute to 23.95px, just
+  under WCAG 2.2 SC 2.5.8, and `check-mobile.ts` failed them. 1.5 puts them at
+  24.5px. The lesson is that those targets are sized by the line box, so the type
+  scale is load-bearing for SC 2.5.8 and not only for looks.
+
+**Copy.** Roughly halved on screen. The pattern was consistently *two elements
+doing one job*: two ledes on State 1 (mechanism, then outcome — only the outcome
+earns space above the fold), two O\*NET notes on the gap map, two "elective slot"
+paragraphs on State 4, three stacked disclaimers in the cart, and a gap-map
+sentence that restated the stat strip six inches above it. **Nothing factual or
+legal was cut** — the advisor disclaimer is verbatim (`Footer.tsx` says not to
+soften it), the O\*NET attribution survives in the one merged footer, the
+simulated-SIS notice and the linked-lab caveat are whole, and State 2's privacy
+disclosure is deliberately the longest lede left in the app because every clause
+in it is a disclosure rather than a pitch.
+
+Verified after: `next build` clean · `tsc --noEmit` clean · eslint clean (one
+pre-existing unused-var warning) · `check-contrast` PALETTE CLEAN · `audit-ui`
+AUDIT CLEAN, zero axe violations at 1440px and 390px across all six screens ·
+`check-mobile` back to its documented baseline (the `sr-only` file input only) ·
+`smoke-pipeline` ALL CHECKS PASSED · all four states re-shot with no page errors.
+
+### Second design pass (Aug 15): two families, elevation, and one column on screen 3
+
+The pass above made the screens legible. It did not make them look designed, and
+three things gave that away. Everything here is presentational except one join
+character in `lib/bottlenecks.ts`; no algorithm, no contract, no `data/*.json`.
+
+1. **Geist and Geist Mono replace JetBrains Mono.** Both come from
+   `next/font/google` — `Geist` and `Geist_Mono` are in Next 16's font list, so
+   there is **no new npm dependency**. The previous pass pointed `--font-sans`,
+   `--font-mono` and `--font-heading` at one family, which made all ~20
+   `font-mono` utilities no-ops; they are real font switches again, which is why
+   none of those call sites needed editing. Geist Mono now marks exactly the
+   strings a student copies character by character — course codes, CRNs, meeting
+   times, prereq-chain nodes — and nothing else.
+   - The type scale went back up a step (12/14/16/19/24/30/36/44/52). Its old
+     values were justified in a comment by mono's 0.6em advance; that premise is
+     gone. `--text-xs--line-height` stays at 1.5 — it is still load-bearing for
+     the SC 2.5.8 24px floor, now with more margin (12 × 1.5 + 8 = 26px).
+   - `.eyebrow` tracking is back to 0.09em for the same reason.
+   - `font-feature-settings: "calt" 0` moved off `body` and onto `.font-mono`
+     and friends. Geist Mono ships no programming ligatures, but the strings the
+     rule protected are still here — ScheduleOptions' `-CS 405, -3 credits` and
+     the footer's `audit - your official audit` — so the guard stays where they
+     live rather than suppressing contextual alternates in prose.
+   - **`/register` pins Courier New inline.** `font-mono` there would have put
+     the product's typeface inside the Banner mock, which sets Arial inline for
+     exactly this reason.
+2. **An elevation scale, `--shadow-e1/e2/e3`.** `ring-1 ring-foreground/10` was
+   the *only* elevation idiom in the app, on ten different container types — a
+   stat strip, a bottleneck card and the cart all sat at the same depth despite
+   being three different kinds of object. Two layers per level (contact +
+   ambient), tinted with the ink hue at 265 rather than neutral grey, because a
+   grey shadow under blue-black ink on warm paper reads as dirt. A hairline ring
+   stays under every shadow: cards are L 0.995 on an L 0.972 canvas and the
+   shadow contributes nothing along the top edge. `check-contrast.ts` is
+   unaffected — its regex only matches values that *start* with `oklch(`.
+3. **The middot is gone as a design device** — 24 rendered sites plus
+   `Bottleneck.reason`. One glyph was doing four jobs (stat separator, prose
+   conjunction, list bullet, name delimiter), which is why it read as a tic.
+   `components/Sep.tsx` is a hairline rule and does the one job worth keeping:
+   separating countable facts in a readout. In prose it became punctuation; the
+   "Teaches:" list got real `list-disc` markers. The three middots left in
+   `app/api/build-schedules/route.ts` are inside the model prompt and never
+   render.
+4. **Screen 3 is one column, gaps first.** The two-column grid only existed at
+   `lg:`, so below 1024px the gap map was already a second screenful after the
+   last bottleneck card — the phone and the laptop told the story in two
+   different orders. Now both read: facts → *What the jobs asked for* → *What's
+   holding up your degree*. Bottleneck cards sit two-up with the hero
+   (`showChain`) spanning both columns; gap chips flow `lg:grid-cols-2`. **Two
+   columns and not three** — three fitted and truncated the DWA titles to
+   "Analyze data to inf…", and §9.3 forbids shortening those strings by editing
+   them, so the column has to be wide enough for CSS to do it honestly.
+5. **Copy that restated a number six inches away is gone.** The step eyebrow on
+   all four screens (the Stepper above already names the step); screen 3's lede
+   (both its numbers are in the two stat strips below it); GapMap's `arithmetic()`
+   sentence, its ranked-by caption and both `Group` notes; "Most waiting behind
+   them first."; and on screen 4 the lede and the elective-slot paragraph merged
+   into one line above the cards. **Nothing factual or legal was cut** — the
+   O\*NET attribution, the advisor disclaimer, the linked-lab caveat, the
+   simulated-SIS notice and the FERPA/OpenAI disclosure on State 2 are all
+   verbatim.
+6. **Schedule cards: the stat block went four lines to three**, and `WhyThis`
+   lost its third paragraph, which restated the meeting time, instructor and CRN
+   already printed in the two rows directly above it — three duplicated facts ×
+   n courses × 3 cards, the single largest source of repetition on the screen
+   that owns the biggest block of the video. `Why` and `Tradeoff` both stay
+   visible: the tradeoff sentence is the only place a card admits a cost, on a
+   screen whose whole job is comparison, and it is half the model's visible
+   output on a submission where "the model wrote the reasoning; it did not pick
+   the courses" is a §16 provenance beat.
+7. **`Button` gained an `xl` size.** Five hero CTAs were each overriding `lg`
+   with the same inline `h-11 px-5 text-base`. The `default` variant's
+   `hover:bg-primary-hover` is untouched — its comment documents a measured axe
+   regression.
+
+Two defects the screenshots caught that no gate would have:
+
+- **The three week grids started at three different heights.** Option A carries
+  no diff line (it *is* the base) and the model-written labels run to one or two
+  lines, so the grids the cards exist to let you compare were vertically
+  offset. Fixed with a `min-h-[5.5rem]` slot holding the label and diff together.
+- **The gap chips at three columns truncated to unreadability** — see item 4.
+
+Verified after: `tsc --noEmit` clean · `next build` clean · eslint clean (three
+pre-existing unused-var warnings, none in touched code) · `check-contrast`
+PALETTE CLEAN, 46 tokens in gamut · `smoke-pipeline` ALL CHECKS PASSED ·
+`audit-ui` **AUDIT CLEAN**, zero axe violations at any impact level at 1440px and
+390px across all six screens, no horizontal overflow · `check-mobile` at its
+documented baseline (the `sr-only` file input, on the two screens it stays
+mounted for) · all six screens re-shot with no page errors.
+
 ---
 
 **The biggest remaining risk is `sample-audit.pdf`.** It is authored on Aug 14, before the pipeline that consumes it exists, and it silently determines whether the never-cut feature is visible at all. Zero critical bottlenecks → the bottleneck story vanishes from the schedule cards. Four or more → `mustTake` exceeds `targetCredits`, the combo set is empty, and State 4 renders nothing — a blank screen in the demo video. `slots = 0` → all three strategies score identically. The mitigation is already folded in: §11.3 steps 2/3/8 make an empty result unreachable, and Aug 17 carries a 30-minute checkpoint to tune **the PDF, not the algorithm**. Build the floor, then tune the input against it.

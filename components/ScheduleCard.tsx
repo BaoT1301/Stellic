@@ -1,5 +1,6 @@
 import { Check, ChevronDown, ExternalLink, TriangleAlert } from "lucide-react";
 
+import { Sep } from "@/components/Sep";
 import { WeekGrid, weekBounds, type WeekBlock } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
 import { normalizeCode } from "@/lib/bottlenecks";
@@ -13,10 +14,11 @@ import { cn } from "@/lib/utils";
  *
  * Four things here are not cosmetic:
  *
- *  1. "You've taken the listed prerequisites", never "all prereqs met".
- *     PrereqRule.minGrade is extracted but unconsumable — StudentAudit
- *     .coursesTaken carries no grades — so the stronger claim is false for a
- *     student with a D. §8, §13. The "(we can't see grades)" gloss says why.
+ *  1. "Prereqs taken", never "all prereqs met". PrereqRule.minGrade is
+ *     extracted but unconsumable — StudentAudit.coursesTaken carries no grades
+ *     — so the stronger claim is false for a student with a D. §8, §13. The
+ *     "(not grades)" gloss beside it is what limits the claim and is not
+ *     removable, only shortenable.
  *  2. The professor link is a constructed RateMyProfessors search URL that the
  *     student's own browser follows. §5 and §11.4: we never fetch it, and we
  *     never assert a rating. The wording is "look them up", not "rated 4.2".
@@ -59,7 +61,11 @@ export function formatMeeting(section: Section): string {
   if (section.days === "" || section.startTime === "") {
     return "Asynchronous — no set meeting time";
   }
-  return `${section.days} · ${formatTime(section.startTime)}–${formatTime(section.endTime)}`;
+  // No separator between the days and the time. "MW 1:30–2:45 pm" is how a
+  // schedule of classes has printed a meeting for forty years; the middot that
+  // used to sit in the middle was decoration on a string that reads fine
+  // without one.
+  return `${section.days} ${formatTime(section.startTime)}–${formatTime(section.endTime)}`;
 }
 
 /**
@@ -171,30 +177,17 @@ function roleSentence(
   if (role === "waiting") {
     if (dependents.length > 0) {
       const n = dependents.length;
-      return `Required, and ${n} ${n === 1 ? "course" : "courses"} you still need ${n === 1 ? "is" : "are"} waiting on it: ${dependents.join(", ")}.`;
+      return `Required. ${n} ${n === 1 ? "course" : "courses"} you still need ${n === 1 ? "is" : "are"} waiting on it: ${dependents.join(", ")}.`;
     }
-    return "Required, and it is one of the courses others are waiting on, so the sooner it happens the more of your degree stays reachable.";
+    return "Required, and others are waiting on it — the sooner it happens the more of your degree stays reachable.";
   }
   if (role === "required") {
-    return "Required for your degree. Nothing else is waiting on it, so the order is yours, but it has to happen sometime.";
+    return "Required. Nothing is waiting on it, so the order is yours.";
   }
   if (role === "elective") {
-    return "This fills an elective slot. Your required courses are fixed; this is the part of next term you get to pick.";
+    return "Fills an elective slot — the part of next term you get to pick.";
   }
-  return "Your prerequisites for it are done and its section fits around the rest of this card.";
-}
-
-/**
- * Line 3 of the disclosure. `formatMeeting` already covers the asynchronous
- * case, and Banner leaves the instructor blank often enough that the missing
- * case needs its own words rather than a dangling "with".
- */
-function sectionSentence(course: CourseRow): string {
-  const meeting = formatMeeting(course.section);
-  const who = course.section.instructor
-    ? ` with ${course.section.instructor}`
-    : ", instructor not listed yet";
-  return `${meeting}${who}.`;
+  return "Prerequisites done, and it fits around the rest of this card.";
 }
 
 export interface ScheduleCardProps {
@@ -264,16 +257,18 @@ export function ScheduleCard({
   return (
     <article
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl bg-card transition-shadow",
+        "flex flex-col overflow-hidden rounded-xl bg-card transition-shadow duration-200",
         selected
-          ? "ring-2 ring-brand shadow-md"
-          : "ring-1 ring-foreground/10 hover:shadow-sm",
+          ? "shadow-e3 ring-2 ring-brand"
+          : "shadow-e1 ring-1 ring-foreground/[0.06] hover:shadow-e2",
       )}
     >
       <header className="border-b border-rule px-5 pt-4 pb-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="eyebrow text-muted-foreground">
-            Option {letter} · {STRATEGY_LABEL[option.strategy]}
+          <p className="eyebrow flex min-w-0 items-center gap-x-2 text-muted-foreground">
+            <span className="shrink-0">Option {letter}</span>
+            <Sep />
+            <span className="truncate">{STRATEGY_LABEL[option.strategy]}</span>
           </p>
           {selected && (
             <span className="eyebrow inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-1 text-brand">
@@ -282,14 +277,23 @@ export function ScheduleCard({
             </span>
           )}
         </div>
-        <h3 className="mt-2.5 text-xl leading-snug font-semibold tracking-tight text-balance">
-          {option.label}
-        </h3>
-        {/* The three cards share a required spine, so the only thing a student
-            has to compare is this line. Plain hyphen and plus, never a dash. */}
-        {diff && (
-          <p className="mt-2 font-mono text-xs text-muted-foreground">{diff}</p>
-        )}
+        {/* A fixed slot for the label and the diff line together.
+            Option A carries no diff (it IS the base) and the model-written
+            labels run to one or two lines, so without a floor here the three
+            week grids below started at three different heights — which is
+            exactly the comparison the grids exist to support. Tall enough for a
+            two-line label plus a diff line; the cards are equal-height already,
+            so the only cost is a little air on the shortest header. */}
+        <div className="mt-2.5 min-h-[5.5rem]">
+          <h3 className="text-xl">{option.label}</h3>
+          {/* The three cards share a required spine, so the only thing a student
+              has to compare is this line. Plain hyphen and plus, never a dash. */}
+          {diff && (
+            <p className="mt-2 font-mono text-xs text-muted-foreground">
+              {diff}
+            </p>
+          )}
+        </div>
       </header>
 
       {/* The week, above the list. The card already claims "No time conflicts"
@@ -311,16 +315,13 @@ export function ScheduleCard({
           {asyncCodes.length > 0 && (
             <p
               className={cn(
-                "text-[0.6875rem] leading-relaxed text-muted-foreground",
+                "text-xs text-muted-foreground",
                 hasWeek && "mt-2",
               )}
             >
-              <span className="font-mono">{asyncCodes.join(", ")}</span>{" "}
-              {asyncCodes.length === 1 ? "is" : "are"} asynchronous — no set
-              meeting time
-              {hasWeek
-                ? `, so ${asyncCodes.length === 1 ? "it is" : "they are"} not on the grid.`
-                : ", so there is no week to draw."}
+              <span className="font-semibold">{asyncCodes.join(", ")}</span>{" "}
+              {asyncCodes.length === 1 ? "is" : "are"} asynchronous
+              {hasWeek ? " — not on the grid." : " — no week to draw."}
             </p>
           )}
         </div>
@@ -336,13 +337,13 @@ export function ScheduleCard({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-semibold">
-                      {course.code}
-                    </span>
+                    {/* text-base/700 against the text-sm/400 title below it.
+                        The code is the thing a student scans for. */}
+                    <span className="text-base font-bold">{course.code}</span>
                     {tag && (
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold tracking-wide uppercase",
+                          "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-bold tracking-wide uppercase",
                           tag.className,
                         )}
                       >
@@ -366,7 +367,7 @@ export function ScheduleCard({
                   // py-1 for the WCAG 2.2 SC 2.5.8 24px target floor. The CRN
                   // is the most-tapped link on this card — it is how a judge
                   // checks the section is real against Banner.
-                  className="inline-flex shrink-0 items-center gap-1 py-1 font-mono text-[0.6875rem] text-muted-foreground tabular-nums underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
+                  className="inline-flex shrink-0 items-center gap-1 py-1 font-mono text-xs text-muted-foreground tabular-nums underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
                 >
                   {course.section.crn}
                   <ExternalLink className="size-2.5" aria-hidden />
@@ -401,8 +402,8 @@ export function ScheduleCard({
                   Closes {closes} {closes === 1 ? "gap" : "gaps"}
                   {skillNames && skillNames[course.skillsClosed[0]!] ? (
                     <span className="text-muted-foreground">
-                      {" "}
-                      · {skillNames[course.skillsClosed[0]!]}
+                      {": "}
+                      {skillNames[course.skillsClosed[0]!]}
                       {closes > 1 ? ` +${closes - 1}` : ""}
                     </span>
                   ) : null}
@@ -422,41 +423,48 @@ export function ScheduleCard({
         })}
       </ul>
 
+      {/*
+        Three lines, from four. The countable facts are one rule-separated
+        readout; the gap arithmetic is one sentence; the two checks are one row.
+        Nothing factual was dropped — the three numbers, the honest denominator,
+        the prereq caveat and the conflict claim are all still here.
+      */}
       <div className="border-t border-rule bg-canvas px-5 py-4">
-        <p className="text-sm font-medium tabular-nums">
-          {option.totalCredits} credits
-          <span className="text-muted-foreground">
-            {" · "}
-            Uses {option.slotsUsed} of your {slotsAvailable} open elective{" "}
+        <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base font-bold tabular-nums">
+          <span>{option.totalCredits} cr</span>
+          <Sep />
+          <span className="font-normal text-muted-foreground">
+            {option.slotsUsed} of {slotsAvailable}{" "}
             {slotsAvailable === 1 ? "slot" : "slots"}
           </span>
+          {cleared > 0 && (
+            <>
+              <Sep />
+              <span className="font-normal text-muted-foreground">
+                unblocks {cleared} {cleared === 1 ? "course" : "courses"}
+              </span>
+            </>
+          )}
         </p>
-        {cleared > 0 && (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Takes {cleared} {cleared === 1 ? "course" : "courses"} others are
-            waiting on
-          </p>
-        )}
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           {gapSentence(option, reachableGaps)}
+          {/* §11.2: a gap whose only closers are prereq-blocked cannot be closed
+              next term by any schedule, so it does not belong in the
+              denominator. Saying where the rest went keeps the arithmetic whole
+              — an em dash rather than a middot, because this is a sentence. */}
+          {blockedGaps !== undefined && blockedGaps > 0
+            ? ` — ${blockedGaps} behind ${blockedGaps === 1 ? "a prereq" : "prereqs"}`
+            : ""}
         </p>
-        {/* §11.2: a gap whose only closers are prereq-blocked cannot be closed
-            next term by any schedule, so it does not belong in the numerator's
-            denominator. Saying where the rest went keeps the arithmetic whole. */}
-        {blockedGaps !== undefined && blockedGaps > 0 && (
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {blockedGaps} more {blockedGaps === 1 ? "needs" : "need"} a
-            prerequisite first.
-          </p>
-        )}
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-          {/* Never "all prereqs met" — see the note at the top of this file. */}
+        <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+          {/* Never "all prereqs met" — see the note at the top of this file.
+              PrereqRule.minGrade is extracted but unconsumable, so the honest
+              qualifier is not optional. Shortened from "(we can't see grades)",
+              not dropped: the claim it limits is the same one. */}
           <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-0.5 text-covered">
             <Check className="size-3 shrink-0" aria-hidden />
-            {"You've taken the listed prerequisites"}
-            <span className="text-muted-foreground">
-              {"(we can't see grades)"}
-            </span>
+            Prereqs taken
+            <span className="text-muted-foreground">(not grades)</span>
           </span>
           {option.conflicts.length === 0 ? (
             <span className="inline-flex items-center gap-1 text-covered">
@@ -500,9 +508,9 @@ function gapSentence(option: ScheduleOption, reachableGaps?: number): string {
     return `Closes ${option.gapsClosed} of ${option.gapsTotal} gaps`;
   }
   if (reachableGaps === 0) {
-    return "None of your open skill gaps can be closed next term";
+    return "No open skill gap can be closed next term";
   }
-  return `Closes ${option.gapsClosed} of the ${reachableGaps} skill gaps you can reach next term`;
+  return `Closes ${option.gapsClosed} of ${reachableGaps} reachable gaps`;
 }
 
 /**
@@ -540,7 +548,7 @@ function WhyThis({
         />
       </summary>
 
-      <div className="mt-2 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs leading-relaxed ring-1 ring-foreground/[0.07]">
+      <div className="mt-2 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs ring-1 ring-foreground/[0.07]">
         <p className="text-foreground">
           {roleSentence(course, role, dependentsOf)}
         </p>
@@ -551,52 +559,43 @@ function WhyThis({
             {/* O*NET DWA names are rendered verbatim. §9.3: keeping them
                 unedited is what keeps the CC BY 4.0 "indicate changes" clause
                 from firing, and the raw skillId is the fallback so a missing
-                name can never render an empty line. */}
-            <ul className="mt-0.5 space-y-0.5">
+                name can never render an empty line.
+
+                A real list marker rather than a middot in a flex row: this is a
+                list, and a browser draws lists. */}
+            <ul className="mt-1 list-disc space-y-0.5 pl-4 marker:text-muted-foreground/60">
               {course.skillsClosed.map((id) => (
-                <li key={id} className="flex gap-1.5">
-                  <span aria-hidden>·</span>
-                  <span>
-                    {skillNames?.[id] ?? id}
-                    {demandNote(skillDemand?.[id], postingCount)}
-                  </span>
+                <li key={id}>
+                  {skillNames?.[id] ?? id}
+                  {demandNote(skillDemand?.[id], postingCount)}
                 </li>
               ))}
             </ul>
           </div>
         ) : (
           <p className="text-muted-foreground">
-            {
-              "Doesn't close any of your open skill gaps. It is on this card for the degree, not for the job."
-            }
+            {"Closes no open gap — here for the degree, not the job."}
           </p>
         )}
 
-        <p className="text-muted-foreground">
-          {sectionSentence(course)} CRN{" "}
-          <a
-            href={bannerSectionUrl(course.section.crn)}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
-            className="inline-block py-1 font-mono underline decoration-dotted underline-offset-2 transition-colors hover:text-brand"
-          >
-            {course.section.crn}
-          </a>{" "}
-          is the number you paste into registration.
-        </p>
+        {/* There used to be a third paragraph here restating the meeting time,
+            the instructor and the CRN. All three are printed in the two rows
+            directly above this disclosure, on every course, on every card — the
+            single largest source of repetition on the screen that owns the
+            biggest block of the video. The panel now carries only what the row
+            does not already say. */}
       </div>
     </details>
   );
 }
 
-/** "· 2 of your 3 postings asked for this." Silent when we lack the counts. */
+/** "(asked for by 2 of 3)". Silent when we lack the counts. */
 function demandNote(demand?: number, postingCount?: number): string {
   if (!demand || demand < 1) return "";
   if (postingCount && postingCount >= demand) {
-    return ` · ${demand} of your ${postingCount} postings asked for this`;
+    return ` (asked for by ${demand} of ${postingCount})`;
   }
-  return ` · ${demand} ${demand === 1 ? "posting" : "postings"} asked for this`;
+  return ` (asked for by ${demand})`;
 }
 
 function Prose({
@@ -613,7 +612,7 @@ function Prose({
       <p className="eyebrow text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "mt-1.5 text-sm leading-relaxed text-pretty",
+          "mt-1.5 text-sm text-pretty",
           muted ? "text-muted-foreground" : "text-foreground",
         )}
       >

@@ -83,10 +83,14 @@ export function BottleneckCard({
   const { Icon } = style;
   const single = bottleneck.termsOffered.filter((t) => t !== "summer").length <= 1;
 
+  // The hero — the one card carrying the prereq chain — sits a level higher than
+  // the rest. Everything on this screen used to be at exactly the same depth,
+  // under a headline saying not every box weighs the same.
   return (
     <article
       className={cn(
         "relative overflow-hidden rounded-xl bg-card ring-1",
+        showChain ? "shadow-e2" : "shadow-e1",
         style.ring,
         className,
       )}
@@ -119,16 +123,16 @@ export function BottleneckCard({
         </div>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h3 className="font-mono text-xl font-semibold tracking-tight">
-            {bottleneck.code}
-          </h3>
+          {/* No font-weight utility: @layer base sets h1-h3 to 700, and this
+              should match the course code on a schedule card. */}
+          <h3 className="text-xl">{bottleneck.code}</h3>
           <p className="text-base text-muted-foreground">{bottleneck.title}</p>
         </div>
 
         {/* §11.1 step 4 owns this string. Render it, never rebuild it. */}
         <p
           className={cn(
-            "mt-2.5 text-[0.9375rem] leading-snug",
+            "mt-2.5 text-base leading-snug",
             bottleneck.urgency === "flexible"
               ? "text-muted-foreground"
               : "font-medium text-foreground",
@@ -215,7 +219,7 @@ function DelayCost({
         />
       </summary>
 
-      <div className="mt-1 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs leading-relaxed ring-1 ring-foreground/[0.07]">
+      <div className="mt-1 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs ring-1 ring-foreground/[0.07]">
         <p className="text-foreground">
           Taken next term,{" "}
           <span className="font-mono font-medium">{bottleneck.code}</span> and the

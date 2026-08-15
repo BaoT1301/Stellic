@@ -363,7 +363,12 @@ function RegisterWorksheet() {
                         value={value}
                         onChange={(e) => setRow(i, e.target.value)}
                         aria-label={`CRN row ${i + 1}`}
-                        className="w-24 border border-[#828f9b] bg-white px-1.5 py-0.5 font-mono text-[12px] text-black focus:outline focus:outline-2 focus:outline-[#1c3f5f]"
+                        // An explicit legacy stack, not `font-mono`. That utility
+                        // now resolves to Geist Mono (app/layout.tsx), and this
+                        // page is a mock of a 2005 SIS — the whole BannerChrome
+                        // wrapper sets Arial inline for the same reason. The
+                        // product's typeface has no business in here.
+                        className="w-24 border border-[#828f9b] bg-white px-1.5 py-0.5 font-[Courier_New,Courier,monospace] text-[12px] text-black focus:outline focus:outline-2 focus:outline-[#1c3f5f]"
                       />
                     </td>
                     <td className="border border-[#cdd6dd] px-2 py-1 text-[#55606b]">

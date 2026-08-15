@@ -146,10 +146,16 @@ export default function Home() {
   // already holds, so the two screens cannot disagree in front of someone who
   // adds the numbers up.
   //
-  // `reachable` and `blocked` MUST stay byte-identical to the same split inside
-  // GapMap.tsx — screen 3 says "3 more you can reach with an elective" and
-  // screen 4 says "closes 1 of the 3 you can reach next term", and a registrar
-  // who notices those disagreeing has found a real defect.
+  // The same `!covered` split GapMap draws its two chip groups from, and the
+  // same one §11.2 step 4 defines: `closableBy` is only filled with courses
+  // whose prerequisites the student has already satisfied, so an empty one means
+  // the skill sits behind a prereq rather than that no course teaches it.
+  //
+  // GapMap used to also print this arithmetic as a sentence and the two had to
+  // agree; that sentence is gone (it restated the stat strip directly above it),
+  // but the definition still has to match the chips, because screen 3 shows a
+  // "needs a prereq first" badge on exactly the gaps `blockedGaps` counts and
+  // screen 4 says "closes 1 of 3 reachable gaps" about the rest.
   const reachableGaps = useMemo(
     () => gaps.filter((g) => !g.covered && g.closableBy.length > 0).length,
     [gaps],
@@ -509,7 +515,6 @@ export default function Home() {
               titles={titles}
               prereqsOf={prereqsOf}
               delays={delays}
-              postingCount={filledPostings || undefined}
               unofferedCritical={unoffered}
               onContinue={() => runBuildSchedules(preferences)}
               onBack={() => setStep("audit")}
@@ -618,7 +623,7 @@ function SiteHeader() {
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-6">
         <div className="flex items-center gap-2.5">
           <ChainMark />
-          <span className="text-[0.9375rem] font-semibold tracking-tight">
+          <span className="text-base font-bold tracking-tight">
             Reverse Audit
           </span>
         </div>
@@ -691,7 +696,7 @@ function Stepper({
               >
                 <span
                   className={cn(
-                    "flex size-5 items-center justify-center rounded-full text-[0.6875rem] font-semibold tabular-nums",
+                    "flex size-5 items-center justify-center rounded-full text-xs font-bold tabular-nums",
                     active
                       ? "bg-foreground text-background"
                       : done

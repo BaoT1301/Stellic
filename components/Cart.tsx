@@ -7,7 +7,6 @@ import {
   Check,
   ChevronDown,
   Copy,
-  ExternalLink,
   Info,
   X,
 } from "lucide-react";
@@ -19,6 +18,7 @@ import {
   formatMeeting,
   weekBlocksFor,
 } from "@/components/ScheduleCard";
+import { Sep } from "@/components/Sep";
 import { WeekGrid, weekBounds } from "@/components/WeekGrid";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { preferenceNotes, sectionsConflict } from "@/lib/schedules";
@@ -90,17 +90,21 @@ export function Cart({
   }
 
   return (
-    <aside className="overflow-hidden rounded-xl bg-card ring-2 ring-brand/25 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <aside className="overflow-hidden rounded-xl bg-card shadow-e3 ring-2 ring-brand/25 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-rule bg-brand-soft px-5 py-4">
         <div>
-          <p className="eyebrow text-brand">Your cart · {NEXT_TERM_LABEL}</p>
-          <h2 className="mt-1.5 text-lg font-semibold tracking-tight">
-            {option.label}
-          </h2>
+          <p className="eyebrow text-brand">Your cart</p>
+          <h2 className="mt-1.5 text-xl">{option.label}</h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm tabular-nums text-muted-foreground">
-            {option.courses.length} courses · {option.totalCredits} credits
+          <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm tabular-nums text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {NEXT_TERM_LABEL}
+            </span>
+            <Sep />
+            <span>{option.courses.length} courses</span>
+            <Sep />
+            <span>{option.totalCredits} credits</span>
           </span>
           {onClear && (
             <Button
@@ -131,11 +135,11 @@ export function Cart({
           {asyncCodes.length > 0 && (
             <p
               className={cn(
-                "text-xs leading-relaxed text-muted-foreground",
+                "text-xs text-muted-foreground",
                 week && "mt-2.5",
               )}
             >
-              <span className="font-mono">{asyncCodes.join(", ")}</span>{" "}
+              <span className="font-semibold">{asyncCodes.join(", ")}</span>{" "}
               {asyncCodes.length === 1 ? "is" : "are"} asynchronous — no set
               meeting time.
             </p>
@@ -156,18 +160,26 @@ export function Cart({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`CRN ${course.section.crn}, the ${NEXT_TERM_LABEL} section of ${course.code}, on the public schedule of classes`}
-                className="w-16 shrink-0 font-mono text-lg leading-none font-semibold tabular-nums underline decoration-dotted underline-offset-4 transition-colors hover:text-brand"
+                // text-lg/700 and not larger: at text-xl a five-digit CRN in
+                // mono measures ~66px and overflows the w-16 gutter the rows
+                // align on.
+                className="w-16 shrink-0 text-lg leading-none font-bold tabular-nums underline decoration-dotted underline-offset-4 transition-colors hover:text-brand"
               >
                 {course.section.crn}
               </a>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">
-                  <span className="font-mono font-medium">{course.code}</span>
-                  <span className="text-muted-foreground"> {course.title}</span>
+                <p className="truncate text-base">
+                  <span className="font-bold">{course.code}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {" "}
+                    {course.title}
+                  </span>
                 </p>
-                <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular-nums">
-                  {formatMeeting(course.section)}
-                  {course.section.instructor ? ` · ${course.section.instructor}` : ""}
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  <span className="font-mono tabular-nums">
+                    {formatMeeting(course.section)}
+                  </span>
+                  {course.section.instructor ? `, ${course.section.instructor}` : ""}
                 </p>
               </div>
             </div>
@@ -193,37 +205,30 @@ export function Cart({
             can prefill. §13: /register is deliberately plain and Banner-styled. */}
         <Link
           href={`/register?crns=${crns.join(",")}`}
-          className={cn(
-            buttonVariants({ variant: "default", size: "lg" }),
-            "h-10 px-4",
-          )}
+          className={cn(buttonVariants({ variant: "default", size: "xl" }))}
         >
           Register these CRNs
           <ArrowRight aria-hidden data-icon="inline-end" />
         </Link>
-        <Button variant="outline" size="lg" className="h-10 px-4" onClick={copy}>
+        <Button variant="outline" size="xl" onClick={copy}>
           {copied ? <Check aria-hidden /> : <Copy aria-hidden />}
           {copied ? "Copied" : "Copy CRNs"}
         </Button>
       </div>
 
-      <div className="space-y-1.5 border-t border-rule bg-canvas px-5 py-3 text-xs leading-relaxed text-muted-foreground">
-        <p className="flex items-start gap-2">
-          <Check className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          Swapping a section never changes your credits or what the schedule
-          covers — only when you sit in the room.
-        </p>
-        <p className="flex items-start gap-2">
-          <ExternalLink className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          Every CRN above opens that section on Patriot Web, the public schedule
-          of classes, where the seat count is listed.
-        </p>
-        <p className="flex items-start gap-2">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          Some courses also require a linked lab or recitation section — check
-          Patriot Web before submitting.
-        </p>
-      </div>
+      {/*
+        Was three stacked paragraphs. Only one of them is a caveat the student
+        can act on — §13 names the linked-lab line specifically and it stays
+        whole. The other two described the UI rather than warning about it: that
+        a swap does not change credits is visible in the header the moment you
+        swap, and that a CRN opens Patriot Web is what the link's own title
+        attribute and external-link icon already say.
+      */}
+      <p className="flex items-start gap-2 border-t border-rule bg-canvas px-5 py-3 text-xs text-muted-foreground">
+        <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+        Some courses also require a linked lab or recitation section — check
+        Patriot Web before submitting.
+      </p>
     </aside>
   );
 }
@@ -335,7 +340,7 @@ function SectionPicker({
       <summary className="ml-20 flex w-fit cursor-pointer list-none items-center gap-1 py-1.5 text-xs text-muted-foreground transition-colors hover:text-brand focus-visible:text-brand [&::-webkit-details-marker]:hidden">
         {/* Counts the sections, not the alternatives: the list below includes the
             one already in the cart, marked as such. */}
-        Change section · {sections.length} offered
+        Change section ({sections.length} offered)
         <ChevronDown
           className="size-3 transition-transform group-open/sec:rotate-180"
           aria-hidden
@@ -370,15 +375,17 @@ function SectionPicker({
                     {formatMeeting(section)}
                   </span>
                   {section.instructor && (
-                    <span className="text-muted-foreground"> · {section.instructor}</span>
+                    <span className="text-muted-foreground">
+                      , {section.instructor}
+                    </span>
                   )}
                   {notes.length > 0 && !isCurrent && clash === undefined && (
-                    <span className="block text-[0.6875rem] text-soon">
+                    <span className="block text-xs text-soon">
                       against your preferences: {notes.join(", ")}
                     </span>
                   )}
                 </span>
-                <span className="shrink-0 text-[0.6875rem]">
+                <span className="shrink-0 text-xs">
                   {isCurrent
                     ? "in your cart"
                     : clash
@@ -394,7 +401,7 @@ function SectionPicker({
       {/* Never silently truncate. The count is the honest statement of what is
           not shown, and Patriot Web is where the rest actually live. */}
       {hidden > 0 && (
-        <p className="mt-1.5 ml-20 text-[0.6875rem] leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 ml-20 text-xs text-muted-foreground">
           Showing the {visible.length} closest to your current time.{" "}
           {allUrl ? (
             <a

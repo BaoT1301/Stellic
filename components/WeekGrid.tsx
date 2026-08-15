@@ -157,7 +157,7 @@ export function WeekGrid({
             <p
               className={cn(
                 "pb-1 text-center font-medium text-muted-foreground",
-                variant === "compact" ? "text-[0.5625rem]" : "text-[0.6875rem]",
+                variant === "compact" ? "text-[0.5625rem]" : "text-xs",
               )}
             >
               {variant === "compact" ? day.key : day.label}
@@ -192,7 +192,7 @@ export function WeekGrid({
                         "block truncate font-mono font-semibold",
                         variant === "compact"
                           ? "text-[0.5rem] leading-[1.15]"
-                          : "text-[0.6875rem] leading-tight",
+                          : "text-xs leading-tight",
                       )}
                     >
                       {block.code}

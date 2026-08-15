@@ -88,9 +88,9 @@ export function AuditUpload({
 
   return (
     <section className="animate-in fade-in duration-500">
+      {/* No step eyebrow — the Stepper above already says "Your audit". */}
       <header className="max-w-3xl">
-        <p className="eyebrow text-brand">Step 2 · where you actually are</p>
-        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+        <h1 className="text-4xl text-balance sm:text-5xl">
           Now the boring half.
         </h1>
         {/*
@@ -102,10 +102,12 @@ export function AuditUpload({
           second half ("Persistence: None"), so every clause below is defensible
           under questioning.
         */}
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
-          Drop in your degree audit. We read the requirements you have left, not
-          your grades. The text goes to OpenAI to pull those requirements out,
-          and that is it — no account, no database, nothing stored.
+        {/* Kept longer than the other ledes on purpose. Every clause here is a
+            disclosure, not a pitch — see the comment above. */}
+        <p className="mt-5 text-lg text-muted-foreground text-pretty">
+          We read the requirements you have left, not your grades. The text goes
+          to OpenAI to pull them out, and that is it — no account, no database,
+          nothing stored.
         </p>
       </header>
 
@@ -122,16 +124,16 @@ export function AuditUpload({
             accept(e.dataTransfer.files[0]);
           }}
           className={cn(
-            "relative flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-16 text-center transition-colors",
+            "relative flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-16 text-center transition-all duration-200",
             dragging
-              ? "border-brand bg-brand-soft"
-              : "border-foreground/20 bg-card hover:border-foreground/35",
+              ? "border-brand bg-brand-soft shadow-e2"
+              : "border-foreground/20 bg-card shadow-e1 hover:border-foreground/35 hover:shadow-e2",
           )}
         >
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
             <Upload className="size-5 text-muted-foreground" aria-hidden />
           </div>
-          <p className="mt-5 text-base font-medium">
+          <p className="mt-5 text-lg font-semibold">
             Drop your degree audit here
           </p>
           {/*
@@ -141,16 +143,15 @@ export function AuditUpload({
             was a §0 rule 7 error about the judges' own customer.
           */}
           <p className="mt-1.5 text-sm text-muted-foreground">
-            PDF, up to 4.5 MB. Stellic, DegreeWorks and Banner exports all work.
+            PDF up to 4.5 MB. Stellic, DegreeWorks and Banner exports.
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Not sure where to find it? Student portal → Student Services →
-            Degree Evaluation → print to PDF.
+            Student portal → Student Services → Degree Evaluation → print to PDF
           </p>
           <Button
             variant="outline"
-            size="lg"
-            className="mt-6 h-10 px-4"
+            size="xl"
+            className="mt-6"
             disabled={isWorking}
             onClick={() => inputRef.current?.click()}
           >
@@ -174,7 +175,7 @@ export function AuditUpload({
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl bg-card p-5 ring-1 ring-foreground/10">
+          <div className="rounded-xl bg-card p-5 shadow-e1 ring-1 ring-foreground/[0.06]">
             <div className="flex items-start gap-3">
               <FileText className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
               <div>
@@ -186,9 +187,9 @@ export function AuditUpload({
                   is the number the sample PDF actually parses to. "Junior" is
                   consistent with it: 86 credits is junior standing (60-89).
                 */}
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Use the sample student: a transfer junior in the BS in
-                  Computer Science, 86 credits in, graduating May 2027.
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A transfer junior in BS Computer Science, 86 credits in,
+                  graduating May 2027.
                 </p>
               </div>
             </div>
@@ -200,7 +201,7 @@ export function AuditUpload({
               <a
                 href={sampleAuditUrl}
                 download
-                className="inline-flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="inline-flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <Download className="size-3.5" aria-hidden />
                 Download the PDF
@@ -208,7 +209,7 @@ export function AuditUpload({
             </div>
           </div>
 
-          <div className="rounded-xl bg-card ring-1 ring-foreground/10">
+          <div className="rounded-xl bg-card shadow-e1 ring-1 ring-foreground/[0.06]">
             <button
               type="button"
               onClick={() => setManualOpen((v) => !v)}
@@ -370,7 +371,7 @@ function ManualEntry({
         </div>
       </Field>
 
-      <p className="text-xs leading-relaxed text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         Your remaining requirements come from the published BS Computer Science
         template, minus what you list here.
       </p>

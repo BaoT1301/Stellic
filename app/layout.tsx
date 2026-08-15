@@ -6,17 +6,37 @@ import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-// app/globals.css maps --font-sans and --font-mono in its @theme block, so the
-// CSS variable names here have to match those exactly or `font-sans` resolves to
-// nothing. Tailwind v4 has no config file to catch this for us (CLAUDE.md §6).
+/**
+ * TWO families, doing two different jobs.
+ *
+ * Geist sets the prose: headings, ledes, explanatory copy, buttons. Geist Mono
+ * sets the machine-readable strings — course codes, CRNs, meeting times, the
+ * diff line on a schedule card. That split is the point: a CRN is a number a
+ * student copies into a registration form character by character, and it should
+ * not look like the sentence around it.
+ *
+ * This replaces a single-family setup where --font-sans and --font-mono both
+ * resolved to JetBrains Mono, which made every `font-mono` utility in the app a
+ * no-op. Those ~20 call sites are now real font switches again, which is why
+ * none of them needed editing.
+ *
+ * The variable names have to match what globals.css reads in its @theme block or
+ * `font-sans` silently resolves to nothing. Tailwind v4 has no config file to
+ * catch this for us (CLAUDE.md §6).
+ *
+ * No `weight` arrays: both are variable fonts on Google Fonts, and listing
+ * weights would ship several static instances instead of one axis.
+ */
 const geistSans = Geist({
-  variable: "--font-sans",
+  variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

@@ -46,6 +46,9 @@ runtime models.
 | shadcn/ui | latest | Component primitives |
 | Base UI | — | shadcn's underlying primitive library as of July 2026 |
 | sonner | — | Toasts (shadcn's `toast` is deprecated) |
+| Geist | — | All prose — headings, body, ledes, buttons. Variable font, served self-hosted by `next/font/google`, so no request leaves the page at runtime. Licensed under the SIL Open Font License 1.1. |
+| Geist Mono | — | Machine-readable strings only — course codes, CRNs, meeting times, prereq-chain nodes. Same variable-font and self-hosting story; also SIL Open Font License 1.1. |
+| `next/font` | — | Self-hosts and subsets both fonts at build time |
 
 ## Data pipeline
 

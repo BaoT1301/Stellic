@@ -7,9 +7,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  /* Two families, doing two different jobs — see app/layout.tsx. Geist sets the
+     prose; Geist Mono sets the machine-readable strings (course codes, CRNs,
+     meeting times). Every `font-mono` utility in the app is a real font switch
+     again rather than a no-op. */
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-geist-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -34,6 +38,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -48,36 +53,136 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ------------------------------------------------------------------ *
+ * Type scale
+ *
+ * Overriding Tailwind's own --text-* keys rather than inventing new
+ * names, so every existing `text-sm` / `text-lg` call site moves onto
+ * this ramp without being edited. Tailwind v4 reads the paired
+ * `--text-x--line-height` and `--text-x--letter-spacing` keys
+ * automatically whenever the size utility is used.
+ *
+ * THE STEPS ARE WIDER THAN STOCK. The complaint this ramp was built
+ * for was that everything read at one size. Tailwind's own scale puts
+ * body at 16px and a section heading at 18px — a 1.13x step that no
+ * reader perceives as a level. Here the levels a screen actually uses
+ * are 12 / 14 / 16 / 19 / 24 / 30 / 36 / 44 / 52, and each display
+ * level is paired with a weight in @layer base below, so size is never
+ * carrying the hierarchy alone.
+ *
+ * These values were previously all one step SMALLER, on the record that
+ * "JetBrains Mono sets every glyph on a 0.6em advance, so a mono string
+ * runs roughly 15% wider." The app is set in Geist now (app/layout.tsx)
+ * and that premise is gone, so the ramp is back to conventional sizes
+ * and the tracking is about half as negative — a proportional sans does
+ * not need the same optical correction a monospace does.
+ * ------------------------------------------------------------------ */
+@theme {
+  /* meta: eyebrows, tags, week-grid labels, CRNs in dense rows.
+     1.5 and not 1.45, for a reason worth keeping: several `py-1 text-xs` links
+     (the CRN, the instructor, the "Why this?" summary) are sized so that
+     padding + line box lands on the WCAG 2.2 SC 2.5.8 24px target floor, and
+     scripts/check-mobile.ts measures them. 12px x 1.5 = 18px + 8px padding =
+     26px, which clears it with more margin than the old 11px did. If that
+     script ever fails one of these, raise the line-height, not the padding. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-xs--letter-spacing: 0.002em;
+
+  /* secondary: helper text, captions, the explanatory line under a heading */
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.55;
+  --text-sm--letter-spacing: 0em;
+
+  /* body */
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-base--letter-spacing: -0.003em;
+
+  /* lede: the one paragraph under a screen heading */
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.6;
+  --text-lg--letter-spacing: -0.01em;
+
+  /* section heading, and the course code on a bottleneck card */
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.3;
+  --text-xl--letter-spacing: -0.016em;
+
+  /* screen-3 and screen-4 section headings */
+  --text-2xl: 1.875rem;
+  --text-2xl--line-height: 1.22;
+  --text-2xl--letter-spacing: -0.02em;
+
+  /* tool-screen headline, mobile */
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.14;
+  --text-3xl--letter-spacing: -0.022em;
+
+  /* tool-screen headline at sm:, and the entry headline on mobile */
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 1.08;
+  --text-4xl--letter-spacing: -0.026em;
+
+  /* entry headline, sm: and up */
+  --text-5xl: 3.25rem;
+  --text-5xl--line-height: 1.04;
+  --text-5xl--letter-spacing: -0.03em;
+}
+
+/* ------------------------------------------------------------------ *
+ * Neutrals
+ *
+ * Every neutral here carries a small amount of chroma, which is the
+ * difference between "greyscale" and "a colour scheme with a quiet
+ * range". The ink is blue-black (hue 265) and the paper is warm
+ * (hue 92-95), so the two ends of the scale lean against each other
+ * instead of both sitting at chroma 0. The amounts are deliberately
+ * tiny — 0.006 on paper, 0.022 on ink — because CLAUDE.md §3 puts
+ * registrars in the judging room and this is a document, not a poster.
+ * ------------------------------------------------------------------ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  /* WCAG 2.1 AA, SC 1.4.3. The shadcn default oklch(0.556 0 0) measures 4.46:1
-     against --canvas and 4.34:1 against --muted, both under the 4.5:1 floor for
-     normal-size text, and this token carries nearly every explanatory string in
-     the app. 0.48 measures 6.16:1 on canvas, 6.54:1 on card, 5.99:1 on muted.
+  --background: oklch(0.995 0.003 95);
+  --foreground: oklch(0.21 0.022 265);
+  --card: oklch(0.995 0.003 95);
+  --card-foreground: oklch(0.21 0.022 265);
+  --popover: oklch(0.995 0.003 95);
+  --popover-foreground: oklch(0.21 0.022 265);
+  /* The primary CTA is the brand blue rather than near-black. There is exactly
+     one accent in this app and the button that advances the flow should be it;
+     a black button next to a blue eyebrow read as two unrelated systems. */
+  --primary: oklch(0.48 0.17 264);
+  --primary-foreground: oklch(0.99 0.004 264);
+  /* The hover state has to DARKEN. shadcn's default variant ships
+     `hover:bg-primary/80`, which composites the primary at 80% over whatever is
+     behind it — fine when --primary is near-black, because 80% of near-black is
+     still very dark. Against a mid-lightness blue on a near-white canvas it
+     lifts the fill to roughly L 0.62 and the white label drops to 3.2:1, which
+     axe flags serious under SC 1.4.3. Verified: this was a real regression, not
+     a theoretical one. components/ui/button.tsx uses this token instead. */
+  --primary-hover: oklch(0.41 0.17 264);
+  --secondary: oklch(0.945 0.006 95);
+  --secondary-foreground: oklch(0.26 0.02 265);
+  --muted: oklch(0.945 0.007 95);
+  /* WCAG 2.1 AA, SC 1.4.3. The shadcn default oklch(0.556 0 0) lands under the
+     4.5:1 floor for normal-size text against both --canvas and --muted, and this
+     token carries nearly every explanatory string in the app. 0.505 clears it on
+     all three surfaces — see scripts/check-contrast.ts, which asserts it.
      ADA Title II makes WCAG 2.1 AA the technical standard for public
      institutions, which is the audience in CLAUDE.md §3. */
-  --muted-foreground: oklch(0.48 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --muted-foreground: oklch(0.505 0.016 265);
+  --accent: oklch(0.945 0.007 95);
+  --accent-foreground: oklch(0.26 0.02 265);
+  --destructive: oklch(0.52 0.205 27);
+  --border: oklch(0.885 0.008 95);
+  --input: oklch(0.885 0.008 95);
   /* SC 1.4.11 wants 3:1 for the visual information that identifies a state, and
      the keyboard focus indicator is the case a procurement review checks first.
      The shadcn default oklch(0.708 0 0) measures 2.44:1 against --canvas, so a
-     focused field was hard to find; 0.55 measures 4.57:1. This token only ever
-     paints on :focus-visible, so nothing at rest changes. */
-  --ring: oklch(0.55 0 0);
+     focused field was hard to find. Using the brand blue clears 3:1 comfortably
+     AND makes the focus ring the same colour as every other interactive accent.
+     This token only ever paints on :focus-visible, so nothing at rest changes. */
+  --ring: oklch(0.48 0.17 264);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -138,6 +243,31 @@
   html {
     @apply font-sans;
   }
+
+  /* Size alone was never going to carry the hierarchy — pairing each display
+     level with a weight and a tighter track is what makes the step read. Set
+     here rather than repeated across nine components, and any call site can
+     still override with a utility. */
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  /* Geist Mono ships no programming ligatures, unlike the JetBrains Mono this
+     replaces — but the strings that would be at risk are still here and still
+     load-bearing: ScheduleOptions' diff line ("-CS 484, +STAT 354") and the
+     footer's "audit - your official audit". Keeping `calt` off on the mono
+     family alone costs one rule and means a future font swap cannot silently
+     turn a minus sign into an arrow. Prose keeps its contextual alternates. */
+  .font-mono,
+  code,
+  kbd,
+  samp,
+  pre {
+    font-feature-settings: "calt" 0;
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -169,23 +299,76 @@
   --color-covered-soft: var(--covered-soft);
   --color-missing: var(--missing);
   --color-missing-soft: var(--missing-soft);
+
+  /* ---------------------------------------------------------------- *
+   * Elevation
+   *
+   * Three levels, and every container in the app is on one of them:
+   * e1 for anything resting on the page, e2 for the thing under your
+   * cursor or the one card that matters most on a screen, e3 for the
+   * cart and the selected schedule.
+   *
+   * This replaces `ring-1 ring-foreground/10` used as the ONLY
+   * elevation idiom on ten different container types, which is why the
+   * screens read as flat: a stat strip, a bottleneck card and the cart
+   * all sat at exactly the same depth despite being three different
+   * kinds of object.
+   *
+   * Tinted with the ink hue rather than pure black. --foreground is
+   * oklch(0.21 0.022 265), a blue-black, and a neutral-grey shadow
+   * under a blue-black ink on warm paper reads as dirt. Two layers per
+   * level: a tight contact shadow that draws the edge, and a wide
+   * ambient one that does the lifting.
+   *
+   * Keep a hairline ring under these. Cards are --card (L 0.995) on
+   * --canvas (L 0.972) and the shadow contributes nothing along the top
+   * edge, so without a ring the card has no boundary where it needs one
+   * most.
+   * ---------------------------------------------------------------- */
+  --shadow-e1:
+    0 1px 2px -1px oklch(0.21 0.022 265 / 0.09),
+    0 1px 3px oklch(0.21 0.022 265 / 0.05);
+  --shadow-e2:
+    0 2px 4px -2px oklch(0.21 0.022 265 / 0.1),
+    0 8px 18px -6px oklch(0.21 0.022 265 / 0.09);
+  --shadow-e3:
+    0 4px 8px -4px oklch(0.21 0.022 265 / 0.12),
+    0 18px 36px -10px oklch(0.21 0.022 265 / 0.11);
 }
 
 :root {
-  --canvas: oklch(0.979 0.004 95);
-  --rule: oklch(0.902 0.004 95);
-  --brand: oklch(0.435 0.115 262);
-  --brand-soft: oklch(0.958 0.018 262);
-  --critical: oklch(0.505 0.175 26);
-  --critical-soft: oklch(0.966 0.024 30);
-  --soon: oklch(0.525 0.105 68);
-  --soon-soft: oklch(0.968 0.032 80);
-  --calm: oklch(0.455 0.028 220);
-  --calm-soft: oklch(0.968 0.008 220);
-  --covered: oklch(0.442 0.078 165);
-  --covered-soft: oklch(0.964 0.028 165);
-  --missing: oklch(0.5 0.155 30);
-  --missing-soft: oklch(0.969 0.026 35);
+  --canvas: oklch(0.972 0.006 92);
+  --rule: oklch(0.888 0.009 92);
+
+  /* Solids. Every one is a text colour somewhere, so lightness is pinned in the
+     0.48-0.52 band where it clears 4.5:1 against BOTH --canvas and its own
+     -soft fill. Chroma is then pushed as high as that lightness and hue allow
+     while staying in sRGB gamut. */
+  --brand: oklch(0.48 0.17 264);
+  --critical: oklch(0.52 0.2 27);
+  --soon: oklch(0.51 0.108 65);
+  --calm: oklch(0.5 0.05 240);
+  --covered: oklch(0.5 0.1 165);
+  --missing: oklch(0.515 0.16 32);
+
+  /* Fills. These were all L 0.964-0.969 at chroma 0.008-0.032, which against a
+     0.979 canvas is a difference you have to be told about — the urgency tint on
+     a bottleneck card and the covered/missing split on the gap chips both read
+     as the same pale grey.
+
+     Getting more colour out of them is a LIGHTNESS move, not a chroma move: at
+     L 0.945 sRGB holds only 0.026 chroma at the brand's hue, so the obvious fix
+     of doubling chroma in place just gets clipped by the browser — which shifts
+     the hue and can collapse two of these into the same rendered colour.
+     scripts/check-contrast.ts caught exactly that on four of the six. Dropping
+     to L 0.935 roughly doubles the chroma ceiling, and every value below sits
+     under it with margin. The solids above still clear 4.5:1 on top of them. */
+  --brand-soft: oklch(0.935 0.028 264);
+  --critical-soft: oklch(0.935 0.03 30);
+  --soon-soft: oklch(0.938 0.055 80);
+  --calm-soft: oklch(0.941 0.02 240);
+  --covered-soft: oklch(0.935 0.05 165);
+  --missing-soft: oklch(0.935 0.031 35);
 }
 
 @layer base {
@@ -202,10 +385,33 @@
   .eyebrow {
     font-size: 0.6875rem;
     line-height: 1;
-    font-weight: 600;
+    font-weight: 700;
+    /* 0.09em now the app is set in a proportional sans. This was dropped to
+       0.06em while everything was monospaced, because uppercase mono is already
+       wide and the full tracking pushed a group heading past the column at
+       390px. Geist has room for it again. */
     letter-spacing: 0.09em;
     text-transform: uppercase;
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * Toasts
+ *
+ * sonner injects its own stylesheet at runtime containing
+ * `[data-sonner-toaster] { font-family: ui-sans-serif, system-ui, ... }`.
+ * That is a real declaration, not an inherited one, so without this the toast
+ * renders in the OS system sans rather than in Geist. Less glaring than it was
+ * when the app was set in a monospace, but still the one surface that would be
+ * in the wrong typeface.
+ *
+ * Beating it needs BOTH: unlayered (sonner's rule is unlayered, and any
+ * unlayered rule wins over @layer regardless of specificity) and higher
+ * specificity than 0,1,0 — hence the `html` prefix.
+ * ------------------------------------------------------------------ */
+html [data-sonner-toaster],
+html [data-sonner-toast] {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ------------------------------------------------------------------ *

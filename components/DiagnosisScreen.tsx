@@ -18,8 +18,16 @@ import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Bottleneck, SkillGap, StudentAudit } from "@/lib/types";
 
 /**
- * State 3 — CLAUDE.md §13. Two columns: what is load-bearing, and the gap map.
- * "This screen and the next are the two that sell the product."
+ * State 3 — CLAUDE.md §13. "This screen and the next are the two that sell the
+ * product."
+ *
+ * ONE COLUMN, in reading order: what the jobs asked for, then what is holding up
+ * the degree. This replaced a two-column grid that only existed at lg: — below
+ * 1024px the gap map was already a full second screen of scrolling after the
+ * last bottleneck card, so the layout the phone got and the layout the laptop
+ * got told the story in two different orders. Now they are the same order, and
+ * the demand side lands before the constraint side, which is the argument the
+ * screen is actually making.
  *
  * Every string on this screen comes from §11.1's output at runtime. §13 is
  * explicit that its own example is ILLUSTRATIVE ONLY and that nothing here may
@@ -83,7 +91,6 @@ export interface DiagnosisScreenProps {
    * Computed in app/page.tsx, which is the only place holding the prereq graph.
    */
   delays?: Record<string, DelayImpact>;
-  postingCount?: number;
   /**
    * Critical bottlenecks with no section next term. §11.3 step 2 requires these
    * to appear here as "see your advisor" and NEVER on a schedule card.
@@ -101,7 +108,6 @@ export function DiagnosisScreen({
   titles,
   prereqsOf,
   delays,
-  postingCount,
   unofferedCritical = [],
   onContinue,
   onBack,
@@ -120,38 +126,26 @@ export function DiagnosisScreen({
 
   const termsRemaining = bottlenecks[0]?.termsRemaining;
   const graduation = formatGraduation(audit.expectedGraduation);
-  const openGaps = gaps.filter((g) => !g.covered).length;
 
   return (
     <section className="animate-in fade-in duration-500">
+      {/*
+        Headline only. No step eyebrow — the Stepper directly above already says
+        "Diagnosis" — and no lede. The lede here read "One requirement costs you
+        a term if you miss it. 7 skills your postings asked for are still open",
+        which is both numbers restated from the two stat strips below it. This is
+        a tool screen, not a landing page, so it opens at 36/44px rather than the
+        52px the entry screen uses.
+      */}
       <header className="max-w-3xl">
-        <p className="eyebrow text-brand">Step 3 · the diagnosis</p>
-        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+        <h1 className="text-3xl text-balance sm:text-4xl">
           Not every box on your audit weighs the same.
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
-          {critical.length > 0 ? (
-            <>
-              {critical.length === 1 ? "One" : critical.length} of your remaining
-              requirements{" "}
-              {critical.length === 1 ? "sits" : "sit"} at the head of a chain and
-              cost{critical.length === 1 ? "s" : ""} you a term for every one you
-              miss. {openGaps} of the skills your postings asked for are still
-              open.
-            </>
-          ) : (
-            <>
-              Nothing you have left is on the critical path — your sequencing is
-              clean. {openGaps} of the skills your postings asked for are still
-              open, and that is where your electives go.
-            </>
-          )}
-        </p>
       </header>
 
       {/* flex-col + divide-y on mobile, flex-row + divide-x above sm. Using
           flex-wrap here instead would put a stray rule on the wrapped row. */}
-      <dl className="mt-8 flex flex-col divide-y divide-rule overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 sm:flex-row sm:divide-x sm:divide-y-0">
+      <dl className="mt-8 flex flex-col divide-y divide-rule overflow-hidden rounded-xl bg-card shadow-e1 ring-1 ring-foreground/[0.06] sm:flex-row sm:divide-x sm:divide-y-0">
         <Fact label="Program" value={audit.major} />
         <Fact
           label="Credits"
@@ -171,82 +165,74 @@ export function DiagnosisScreen({
         <Fact label="Catalog" value={audit.catalogYear ?? "not on file"} />
       </dl>
 
-      {/*
-        min-w-0 on BOTH children is load-bearing, not tidiness. The
-        minmax(0,...) that prevents grid blowout only applies at lg:; below that
-        the implicit single column is `auto` and a grid item's default
-        `min-width: auto` refuses to shrink below its content's min-content
-        width. Measured at 390px before this fix: the column rendered 596px wide
-        and the page scrolled sideways to 620px, which also pushed a gap chip on
-        top of the "Build my semester" button so it could not be tapped.
-      */}
-      <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold tracking-tight">
-            What&apos;s holding up the rest of your degree
-          </h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-            Ordered by how much of your remaining degree is waiting behind each
-            one. These are the load-bearing ones.
-          </p>
-
-          <Group
-            title="Take this term or you graduate late"
-            tone="critical"
-            count={critical.length}
-          >
-            {critical.map((b) => (
-              <BottleneckCard
-                key={b.code}
-                bottleneck={b}
-                titles={titles}
-                completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
-                showChain={heroHasChain && b.code === hero?.code}
-                delay={delays?.[b.code]}
-              />
-            ))}
-          </Group>
-
-          {unofferedCritical.length > 0 && (
-            <p className="mt-4 rounded-lg bg-critical-soft px-4 py-3 text-sm leading-relaxed text-critical">
-              <span className="font-mono font-medium">
-                {unofferedCritical.join(", ")}
-              </span>{" "}
-              {unofferedCritical.length === 1 ? "is" : "are"} on your critical
-              path but {unofferedCritical.length === 1 ? "has" : "have"} no{" "}
-              {NEXT_TERM_LABEL} section. Nothing we build can include{" "}
-              {unofferedCritical.length === 1 ? "it" : "them"} — see your advisor.
-            </p>
-          )}
-
-          <Group
-            title="Take this term or next"
-            tone="soon"
-            count={soon.length}
-          >
-            {soon.map((b) => (
-              <BottleneckCard
-                key={b.code}
-                bottleneck={b}
-                titles={titles}
-                completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
-                showChain={heroHasChain && b.code === hero?.code}
-                delay={delays?.[b.code]}
-              />
-            ))}
-          </Group>
-
-          <DelayGroup codes={flexible.map((b) => b.code)}>
-            {flexible.map((b) => (
-              <BottleneckCard key={b.code} bottleneck={b} titles={titles} />
-            ))}
-          </DelayGroup>
-        </div>
-
-        <GapMap gaps={gaps} postingCount={postingCount} className="min-w-0" />
+      {/* Demand first, then constraint. min-w-0 stays on both sections: they are
+          full width now so a grid blowout is no longer possible, but the chip
+          grid inside GapMap and the code chips inside a bottleneck card both
+          rely on an ancestor that will shrink below its min-content width. */}
+      <div className="mt-12 min-w-0">
+        <GapMap gaps={gaps} className="min-w-0" />
       </div>
 
-      <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
+      <div className="mt-14 min-w-0">
+        <h2 className="text-2xl">What&apos;s holding up your degree</h2>
+
+        <Group
+          title="Take this term or graduate late"
+          tone="critical"
+          count={critical.length}
+        >
+          {critical.map((b) => (
+            <BottleneckCard
+              key={b.code}
+              bottleneck={b}
+              titles={titles}
+              completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
+              showChain={heroHasChain && b.code === hero?.code}
+              delay={delays?.[b.code]}
+              // The hero carries the prereq SVG and needs the full width; the
+              // rest pair up rather than each stretching to 1200px.
+              className={
+                heroHasChain && b.code === hero?.code ? "md:col-span-2" : ""
+              }
+            />
+          ))}
+        </Group>
+
+        {unofferedCritical.length > 0 && (
+          <p className="mt-4 rounded-lg bg-critical-soft px-4 py-3 text-sm text-critical">
+            <span className="font-semibold">
+              {unofferedCritical.join(", ")}
+            </span>{" "}
+            {unofferedCritical.length === 1 ? "has" : "have"} no{" "}
+            {NEXT_TERM_LABEL} section, so nothing we build can include{" "}
+            {unofferedCritical.length === 1 ? "it" : "them"} — see your advisor.
+          </p>
+        )}
+
+        <Group title="Take this term or next" tone="soon" count={soon.length}>
+          {soon.map((b) => (
+            <BottleneckCard
+              key={b.code}
+              bottleneck={b}
+              titles={titles}
+              completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
+              showChain={heroHasChain && b.code === hero?.code}
+              delay={delays?.[b.code]}
+              className={
+                heroHasChain && b.code === hero?.code ? "md:col-span-2" : ""
+              }
+            />
+          ))}
+        </Group>
+
+        <DelayGroup codes={flexible.map((b) => b.code)}>
+          {flexible.map((b) => (
+            <BottleneckCard key={b.code} bottleneck={b} titles={titles} />
+          ))}
+        </DelayGroup>
+      </div>
+
+      <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6">
         {onBack ? (
           <Button variant="ghost" size="lg" onClick={onBack} disabled={isWorking}>
             <ArrowLeft aria-hidden data-icon="inline-start" />
@@ -255,12 +241,7 @@ export function DiagnosisScreen({
         ) : (
           <span />
         )}
-        <Button
-          size="lg"
-          onClick={onContinue}
-          disabled={isWorking}
-          className="h-11 px-5 text-[0.9375rem]"
-        >
+        <Button size="xl" onClick={onContinue} disabled={isWorking}>
           {isWorking ? "Building your semester…" : "Build my semester"}
           {!isWorking && <ArrowRight aria-hidden data-icon="inline-end" />}
         </Button>
@@ -306,7 +287,10 @@ function Group({
         {title}
         <span className="tabular-nums opacity-70">{count}</span>
       </h3>
-      <div className="mt-3 flex flex-col gap-3">{children}</div>
+      {/* Two up. These cards are full width now, and a short one — a code, a
+          title and a one-line reason — stretched across 1200px is mostly empty
+          card. The hero opts back out with md:col-span-2. */}
+      <div className="mt-3 grid items-start gap-3 md:grid-cols-2">{children}</div>
     </div>
   );
 }
@@ -314,9 +298,9 @@ function Group({
 /** The one-line body under the summary, so the collapse never reads as "skip these". */
 function delayNote(count: number): string {
   if (count === 1) {
-    return "You still have to take it. Nothing else is waiting on it, so when you take it is up to you.";
+    return "Still required. Nothing is waiting on it, so when is up to you.";
   }
-  return `You still have to take all ${spell(count)}. None of them blocks anything else, so the order is yours.`;
+  return `Still required, all ${spell(count)}. Nothing is waiting on them, so the order is yours.`;
 }
 
 /**
@@ -351,7 +335,7 @@ function DelayGroup({
       <summary className="flex list-none cursor-pointer flex-col gap-2 rounded-lg py-1.5 [&::-webkit-details-marker]:hidden">
         <span className={`eyebrow flex items-center gap-1.5 ${text}`}>
           <Icon className="size-3.5" aria-hidden />
-          Still required - but nothing is waiting on them
+          Nothing is waiting on these
           <span className="tabular-nums opacity-70">{codes.length}</span>
           <ChevronRight
             className="size-3.5 transition-transform group-open:rotate-90"
@@ -369,10 +353,10 @@ function DelayGroup({
           ))}
         </span>
       </summary>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-sm text-muted-foreground">
         {delayNote(codes.length)}
       </p>
-      <div className="mt-3 flex flex-col gap-3">{children}</div>
+      <div className="mt-3 grid items-start gap-3 md:grid-cols-2">{children}</div>
     </details>
   );
 }

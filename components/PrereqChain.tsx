@@ -254,7 +254,7 @@ export function PrereqChain({
           )}
         </svg>
       </div>
-      <figcaption className="mt-3 text-xs leading-relaxed text-muted-foreground">
+      <figcaption className="mt-3 text-xs text-muted-foreground">
         Everything to the right is a course you still need and cannot reach until{" "}
         <span className="font-mono font-medium text-foreground">
           {bottleneck.code}

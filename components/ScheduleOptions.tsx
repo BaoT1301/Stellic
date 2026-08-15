@@ -9,7 +9,6 @@ import { ScheduleCard, weekBlocksFor } from "@/components/ScheduleCard";
 import { weekBounds } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
 import { rmpUrl } from "@/lib/rmp";
-import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Preferences, ScheduleOption, Section } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -193,17 +192,12 @@ export function ScheduleOptions({
 
   return (
     <section className="animate-in fade-in duration-500">
+      {/* No step eyebrow — the Stepper above says "Schedule" and the site header
+          says "Planning Fall 2026". A tool screen, so 36/44px, not 52. */}
       <header className="max-w-3xl">
-        <p className="eyebrow text-brand">Step 4 · {NEXT_TERM_LABEL}</p>
-        <h1 className="mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
+        <h1 className="text-3xl text-balance sm:text-4xl">
           Three ways to spend next term.
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground text-pretty">
-          Every course below has a real section with a real CRN. The model wrote
-          the reasoning; it did not pick the courses — the combinations are
-          generated from your requirements, the prerequisite graph and the
-          published meeting times.
-        </p>
       </header>
 
       <div className="mt-8">
@@ -216,24 +210,33 @@ export function ScheduleOptions({
         />
       </div>
 
-      {options.length > 1 && (
-        <div className="mt-6 max-w-2xl">
-          <p className="text-sm text-foreground">
-            The required courses are on every option. The elective slot is where{" "}
-            {options.length === 3 ? "the three" : "they"} differ.
-          </p>
-          {/* First and only place "slot" is glossed. §13's toggle row is right
-              above this, so the gloss lands before the phrase is used on a card. */}
-          <p className="mt-1 text-sm text-muted-foreground">
-            Elective slots are the classes you actually get to pick.
-          </p>
-        </div>
-      )}
+      {/*
+        ONE line where there were two paragraphs and a lede. Both claims survive
+        and they belong together anyway: the provenance beat (§16 — the model
+        wrote the prose, not the course list) is the reason to trust the second
+        half, which is that the cards differ only in the elective slot. Sitting
+        directly above the cards is also where it is actually useful, rather than
+        above the toggles where the lede used to be.
+      */}
+      <p className="mt-6 max-w-3xl text-sm text-muted-foreground">
+        Every course has a real section with a real CRN, and the model wrote the
+        reasoning rather than picking the courses.
+        {options.length > 1 && (
+          <>
+            {" "}
+            <span className="text-foreground">
+              Required courses are on every option
+            </span>{" "}
+            — {options.length === 3 ? "the three" : "they"} differ only in the
+            elective slot, the class you actually get to pick.
+          </>
+        )}
+      </p>
 
       {options.length === 0 ? (
         // §11.3 step 8 makes this unreachable, and §0 rule 3 says build it
         // anyway: a blank screen in the demo video is worse than any feature.
-        <p className="mt-8 rounded-xl bg-card px-5 py-8 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">
+        <p className="mt-8 rounded-xl bg-card px-5 py-8 text-center text-sm text-muted-foreground shadow-e1 ring-1 ring-foreground/[0.06]">
           No conflict-free combination survived those preferences. Turn one off
           and regenerate.
         </p>
