@@ -15,6 +15,30 @@ function getClient(): OpenAI {
   return _client;
 }
 
+/**
+ * DO NOT SET `temperature: 0` HERE. It is the obvious move on an extraction
+ * task and it was measured to make /api/extract-skills materially WORSE.
+ *
+ * Same two sample postings, same prompt, varying only temperature:
+ *
+ *   default  →  a mixed, sensible list: "Analyze data to identify trends",
+ *               "Perform exploratory data analysis", "Write production-quality
+ *               software". Count varies run to run (5-15).
+ *   0        →  20 results, ALL of them consecutive "Analyze ..." entries, and
+ *               both "Write computer programming code" and "Write
+ *               production-quality software" absent. §12.2 sorts the allowed
+ *               DWA list alphabetically by name, so greedy decoding walks it
+ *               from the top and locks into the first verb it sees.
+ *   0.2      →  same clustering, plus "Analyze patient data."
+ *   0.4      →  drifts to "Liaise between departments", "Confer with managers",
+ *               and "Immunize patients." for a data-science posting.
+ *
+ * The last two are §0 rule 7 / rule 9 failures — a wrong skill is what puts an
+ * unrelated course on a student's schedule with a real CRN beside it, which is
+ * the exact bug §19 already had to fix once. Variance is the lesser evil, and
+ * /api/extract-skills handles the empty tail with a retry rather than by
+ * turning the sampler down.
+ */
 export async function callStructured<T>(
   system: string,
   user: string,

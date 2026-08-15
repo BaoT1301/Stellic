@@ -1406,6 +1406,72 @@ PALETTE CLEAN, 46 tokens in gamut · `smoke-pipeline` ALL CHECKS PASSED ·
 documented baseline (the `sr-only` file input, on the two screens it stays
 mounted for) · all six screens re-shot with no page errors.
 
+### `/api/extract-skills` was returning real ids for skills it had invented (Aug 15)
+
+Surfaced by `model returned no usable skills` firing during a manual run. That
+error is caught and serves the fixture, so the flow never broke — which is why
+the far worse bug underneath it had gone unnoticed.
+
+**The model was being asked to copy an opaque key.** The prompt listed 1,411 rows
+of `skillId<TAB>skillName` and the schema asked for `skillId` back. `gpt-4o`
+cannot do that reliably over a list that size, and its failure is silent: it
+emits a plausible name it INVENTED next to a real id belonging to something else.
+Observed directly — it returned `4.A.2.b.2.I12.D02` labelled
+*"Write production-quality software."*, which is not an O\*NET DWA at all. That id
+is **"Create marketing materials."**
+
+The two existing guards made it invisible rather than catching it:
+
+- `scopedIds.has(s.skillId)` passed, because the id was genuinely in the list.
+- §9.3's canonical-name lookup then *replaced* the invented name with the real
+  name for that id — laundering a hallucination into a real, wrong DWA and
+  rendering it on a backend engineer's gap map. §0 rule 7, in front of registrars.
+
+**Fix: the NAME is the key and the id is derived.** DWA titles are unique across
+all 2,070 rows of O\*NET 20.1 (verified), so this is sound. The model now returns
+`{ skillName, postings }`, the route resolves the name to an id by exact match,
+and anything that does not resolve is dropped. A wrong name is now a name that
+does not exist, instead of a different skill. Ids are gone from the prompt too —
+they were ~19 chars x 1,100 rows of pure liability. `demandCount` was also
+dropped from the model's schema; the route already derived it.
+
+**Two smaller fixes landed with it:**
+
+- **Scoping now matches `lib/gaps.ts`.** That file already applies
+  `isUndergraduate` when filling `SkillGap.closableBy`; the route did not, so a
+  DWA taught only by MATH 776 or PHYS 685 could be demanded and then have nothing
+  able to close it — which the gap map rendered as *"needs a prereq first"*, a
+  false reason. It is not behind a prerequisite, it is behind a graduate course.
+  1,411 → 1,136 offered DWAs, and it is where *"Measure dimensions of completed
+  products or workpieces"* was entering an undergraduate's gap map.
+- **One retry on the empty set,** with a nudge that states no minimum. The empty
+  set used to fall straight through to the cached fixture, showing the student
+  skills extracted from somebody else's two job postings — the trade §19 already
+  settled the other way for `/api/build-schedules`.
+
+> **DO NOT SET `temperature: 0` ON `callStructured`.** It is the obvious move on
+> an extraction task and it was measured to make this materially worse. §12.2
+> sorts the allowed list alphabetically, so greedy decoding walks it from the top
+> and locks onto the first verb: at 0 it returned 20 consecutive *"Analyze ..."*
+> entries with both programming activities absent. At 0.2 it added *"Analyze
+> patient data."*; at 0.4 it drifted to *"Liaise between departments"* and
+> **"Immunize patients."** for a data-science posting. The default temperature's
+> variance is the lesser evil, and the retry above handles its empty tail.
+> `lib/openai.ts` carries this warning at the call site.
+
+`scripts/diag-skills.ts` (new, read-only) replays the route against the live API
+and prints the raw model output beside each filter, so this class of failure is
+attributable rather than guessable. It duplicates the system prompt — **re-copy
+it if the route's rules change.**
+
+Verified after: `tsc` clean · `next build` clean · **`check-openai.ts` confirms
+the new `extractedSkillsSchema` is accepted by strict mode** (§19 requires this
+after any `lib/schemas.ts` change) · `smoke-pipeline` ALL CHECKS PASSED ·
+`audit-ui` AUDIT CLEAN · `check-contrast` PALETTE CLEAN · live route returns
+`degraded: false` with *Write computer programming code*, *Assess database
+performance* and *Develop database parameters or specifications* on the SWE
+posting, and invented names now correctly dropped rather than renamed.
+
 ---
 
 **The biggest remaining risk is `sample-audit.pdf`.** It is authored on Aug 14, before the pipeline that consumes it exists, and it silently determines whether the never-cut feature is visible at all. Zero critical bottlenecks → the bottleneck story vanishes from the schedule cards. Four or more → `mustTake` exceeds `targetCredits`, the combo set is empty, and State 4 renders nothing — a blank screen in the demo video. `slots = 0` → all three strategies score identically. The mitigation is already folded in: §11.3 steps 2/3/8 make an empty result unreachable, and Aug 17 carries a 30-minute checkpoint to tune **the PDF, not the algorithm**. Build the floor, then tune the input against it.

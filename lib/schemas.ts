@@ -75,10 +75,28 @@ export type ParsedAudit = z.infer<typeof studentAuditSchema>;
 // cardinality and cannot be inverted back into a membership set.
 // ---------------------------------------------------------------------------
 
+// THE MODEL RETURNS THE NAME, NOT THE ID. This is load-bearing and was a real
+// bug, not a style preference.
+//
+// Asking for `skillId` meant asking the model to copy an opaque key like
+// "4.A.2.b.2.I12.D02" out of a 1,411-row list. It cannot do that reliably, and
+// the way it fails is silent: it emits a plausible-sounding name it INVENTED
+// ("Write production-quality software.", which is not an O*NET DWA) beside a
+// real id belonging to something else entirely — that id is
+// "Create marketing materials."
+//
+// The route's §9.3 guard then replaced the invented name with the canonical one
+// for the id it was given, which is exactly what made this invisible: a
+// hallucination was laundered into a real, wrong DWA and rendered on the gap map
+// of a backend-engineer posting. The `scopedIds.has()` check could never catch
+// it, because the id was genuinely in the allowed list.
+//
+// DWA titles are unique across all 2,070 rows of the O*NET 20.1 reference
+// (verified), so the name is a sound key. It is also semantic, which is the
+// whole point: a wrong name is a name that does not resolve, and an unresolvable
+// name gets dropped instead of silently becoming a different skill.
 export const extractedSkillSchema = z.object({
-  skillId: z.string(),
   skillName: z.string(),
-  demandCount: z.number(),
   postings: z.array(z.number()),
 });
 
