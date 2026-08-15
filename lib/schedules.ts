@@ -78,7 +78,15 @@ export type IneligibilityReason =
   | "preferences"
   | "unmet-prereq"
   | "major-restricted"
-  | "unmet-coreq";
+  | "unmet-coreq"
+  /**
+   * NOT an eligibility verdict — the only value here that `computeEligibility`
+   * never produces. The course passed all six filters: it is offered next term,
+   * the student can register for it, and it still reached no card, because the
+   * combination it belonged to overran `targetCredits` or could not be seated
+   * without a time conflict. See `unplacedCriticals`.
+   */
+  | "did-not-fit";
 
 export interface Ineligibility {
   code: string;
@@ -404,6 +412,66 @@ export function ineligibleCriticals(
     if (b.urgency !== "critical") continue;
     const why = rejected.get(normalizeCode(b.code));
     if (why) out.push(why);
+  }
+  return out;
+}
+
+/**
+ * §11.3 step 2's guarantee, closed at the other end.
+ *
+ * The promise is that a critical bottleneck either makes every card or is
+ * listed as "see your advisor". `ineligibleCriticals` above only covers the
+ * first half of that: it reads the `rejected` map, which `computeEligibility`
+ * fills at ELIGIBILITY time. Three paths in `buildSchedules` drop a course that
+ * was eligible, after that map is written, into neither place:
+ *
+ *   - the mustTake prefix `break` — `criticalEligible` is sorted chainDepth
+ *     desc, so one bulky critical at the head can push cheaper ones behind it
+ *     past `targetCredits`
+ *   - the group-credits `continue`, when a critical plus its coreqs overruns
+ *     the target
+ *   - `seatGreedily` returning null, when no section can be placed without a
+ *     time conflict
+ *
+ * Measured against the committed catalog and the sample audit this does not
+ * fire: `criticalEligible` is a single 3-credit course, which fits under both
+ * targets and seats against an empty `base`. It is therefore REPORT-ONLY and
+ * deliberately changes nothing about which courses get picked — the `break` in
+ * particular implements §11.3's literal "largest prefix fitting targetCredits"
+ * and is left exactly as it is.
+ *
+ * `base` is seated once and shared by all three strategies, so a critical is on
+ * every combo or on none; "present in no combo" is the whole test.
+ *
+ * A course found here carries `"did-not-fit"` unless `rejected` already knows
+ * better — which it can, because the caller passes the LIVE preferences here
+ * while the diagnosis screen used the defaults, so a toggle can turn a course
+ * that was eligible at diagnosis time into a "preferences" rejection at build
+ * time. Reporting that as "did not fit" would be the same class of false claim
+ * the one-cause red banner was (§0 rule 7).
+ */
+export function unplacedCriticals(
+  bottlenecks: Bottleneck[],
+  combos: Combo[],
+  rejected: ReadonlyMap<string, Ineligibility>,
+): Ineligibility[] {
+  const placed = new Set(
+    combos.flatMap((c) => c.courses.map((row) => normalizeCode(row.code))),
+  );
+
+  const out: Ineligibility[] = [];
+  for (const b of bottlenecks) {
+    if (b.urgency !== "critical") continue;
+    const code = normalizeCode(b.code);
+    if (placed.has(code)) continue;
+    out.push(
+      rejected.get(code) ?? {
+        code,
+        reason: "did-not-fit",
+        blockers: [],
+        restriction: null,
+      },
+    );
   }
   return out;
 }

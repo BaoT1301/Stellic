@@ -22,6 +22,7 @@ import {
   explainIneligibility,
   getEligibleCourses,
   ineligibleCriticals,
+  unplacedCriticals,
 } from "../lib/schedules";
 import { normalizeCode } from "../lib/bottlenecks";
 import { NEXT_TERM } from "../lib/types";
@@ -329,6 +330,63 @@ for (const variant of [
       "[inPersonOnly] honours modality",
       combos.every((c) => c.courses.every((r) => r.section.modality === "in-person")),
       "all sections in-person",
+    );
+  }
+
+  // §11.3 step 2's guarantee, as an assertion rather than a comment: every
+  // critical bottleneck is on EVERY card or it is named as "see your advisor".
+  // Neither-place is the failure this exists to catch — `ineligibleCriticals`
+  // only sees the eligibility-time `rejected` map, and three later paths in
+  // buildSchedules (the mustTake prefix break, the group-credits continue,
+  // seatGreedily returning null) drop an ELIGIBLE critical after it is written.
+  //
+  // Checked per preference variant on purpose: `lighterWorkload` cuts the
+  // target from 15 to 12, which is the toggle most likely to make it fire.
+  {
+    const unblockedCriticals = bottlenecks.filter(
+      (b) => b.urgency === "critical" && b.blockedBy.length === 0,
+    );
+    const advisor = new Set(
+      unplacedCriticals(
+        unblockedCriticals,
+        combos,
+        explainIneligibility(audit, variant.prefs, courses, prereqs),
+      ).map((e) => e.code),
+    );
+    const unaccounted = unblockedCriticals
+      .map((b) => normalizeCode(b.code))
+      .filter(
+        (code) =>
+          !advisor.has(code) &&
+          !combos.every((c) => c.courses.some((r) => normalizeCode(r.code) === code)),
+      );
+    check(
+      `[${variant.name}] every critical is on every card or named for the advisor`,
+      unaccounted.length === 0,
+      unaccounted.length === 0
+        ? `${unblockedCriticals.length} critical, ${advisor.size} sent to the advisor`
+        : `neither place: ${unaccounted.join(", ")}`,
+    );
+    // "did-not-fit" is the only reason that asserts the course IS registerable
+    // next term, so it is the only one that can be checked against the catalog
+    // the way the no-section regression above is. Same bug class, other sign.
+    const sectionsOf = new Map(
+      courses.map((c) => [
+        normalizeCode(c.code),
+        (c.sections ?? []).filter((s) => s.term === NEXT_TERM).length,
+      ]),
+    );
+    const didNotFit = unplacedCriticals(
+      unblockedCriticals,
+      combos,
+      explainIneligibility(audit, variant.prefs, courses, prereqs),
+    ).filter((e) => e.reason === "did-not-fit");
+    check(
+      `[${variant.name}] no 'did not fit' claim is made about a course with no section`,
+      didNotFit.every((e) => (sectionsOf.get(e.code) ?? 0) > 0),
+      didNotFit.length === 0
+        ? "none reported"
+        : didNotFit.map((e) => `${e.code}:${sectionsOf.get(e.code)}`).join(", "),
     );
   }
 }

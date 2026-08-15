@@ -8,7 +8,9 @@ import { PreferenceToggles } from "@/components/PreferenceToggles";
 import { ScheduleCard, weekBlocksFor } from "@/components/ScheduleCard";
 import { weekBounds } from "@/components/WeekGrid";
 import { Button } from "@/components/ui/button";
+import { ineligibilityCopy } from "@/lib/prose";
 import { rmpUrl } from "@/lib/rmp";
+import type { Ineligibility } from "@/lib/schedules";
 import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Preferences, ScheduleOption, Section } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -81,6 +83,19 @@ export interface ScheduleOptionsProps {
    * wider than the pool the search used.
    */
   alternatesOf?: Record<string, Section[]>;
+  /**
+   * Critical bottlenecks that reached none of these cards — §11.3 step 2
+   * requires every one of them to be named as "see your advisor" instead.
+   *
+   * The half rejected at ELIGIBILITY time is on the diagnosis screen. These are
+   * the ones that were eligible and still did not make it: the mustTake prefix
+   * overran the credit target, or no section could be seated conflict-free. It
+   * is listed here rather than there because it is computed against the LIVE
+   * toggles, which are on this screen and not on that one.
+   */
+  unplacedCritical?: Ineligibility[];
+  /** `StudentAudit.major`, only so a major-restriction line can quote it back. */
+  auditMajor?: string;
   preferences: Preferences;
   onPreferencesChange: (next: Preferences) => void;
   onRegenerate: () => void;
@@ -103,6 +118,8 @@ export function ScheduleOptions({
   skillDemand,
   postingCount,
   alternatesOf,
+  unplacedCritical = [],
+  auditMajor = "",
   preferences,
   onPreferencesChange,
   onRegenerate,
@@ -238,6 +255,26 @@ export function ScheduleOptions({
           </>
         )}
       </p>
+
+      {/*
+        §11.3 step 2: a critical bottleneck that reached no card must be named
+        here, never silently dropped. Above the cards, because it changes how
+        the cards should be read — the schedules below are the best available
+        WITHOUT this course, not the best available.
+
+        Same critical-soft treatment as the diagnosis screen's list, and the
+        same `ineligibilityCopy`, so one verdict cannot acquire two voices.
+      */}
+      {unplacedCritical.length > 0 && (
+        <ul className="mt-6 space-y-1.5 rounded-sm border border-critical/25 bg-critical-soft px-4 py-3 text-sm text-critical">
+          {unplacedCritical.map((entry) => (
+            <li key={entry.code}>
+              <span className="font-mono font-semibold">{entry.code}</span>{" "}
+              {ineligibilityCopy(entry, auditMajor)}
+            </li>
+          ))}
+        </ul>
+      )}
 
       {options.length === 0 ? (
         // §11.3 step 8 makes this unreachable, and §0 rule 3 says build it

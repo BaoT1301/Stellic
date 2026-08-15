@@ -20,6 +20,7 @@ import {
   buildSchedules,
   explainIneligibility,
   ineligibleCriticals,
+  unplacedCriticals,
   type Combo,
   type Ineligibility,
 } from "@/lib/schedules";
@@ -151,6 +152,12 @@ export default function Home() {
   const [prereqsOf, setPrereqsOf] = useState<Record<string, string[]>>({});
   const [delays, setDelays] = useState<Record<string, DelayImpact>>({});
   const [ineligible, setIneligible] = useState<Ineligibility[]>([]);
+  // Criticals that survived the eligibility pass and STILL reached no card —
+  // separate state, and shown on screen 4 rather than merged into `ineligible`
+  // above. `ineligible` is computed with the DEFAULT preferences on purpose
+  // (see runDiagnosis); this one is computed with the live toggles, so it can
+  // legitimately say "your preferences" where the diagnosis screen may not.
+  const [unplaced, setUnplaced] = useState<Ineligibility[]>([]);
   const [electiveSlots, setElectiveSlots] = useState(1);
 
   const [options, setOptions] = useState<ScheduleOption[]>([]);
@@ -489,6 +496,23 @@ export default function Home() {
         catalogSkills,
       );
 
+      // §11.3 step 2 promises a critical bottleneck either makes every card or
+      // is named as "see your advisor". `ineligibleCriticals` only covers the
+      // ones rejected at eligibility time; this covers the ones that were
+      // eligible and still did not survive the credit target or the conflict
+      // check. Report-only — it does not change what the builder picked.
+      //
+      // `prefs`, not `defaultPreferences`: a course the toggles just excluded
+      // should say so, and on THIS screen the toggles are visible three inches
+      // below the sentence.
+      setUnplaced(
+        unplacedCriticals(
+          bottlenecksRef.current.filter((b) => b.blockedBy.length === 0),
+          combos,
+          explainIneligibility(currentAudit, prefs, courses, prereqs),
+        ),
+      );
+
       // Every Fall 2026 section of every course that made a card, for the cart's
       // section picker. Straight off the catalog rather than out of the builder:
       // §11.3 caps `getEligibleCourses` at four sections per course and pre-filters
@@ -652,6 +676,8 @@ export default function Home() {
               skillDemand={skillDemand}
               postingCount={filledPostings || undefined}
               alternatesOf={alternates}
+              unplacedCritical={unplaced}
+              auditMajor={audit?.major ?? ""}
               preferences={preferences}
               onPreferencesChange={setPreferences}
               onRegenerate={() => void buildOrToast(preferences)}
