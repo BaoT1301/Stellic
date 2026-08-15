@@ -357,7 +357,19 @@ export default function Home() {
       courses,
       prereqs,
     );
-    setUnoffered(unofferedCriticals(nextBottlenecks, eligible));
+    // Unblocked criticals ONLY. `unofferedCriticals` returns anything critical
+    // that missed ANY of getEligibleCourses' filters, but the banner it feeds
+    // asserts one specific cause — "has no Fall 2026 section". A prereq-blocked
+    // course fails that filter too, and CS 367 has eight live Fall 2026
+    // sections: the banner would have printed a claim a registrar can disprove
+    // from Patriot Web in 30 seconds (§0 rule 7). The blocked group on the
+    // diagnosis screen carries the prereq explanation instead.
+    setUnoffered(
+      unofferedCriticals(
+        nextBottlenecks.filter((b) => b.blockedBy.length === 0),
+        eligible,
+      ),
+    );
 
     setElectiveSlots(
       Math.max(

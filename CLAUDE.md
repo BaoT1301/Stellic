@@ -1472,6 +1472,94 @@ after any `lib/schemas.ts` change) · `smoke-pipeline` ALL CHECKS PASSED ·
 performance* and *Develop database parameters or specifications* on the SWE
 posting, and invented names now correctly dropped rather than renamed.
 
+### §11.1 reasoned downstream only, and told a student to take a course she was locked out of (Aug 15)
+
+Found by eye on the diagnosis screen: **CS 367 Computer Systems and Programming**
+was rendered under *"Take this term or next"* while its own prerequisite CS 262
+was still unmet. "This term" is not an option for that course. §11.1 measured only
+what waits BEHIND a requirement — `chainDepth` over the reverse graph — and never
+asked whether the student can START it. `prereqsSatisfied` was sitting in
+`lib/bottlenecks.ts` the whole time; only `lib/schedules.ts` called it, so the
+knowledge reached the schedule builder and never reached the label.
+
+The same blind spot put **CS 471 Operating Systems** under *"Nothing is waiting on
+these"* while CS 262's own delay panel listed it as *"already past your last 2
+terms"* — two contradictory claims on one screen.
+
+**`Bottleneck` gains `blockedBy` and `termsUntilEligible`** (additive; it appears
+in no zod response schema, only the `/api/build-schedules` REQUEST body). The
+classifier is now dimensionally complete:
+
+```
+pressure = termsUntilEligible + chainDepth + offeringPenalty
+```
+
+`termsUntilEligible` is the longest chain of unmet prereqs IN FRONT of a course —
+`max` across `allOf`, `min` per `oneOf` group, same `visiting` back-edge guard
+`longestChain` carries and for the same white-screen reason. Terms spent waiting
+and terms spent being waited on both come out of the same runway, so both belong
+in the same inequality.
+
+**Two things worth remembering:**
+
+1. **`blockedBy` is a flat AND-list, so an unmet `oneOf` group contributes exactly
+   ONE representative.** CS 367 needs "CS 262 or CS 222"; emitting both rendered
+   as *"Needs CS 222 and CS 262 first"*, which is false. The representative
+   prefers a member that is in `remainingRequired` — CS 262 is on this student's
+   audit and CS 222 is not, and sending her after a course she does not need would
+   be its own §0 rule 7 failure.
+2. **The red `unofferedCritical` banner was one code-move away from a checkably
+   false claim.** `unofferedCriticals` returns anything critical missing from
+   `eligible`, which fails on six different filters, but the copy asserts one
+   cause: *"has no Fall 2026 section."* CS 367 has **8** live Fall 2026 sections
+   and CS 471 has 5. `app/page.tsx` now passes only unblocked criticals; the
+   blocked group carries the prereq explanation. The wider fix — a reason per
+   course out of `getEligibleCourses` — is left undone and noted here.
+
+The display partitions on **actionability first, urgency second**: `urgency` keeps
+its three frozen values and `DiagnosisScreen` derives a fourth group, *"Can't take
+yet, clear the prerequisite first"*, placed AFTER both actionable groups because
+urgency is not an instruction when the course cannot be registered for. Cards keep
+their urgency bar and ring, so a blocked-critical course still reads red. No new
+palette token, so `check-contrast` is untouched.
+
+Three more surfaces asserted the same false thing and were fixed with it:
+`PrereqChain` hardcoded `TAKE THIS TERM` on the head node (it now draws an unmet
+prereq as a `blocker` node labelled `TAKE THIS FIRST`, and the head reads `THEN
+THIS`); `DelayCost` opened *"Taken next term…"* unconditionally; and
+`completedPrereqsFor` filtered the chain's left node down to COMPLETED prereqs, so
+the actual blocker was drawn nowhere. `delayImpact` is offset by
+`termsUntilEligible` throughout — `termsNeeded = 1 + tue + deepest`, and the
+at-risk/beyond-window thresholds shift with it, which correctly moves CS 471 from
+"breaks if you delay" to "already unreachable" on CS 367's panel.
+
+> **The hero falls back to a blocked row when nothing is actionable.** Drawing the
+> chain only from `actionable` is right — its head says TAKE THIS TERM — but a
+> student whose every remaining course is blocked then got no chain at all, which
+> is exactly the student who most needs to see the sequence. That fallback is also
+> the only thing that makes `PrereqChain`'s blocker node reachable; without it the
+> branch is dead code.
+
+Note for anyone re-checking this: **the live PDF path and
+`samples/fallback-response.json` disagree.** The real `/api/parse-audit` run
+(`degraded: false`) has this student already holding CS 321, CS 330 and CS 405, so
+the browser shows 1 critical / 0 soon / 2 blocked / 2 flexible while the fixture
+yields 3 / 3 / — / 2. Both are correct for their own input; do not "fix" one
+against the other.
+
+Verified after: `tsc --noEmit` clean · `next build` clean · eslint at its
+documented baseline (three pre-existing unused-var warnings, none in touched
+code) · `smoke-pipeline` **ALL CHECKS PASSED** with six new §11.1 assertions
+(`blockedBy` ⟺ `termsUntilEligible > 0`, no blocker is an already-taken course,
+every actionable row is registrable next term, a blocked row never outranks what
+it waits on, `termsNeeded === chainDepth + termsUntilEligible + 1`, and the panel
+and card agree on `termsUntilEligible`) · `audit-ui` **AUDIT CLEAN**, zero axe
+violations at 1440px and 390px across all six screens · `check-contrast` PALETTE
+CLEAN · `check-mobile` at its documented baseline (the `sr-only` file input) ·
+all screens re-shot with no page errors · schedule cards unchanged, because
+`mustTake` always filtered criticals through `eligible` — the builder was never
+wrong, only the label was.
+
 ---
 
 **The biggest remaining risk is `sample-audit.pdf`.** It is authored on Aug 14, before the pipeline that consumes it exists, and it silently determines whether the never-cut feature is visible at all. Zero critical bottlenecks → the bottleneck story vanishes from the schedule cards. Four or more → `mustTake` exceeds `targetCredits`, the combo set is empty, and State 4 renders nothing — a blank screen in the demo video. `slots = 0` → all three strategies score identically. The mitigation is already folded in: §11.3 steps 2/3/8 make an empty result unreachable, and Aug 17 carries a 30-minute checkpoint to tune **the PDF, not the algorithm**. Build the floor, then tune the input against it.

@@ -7,6 +7,7 @@ import {
   Check,
   ChevronRight,
   CircleAlert,
+  Lock,
   TriangleAlert,
 } from "lucide-react";
 
@@ -113,15 +114,37 @@ export function DiagnosisScreen({
   onBack,
   isWorking = false,
 }: DiagnosisScreenProps) {
-  const critical = bottlenecks.filter((b) => b.urgency === "critical");
-  const soon = bottlenecks.filter((b) => b.urgency === "soon");
-  const flexible = bottlenecks.filter((b) => b.urgency === "flexible");
+  // Partition on ACTIONABILITY first, then urgency. Urgency alone put CS 367
+  // under "Take this term or next" while its own prerequisite CS 262 was unmet —
+  // a heading offering a term that does not exist for that course. `urgency`
+  // keeps the three frozen values (§8); this is a display split, not a fourth
+  // one. A blocked course is still ranked by urgency inside its own group,
+  // because `computeBottlenecks` sorts globally and `filter` preserves order.
+  const actionable = bottlenecks.filter((b) => b.blockedBy.length === 0);
+  const critical = actionable.filter((b) => b.urgency === "critical");
+  const soon = actionable.filter((b) => b.urgency === "soon");
+  const blocked = bottlenecks.filter(
+    (b) => b.blockedBy.length > 0 && b.urgency !== "flexible",
+  );
+  const flexible = bottlenecks.filter(
+    (b) => b.blockedBy.length === 0 && b.urgency === "flexible",
+  );
 
   // The hero is the deepest critical course — the one whose chain is worth
   // drawing. Falls back to the deepest "soon" so the SVG never disappears just
   // because a student happens to be in good shape.
+  //
+  // ACTIONABLE first: the chain's head node says TAKE THIS TERM, so heading it
+  // with a course she cannot register for is the same false claim in a second
+  // place. But a student whose every remaining course is blocked has no
+  // actionable row at all, and dropping the chain entirely is the wrong answer
+  // for exactly the student who most needs to see the sequence — so blocked
+  // rows are the fallback, and PrereqChain draws the blocker as its head.
+  const deepestFirst = (a: Bottleneck, b: Bottleneck) => b.chainDepth - a.chainDepth;
   const hero =
-    [...critical, ...soon].sort((a, b) => b.chainDepth - a.chainDepth)[0] ?? null;
+    [...critical, ...soon].sort(deepestFirst)[0] ??
+    [...blocked].sort(deepestFirst)[0] ??
+    null;
   const heroHasChain = hero !== null && hero.chainDepth > 0;
 
   const termsRemaining = bottlenecks[0]?.termsRemaining;
@@ -225,6 +248,33 @@ export function DiagnosisScreen({
           ))}
         </Group>
 
+        {/*
+          Third, after everything she can act on. These courses are as urgent as
+          the ones above — several are `critical` — but urgency is not an
+          instruction when the course cannot be registered for, so they sit below
+          the two groups that CAN be acted on next term. Each card names the
+          course that unblocks it, and that course is in one of the groups above.
+        */}
+        <Group
+          title="Can't take yet, clear the prerequisite first"
+          tone="blocked"
+          count={blocked.length}
+        >
+          {blocked.map((b) => (
+            <BottleneckCard
+              key={b.code}
+              bottleneck={b}
+              titles={titles}
+              completedPrereqs={completedPrereqsFor(b.code, prereqsOf, audit)}
+              showChain={heroHasChain && b.code === hero?.code}
+              delay={delays?.[b.code]}
+              className={
+                heroHasChain && b.code === hero?.code ? "md:col-span-2" : ""
+              }
+            />
+          ))}
+        </Group>
+
         <DelayGroup codes={flexible.map((b) => b.code)}>
           {flexible.map((b) => (
             <BottleneckCard key={b.code} bottleneck={b} titles={titles} />
@@ -250,7 +300,11 @@ export function DiagnosisScreen({
   );
 }
 
-/** Direct prerequisites the student has already cleared — left context on the chain. */
+/**
+ * Direct prerequisites the student has already cleared — left context on the
+ * chain. Only consulted when `Bottleneck.blockedBy` is empty: an UNMET
+ * prerequisite is the more important left-hand node, and PrereqChain prefers it.
+ */
 function completedPrereqsFor(
   code: string,
   prereqsOf: Record<string, string[]> | undefined,
@@ -264,6 +318,10 @@ function completedPrereqsFor(
 const GROUP_TONE = {
   critical: { Icon: TriangleAlert, text: "text-critical" },
   soon: { Icon: CircleAlert, text: "text-soon" },
+  // Muted on purpose, and no new palette token — a queue is not an alarm, and the
+  // cards inside keep their own urgency bar and ring, so a blocked-critical
+  // course still reads red at the card level.
+  blocked: { Icon: Lock, text: "text-muted-foreground" },
   flexible: { Icon: Check, text: "text-calm" },
 } as const;
 

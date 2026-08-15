@@ -122,33 +122,128 @@ export function remainingRequired(audit: StudentAudit): string[] {
 }
 
 /**
- * Does `coursesTaken` satisfy this course's prerequisite rule?
+ * Which prerequisites of `code` the student has NOT completed.
  *
  * `minGrade` is deliberately ignored: §8 and §13 — `StudentAudit.coursesTaken`
  * carries no grades, so the strongest TRUE claim is "prereq courses completed".
- * The UI must never say "all prereqs met".
+ * The UI must never say "all prereqs met", and this list means "prereq course
+ * not completed", never anything about a grade.
  *
- * `coreq` is deliberately NOT checked here. A corequisite is satisfiable by
- * taking it in the SAME term, so it is a constraint on the combo (§11.3 step 1
- * and step 5), not on the course.
+ * `coreq` is deliberately NOT included. A corequisite is satisfiable by taking
+ * it in the SAME term, so it is a constraint on the combo (§11.3 step 1 and
+ * step 5), not on the course.
+ *
+ * The list is flat and reads as AND — every code in it has to happen. An unmet
+ * `oneOf` group therefore contributes EXACTLY ONE representative, never all of
+ * its members: CS 367 needs "CS 262 or CS 222", and emitting both would render
+ * as "Needs CS 222 and CS 262 first", which is false. One member is a true and
+ * sufficient answer — taking it does unblock the course — it is simply not the
+ * only one.
+ *
+ * `scope` — normally `remainingRequired` — picks that representative. CS 262 is
+ * already on this student's audit and CS 222 is not, so naming CS 222 would send
+ * her after a course she does not need. Alphabetical otherwise, for determinism.
+ */
+export function unmetPrereqs(
+  code: string,
+  prereqs: PrereqGraph,
+  taken: ReadonlySet<string>,
+  scope?: ReadonlySet<string>,
+): string[] {
+  const rule = prereqs[normalizeCode(code)];
+  if (!rule) return []; // no rule in the graph == no prerequisites
+
+  const out = new Set<string>();
+  for (const req of rule.allOf ?? []) {
+    const c = normalizeCode(req);
+    if (!taken.has(c)) out.add(c);
+  }
+  for (const group of rule.oneOf ?? []) {
+    // An empty group is a parse artifact, not an unsatisfiable requirement.
+    if (!group.length) continue;
+    const options = [...new Set(group.map(normalizeCode))].sort();
+    if (options.some((opt) => taken.has(opt))) continue;
+    const representative =
+      (scope ? options.find((opt) => scope.has(opt)) : undefined) ?? options[0];
+    if (representative) out.add(representative);
+  }
+  return [...out].sort();
+}
+
+/**
+ * Does `coursesTaken` satisfy this course's prerequisite rule?
+ *
+ * Defined in terms of `unmetPrereqs` so the boolean §11.3 filters eligibility
+ * with and the list §11.1 labels a card with can never disagree. `scope` is
+ * omitted deliberately: which member of a group gets NAMED is a display
+ * question, and it cannot change whether the group is satisfied.
  */
 export function prereqsSatisfied(
   code: string,
   prereqs: PrereqGraph,
   taken: ReadonlySet<string>,
 ): boolean {
-  const rule = prereqs[normalizeCode(code)];
-  if (!rule) return true; // no rule in the graph == no prerequisites
+  return unmetPrereqs(code, prereqs, taken).length === 0;
+}
+
+/**
+ * Terms until `code` can first be taken. 0 means next term.
+ *
+ * §11.1 measured only what is waiting BEHIND a course. That is half the
+ * arithmetic: a course whose own prerequisite is unmet cannot be taken next
+ * term at all, and labelling it "take this term" offers an option that does not
+ * exist. This is the chain standing IN FRONT of it.
+ *
+ * `allOf` takes the max — every one has to be cleared. Each unmet `oneOf` group
+ * takes the min — the student picks the cheapest path through it. A prerequisite
+ * that is neither taken nor itself blocked contributes 1, so a single missing
+ * course reads as one term.
+ *
+ * Memoized, with the same `visiting` back-edge guard `longestChain` carries and
+ * for the same reason: §6 runs this inside a React render, so a cycle in data we
+ * did not author is a RangeError and a white screen in the demo video.
+ */
+export function termsUntilEligible(
+  code: string,
+  prereqs: PrereqGraph,
+  taken: ReadonlySet<string>,
+  memo: Map<string, number> = new Map(),
+  visiting: Set<string> = new Set(),
+): number {
+  const node = normalizeCode(code);
+  const cached = memo.get(node);
+  if (cached !== undefined) return cached;
+  if (visiting.has(node)) return 0; // back edge
+
+  const rule = prereqs[node];
+  if (!rule) {
+    memo.set(node, 0);
+    return 0;
+  }
+
+  visiting.add(node);
+  let worst = -1; // -1 == nothing unmet, so the course is already takeable
 
   for (const req of rule.allOf ?? []) {
-    if (!taken.has(normalizeCode(req))) return false;
+    const c = normalizeCode(req);
+    if (taken.has(c)) continue;
+    worst = Math.max(worst, termsUntilEligible(c, prereqs, taken, memo, visiting));
   }
   for (const group of rule.oneOf ?? []) {
-    // An empty group is a parse artifact, not an unsatisfiable requirement.
     if (!group.length) continue;
-    if (!group.some((opt) => taken.has(normalizeCode(opt)))) return false;
+    const options = group.map(normalizeCode);
+    if (options.some((opt) => taken.has(opt))) continue;
+    const cheapest = Math.min(
+      ...options.map((opt) => termsUntilEligible(opt, prereqs, taken, memo, visiting)),
+    );
+    worst = Math.max(worst, cheapest);
   }
-  return true;
+
+  visiting.delete(node);
+
+  const out = worst < 0 ? 0 : 1 + worst;
+  memo.set(node, out);
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -352,10 +447,14 @@ function longestDistancesFrom(
 }
 
 export interface DelayImpact {
-  /** Terms the course plus everything behind it occupies, taken NEXT term. */
+  /** Terms the course plus everything behind it occupies, taken AS EARLY AS
+   *  POSSIBLE — which is `termsUntilEligible` terms from now, not always next. */
   termsNeeded: number;
   /** Fall and spring terms the student has left — `termsRemaining`. */
   termsAvailable: number;
+  /** Terms until the course can first be taken. 0 = next term. Mirrors the field
+   *  of the same name on `Bottleneck`, so the panel and the card cannot drift. */
+  termsUntilEligible: number;
   /**
    * Still-needed courses that no longer fit if this course slips ONE term, and
    * that DO fit if it is taken next term. This is the cost of the delay itself.
@@ -377,10 +476,13 @@ export interface DelayImpact {
  *
  * §2's thesis is "a prereq missed in fall pushes an entire downstream sequence
  * back a full year", and §11.1 already computes everything needed to say that
- * about THIS student's own courses rather than in general. A course at distance
- * `d` behind this one is taken in term `1 + d` if this one is taken next term,
- * and in term `2 + d` if it slips — so it falls outside the window exactly when
- * `2 + d > termsAvailable`.
+ * about THIS student's own courses rather than in general.
+ *
+ * The head course lands in term `1 + termsUntilEligible` at the earliest — for a
+ * course with an unmet prerequisite that is NOT next term, and the panel said
+ * "taken next term" regardless. A course at distance `d` behind it follows in
+ * term `1 + tue + d`, or `2 + tue + d` if the head slips one term, so it falls
+ * outside the window exactly when `2 + tue + d > termsAvailable`.
  *
  * Chain arithmetic only. `offeringPenalty` is deliberately not folded in here:
  * it would need each dependent's own offering pattern, and the honest version of
@@ -399,9 +501,17 @@ export function delayImpact(
   const head = normalizeCode(code);
   const scope = new Set(remainingRequired(audit));
   const termsAvailable = termsRemaining(audit, now);
+  const taken = new Set(audit.coursesTaken.map(normalizeCode));
+  const tue = termsUntilEligible(head, prereqs, taken);
 
   if (!scope.has(head)) {
-    return { termsNeeded: 1, termsAvailable, atRisk: [], beyondWindowNow: [] };
+    return {
+      termsNeeded: 1 + tue,
+      termsAvailable,
+      termsUntilEligible: tue,
+      atRisk: [],
+      beyondWindowNow: [],
+    };
   }
 
   const adj = buildReverseGraph(scope, prereqs);
@@ -413,11 +523,11 @@ export function delayImpact(
 
   for (const [dependent, distance] of distances) {
     if (distance > deepest) deepest = distance;
-    // Taken next term, this dependent lands in term 1 + distance; a term later,
-    // in term 2 + distance.
-    if (1 + distance > termsAvailable) {
+    // Taken as early as it CAN be, this dependent lands in term 1 + tue +
+    // distance; a term later, in term 2 + tue + distance.
+    if (1 + tue + distance > termsAvailable) {
       beyondWindowNow.push({ code: dependent, distance });
-    } else if (2 + distance > termsAvailable) {
+    } else if (2 + tue + distance > termsAvailable) {
       atRisk.push({ code: dependent, distance });
     }
   }
@@ -428,8 +538,9 @@ export function delayImpact(
   ) => b.distance - a.distance || a.code.localeCompare(b.code);
 
   return {
-    termsNeeded: 1 + deepest,
+    termsNeeded: 1 + tue + deepest,
     termsAvailable,
+    termsUntilEligible: tue,
     atRisk: atRisk.sort(deepestFirst).map((a) => a.code),
     beyondWindowNow: beyondWindowNow.sort(deepestFirst).map((a) => a.code),
   };
@@ -439,8 +550,14 @@ export function delayImpact(
 // Reason copy
 // ---------------------------------------------------------------------------
 
-function dependentsPhrase(n: number): string {
-  if (n === 0) return "Nothing you still need depends on it";
+/** `leads` false when a blocker clause got there first, so the capital does not
+ *  land mid-sentence: "Needs CS 367 first, nothing you still need depends on it". */
+function dependentsPhrase(n: number, leads = true): string {
+  if (n === 0) {
+    return leads
+      ? "Nothing you still need depends on it"
+      : "nothing you still need depends on it";
+  }
   if (n === 1) return "1 course depends on it";
   return `${n} courses depend on it`;
 }
@@ -484,12 +601,19 @@ export function computeBottlenecks(
   const memo = new Map<string, number>();
   const visiting = new Set<string>();
 
+  // The upstream half. `taken` is the full audit, not `scope`: a prerequisite is
+  // cleared by having taken it, whether or not it was ever a listed requirement.
+  const taken = new Set(audit.coursesTaken.map(normalizeCode));
+  const eligibleMemo = new Map<string, number>();
+
   const terms = termsRemaining(audit, now);
 
   const out: Bottleneck[] = scopeList.map((code) => {
     const course = byCode.get(code);
     const chainDepth = longestChain(code, adj, memo, visiting);
     const dependents = transitiveDependents(code, adj);
+    const blockedBy = unmetPrereqs(code, prereqs, taken, scope);
+    const untilEligible = termsUntilEligible(code, prereqs, taken, eligibleMemo);
 
     // §8/§9.1: termsOffered is NEVER []. A course we could not find in the
     // catalog at all gets the same neutral default the scraper uses, so an
@@ -505,11 +629,24 @@ export function computeBottlenecks(
     const offered = termsOffered.filter((t) => t !== "summer");
     const offeringPenalty = offered.length >= 2 ? 0 : 1;
 
-    const pressure = chainDepth + offeringPenalty;
+    // `untilEligible` is the terms this course spends WAITING, `chainDepth` the
+    // terms it spends being waited on. Both come out of the student's runway, so
+    // both belong in the same inequality. Without the first term, CS 471 — three
+    // terms of chain deep against two terms left — classified as `flexible` and
+    // rendered under "Nothing is waiting on these" while CS 262's own delay panel
+    // called it already unreachable, on the same screen.
+    const pressure = untilEligible + chainDepth + offeringPenalty;
     const urgency: Bottleneck["urgency"] =
       pressure >= terms ? "critical" : pressure >= terms - 1 ? "soon" : "flexible";
 
-    const parts = [dependentsPhrase(dependents.length)];
+    const parts: string[] = [];
+    // Blocker first: it is the only clause that says what to do NEXT, and a
+    // student reading "2 courses depend on it" about a course she cannot
+    // register for has been told the wrong thing first.
+    if (blockedBy.length > 0) {
+      parts.push(`Needs ${blockedBy.join(" and ")} first`);
+    }
+    parts.push(dependentsPhrase(dependents.length, parts.length === 0));
     if (offeringPenalty === 1) {
       parts.push(
         offered.length === 1 ? `offered in ${offered[0]} only` : "not offered fall or spring",
@@ -524,6 +661,8 @@ export function computeBottlenecks(
       dependents,
       termsOffered,
       termsRemaining: terms,
+      blockedBy,
+      termsUntilEligible: untilEligible,
       urgency,
       // Comma, not a middot. This is the one display string lib/ produces and
       // BottleneckCard renders it verbatim; it is a sentence about a course, and

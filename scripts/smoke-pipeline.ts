@@ -93,15 +93,55 @@ check(
   bottlenecks[0]?.reason ?? "n/a",
 );
 
+// The upstream half. §11.1 used to reason downstream only, which put a course
+// with an unmet prerequisite under a heading offering to take it this term.
+const blocked = bottlenecks.filter((b) => b.blockedBy.length > 0);
+check(
+  "blockedBy and termsUntilEligible agree",
+  bottlenecks.every((b) => (b.blockedBy.length > 0) === (b.termsUntilEligible > 0)),
+  `${blocked.length} of ${bottlenecks.length} rows are blocked`,
+);
+check(
+  "no blocker is a course already taken",
+  bottlenecks.every((b) => b.blockedBy.every((c) => !audit.coursesTaken.includes(c))),
+  blocked.map((b) => `${b.code} needs ${b.blockedBy.join("+")}`).join(", ") || "none",
+);
+check(
+  // The defect this all exists for: the diagnosis screen partitions on
+  // blockedBy first, so anything reaching a "take this term" heading must be
+  // registrable next term.
+  "every actionable row is registrable next term",
+  bottlenecks
+    .filter((b) => b.blockedBy.length === 0)
+    .every((b) => b.termsUntilEligible === 0),
+  `${bottlenecks.length - blocked.length} actionable rows carry no unmet prereq`,
+);
+check(
+  "a blocked row is never ranked below a course it is waiting on",
+  blocked.every((b) => {
+    const blocker = bottlenecks.find((x) => b.blockedBy.includes(x.code));
+    return !blocker || blocker.termsUntilEligible < b.termsUntilEligible;
+  }),
+  "the course that unblocks it is always closer to takeable",
+);
+
 // --- §11.1, cost of delay --------------------------------------------------
 // The "What if you take it later?" panel on a critical BottleneckCard. Its
 // arithmetic has to stay consistent with the urgency label sitting right above
 // it, or the card argues with itself in front of a registrar.
 const delays = bottlenecks.map((b) => ({ b, d: delayImpact(b.code, audit, prereqs) }));
 check(
-  "termsNeeded is chainDepth + 1 for every row",
-  delays.every(({ b, d }) => d.termsNeeded === b.chainDepth + 1),
+  // Was chainDepth + 1. The head course now lands in term 1 + termsUntilEligible
+  // rather than always next term, so the whole walk is offset by the chain
+  // standing IN FRONT of it as well as the one behind.
+  "termsNeeded is chainDepth + termsUntilEligible + 1 for every row",
+  delays.every(({ b, d }) => d.termsNeeded === b.chainDepth + b.termsUntilEligible + 1),
   "the distance map and longestChain agree on depth",
+);
+check(
+  "delayImpact and computeBottlenecks agree on termsUntilEligible",
+  delays.every(({ b, d }) => d.termsUntilEligible === b.termsUntilEligible),
+  "the panel and the card cannot disagree about when a course opens up",
 );
 check(
   "atRisk and beyondWindowNow are subsets of dependents",
@@ -153,7 +193,13 @@ check(
 
 // --- §11.3 -----------------------------------------------------------------
 const eligible = getEligibleCourses(audit, prefs, courses, prereqs);
-const unoffered = unofferedCriticals(bottlenecks, eligible);
+// Unblocked criticals only — the same filter app/page.tsx applies. A
+// prereq-blocked course also misses `eligible`, but "not offered next term" is
+// the wrong reason for it: CS 367 has eight live Fall 2026 sections.
+const unoffered = unofferedCriticals(
+  bottlenecks.filter((b) => b.blockedBy.length === 0),
+  eligible,
+);
 console.log("\n§11.3 schedules");
 check("eligible set is non-empty", eligible.size > 0, `${eligible.size} eligible courses next term`);
 

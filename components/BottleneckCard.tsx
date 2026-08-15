@@ -1,4 +1,4 @@
-import { Check, ChevronDown, CircleAlert, Clock, TriangleAlert } from "lucide-react";
+import { Check, ChevronDown, CircleAlert, Clock, Lock, TriangleAlert } from "lucide-react";
 
 import { PrereqChain } from "@/components/PrereqChain";
 import type { DelayImpact } from "@/lib/bottlenecks";
@@ -43,6 +43,23 @@ const URGENCY = {
 } as const;
 
 /**
+ * The chip, for a course the student cannot register for yet.
+ *
+ * `URGENCY[urgency].label` is an instruction — "Take this term" — and it was
+ * being read unconditionally. For CS 367, whose prerequisite CS 262 is still
+ * unmet, that offered a term that does not exist. When `blockedBy` is non-empty
+ * the chip names the blocker instead, generated from the prereq graph at
+ * runtime; §13 forbids hardcoding any of this copy.
+ *
+ * `termsUntilEligible === 1` is the common, actionable case and gets the
+ * sharpest sentence: clear the blocker this term, take this one next.
+ */
+function blockedLabel(blockedBy: string[], termsUntilEligible: number): string {
+  const names = blockedBy.join(" and ");
+  return termsUntilEligible === 1 ? `Next term, after ${names}` : `After ${names}`;
+}
+
+/**
  * Summer is never plannable (§11.1), so it is never spoken about here. A course
  * offered in exactly one plannable term is the offering half of the urgency
  * story and gets said out loud; anything else is quiet.
@@ -80,8 +97,17 @@ export function BottleneckCard({
   className,
 }: BottleneckCardProps) {
   const style = URGENCY[bottleneck.urgency];
-  const { Icon } = style;
   const single = bottleneck.termsOffered.filter((t) => t !== "summer").length <= 1;
+
+  // Blocked overrides the chip only. `style.bar` and `style.ring` stay on
+  // urgency, so a blocked-critical course still reads red — it IS critical; it
+  // just is not something she can do next term.
+  const isBlocked = bottleneck.blockedBy.length > 0;
+  const Icon = isBlocked ? Lock : style.Icon;
+  const chipLabel = isBlocked
+    ? blockedLabel(bottleneck.blockedBy, bottleneck.termsUntilEligible)
+    : style.label;
+  const chipClass = isBlocked ? "bg-muted text-foreground" : style.chip;
 
   // The hero — the one card carrying the prereq chain — sits a level higher than
   // the rest. Everything on this screen used to be at exactly the same depth,
@@ -105,11 +131,11 @@ export function BottleneckCard({
           <span
             className={cn(
               "eyebrow inline-flex items-center gap-1.5 rounded-full px-2 py-1",
-              style.chip,
+              chipClass,
             )}
           >
             <Icon className="size-3" aria-hidden />
-            {style.label}
+            {chipLabel}
           </span>
           <span
             className={cn(
@@ -151,9 +177,15 @@ export function BottleneckCard({
           </div>
         )}
 
-        {delay && (delay.atRisk.length > 0 || delay.beyondWindowNow.length > 0) && (
-          <DelayCost bottleneck={bottleneck} delay={delay} titles={titles} />
-        )}
+        {/* termsNeeded > termsAvailable is the third trigger. CS 471 has no
+            dependents, so both lists are empty, yet it needs three terms against
+            her two — and this panel is the only surface that says so. */}
+        {delay &&
+          (delay.atRisk.length > 0 ||
+            delay.beyondWindowNow.length > 0 ||
+            delay.termsNeeded > delay.termsAvailable) && (
+            <DelayCost bottleneck={bottleneck} delay={delay} titles={titles} />
+          )}
 
         {bottleneck.dependents.length > 0 && !showChain && (
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -205,7 +237,9 @@ function DelayCost({
   delay: DelayImpact;
   titles?: Record<string, string>;
 }) {
-  const { termsNeeded, termsAvailable, atRisk, beyondWindowNow } = delay;
+  const { termsNeeded, termsAvailable, termsUntilEligible, atRisk, beyondWindowNow } =
+    delay;
+  const blockedBy = bottleneck.blockedBy;
 
   return (
     <details className="group/delay mt-3">
@@ -220,11 +254,28 @@ function DelayCost({
       </summary>
 
       <div className="mt-1 space-y-2 rounded-lg bg-canvas px-3 py-2.5 text-xs ring-1 ring-foreground/[0.07]">
+        {/* "Taken next term" was asserted unconditionally, which is false for a
+            course with an unmet prerequisite — the soonest it can be taken is
+            termsUntilEligible terms out. Both branches state the same
+            arithmetic; only the earliest term differs. */}
         <p className="text-foreground">
-          Taken next term,{" "}
-          <span className="font-mono font-medium">{bottleneck.code}</span> and the
-          chain behind it need {termsNeeded}{" "}
-          {termsNeeded === 1 ? "term" : "terms"}. You have {termsAvailable}.
+          {termsUntilEligible > 0 && blockedBy.length > 0 ? (
+            <>
+              You cannot take{" "}
+              <span className="font-mono font-medium">{bottleneck.code}</span>{" "}
+              until {blockedBy.join(" and ")}{" "}
+              {blockedBy.length === 1 ? "is" : "are"} done, so it and the chain
+              behind it need {termsNeeded} {termsNeeded === 1 ? "term" : "terms"}.
+              You have {termsAvailable}.
+            </>
+          ) : (
+            <>
+              Taken next term,{" "}
+              <span className="font-mono font-medium">{bottleneck.code}</span> and
+              the chain behind it need {termsNeeded}{" "}
+              {termsNeeded === 1 ? "term" : "terms"}. You have {termsAvailable}.
+            </>
+          )}
         </p>
 
         {atRisk.length > 0 && (
@@ -240,7 +291,9 @@ function DelayCost({
             unreachable would be a false claim in the reassuring direction. */}
         {beyondWindowNow.length > 0 && (
           <Codes
-            lead={`Already past your last ${termsAvailable === 1 ? "term" : `${termsAvailable} terms`} even if you take it next term:`}
+            // "even if you take it next term" is itself a false premise for a
+            // blocked course — next term is not available to it.
+            lead={`Already past your last ${termsAvailable === 1 ? "term" : `${termsAvailable} terms`} even ${termsUntilEligible > 0 ? "at the soonest you could take it" : "if you take it next term"}:`}
             codes={beyondWindowNow}
             titles={titles}
             tone="muted"

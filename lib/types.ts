@@ -109,6 +109,13 @@ export interface Bottleneck {
   // this one. dependents.length >= chainDepth, always.
   termsOffered: Term[];
   termsRemaining: number; // integer count of fall+spring terms
+  // ADDITIVE, Aug 15. §11.1 reasoned downstream only: chainDepth answers "what is
+  // waiting behind this course" and nothing asked whether the student can START
+  // it. That put CS 367 under "Take this term or next" while its own prerequisite
+  // CS 262 was still unmet — an option that does not exist. These two carry the
+  // upstream half.
+  blockedBy: string[]; // immediate unmet prereqs, sorted. [] = registrable next term
+  termsUntilEligible: number; // terms until it can first be taken. 0 = next term
   urgency: "critical" | "soon" | "flexible";
   reason: string; // human-readable, shown in UI
 }

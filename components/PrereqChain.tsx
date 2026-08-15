@@ -27,7 +27,13 @@ const PAD = 10;
 const NODE_Y = 34;
 const MAX_NODES = 4;
 
-type NodeKind = "done" | "head" | "blocked";
+/**
+ * `done` — a prerequisite already completed, drawn dashed and grey.
+ * `blocker` — a prerequisite still UNMET, which is what has to happen first.
+ * `head` — the bottleneck this chain is about.
+ * `blocked` — a course downstream, waiting on the head.
+ */
+type NodeKind = "done" | "blocker" | "head" | "blocked";
 
 interface ChainNode {
   code: string;
@@ -52,9 +58,12 @@ function clip(text: string, max = 22) {
 function chainDescription(
   bottleneck: Bottleneck,
   upstream: string | undefined,
+  upstreamIsBlocker: boolean,
 ): string {
   const head = upstream
-    ? `You have already finished ${upstream}. ${bottleneck.code} ${bottleneck.title} comes next.`
+    ? upstreamIsBlocker
+      ? `You still need ${upstream} before you can take ${bottleneck.code} ${bottleneck.title}.`
+      : `You have already finished ${upstream}. ${bottleneck.code} ${bottleneck.title} comes next.`
     : `${bottleneck.code} ${bottleneck.title} sits at the head of it.`;
   const waiting =
     bottleneck.dependents.length === 0
@@ -82,14 +91,20 @@ export function PrereqChain({
 }: PrereqChainProps) {
   const titleOf = (code: string) => titles[code] ?? "";
 
-  const upstream = completedPrereqs[0];
+  // An UNMET prerequisite outranks a completed one for the left-hand slot. The
+  // completed node is context; the unmet one is the reason the head cannot be
+  // taken yet, and leaving it out is what let this drawing stamp TAKE THIS TERM
+  // on a course the student cannot register for.
+  const blocker = bottleneck.blockedBy[0];
+  const upstream = blocker ?? completedPrereqs[0];
+  const upstreamKind: NodeKind = blocker ? "blocker" : "done";
   const downstreamRoom = MAX_NODES - 1 - (upstream ? 1 : 0);
   const shown = bottleneck.dependents.slice(0, downstreamRoom);
   const hidden = bottleneck.dependents.length - shown.length;
 
   const nodes: ChainNode[] = [
     ...(upstream
-      ? [{ code: upstream, title: titleOf(upstream), kind: "done" as const }]
+      ? [{ code: upstream, title: titleOf(upstream), kind: upstreamKind }]
       : []),
     { code: bottleneck.code, title: bottleneck.title, kind: "head" as const },
     ...shown.map((code) => ({
@@ -130,7 +145,7 @@ export function PrereqChain({
           width="100%"
           preserveAspectRatio="xMidYMid meet"
           role="img"
-          aria-label={chainDescription(bottleneck, upstream)}
+          aria-label={chainDescription(bottleneck, upstream, upstreamKind === "blocker")}
           // min-w only below sm. Measured: an unconditional min-w-[520px] made
           // the SVG 520px inside a 505px card, so the last node rendered
           // half-clipped at the card edge on the screen the video dwells on.
@@ -180,6 +195,7 @@ export function PrereqChain({
             const x = xOf(i);
             const head = node.kind === "head";
             const done = node.kind === "done";
+            const blocker = node.kind === "blocker";
             return (
               <g key={node.code}>
                 {/* One string, not a fragment: React refuses array children on
@@ -191,6 +207,9 @@ export function PrereqChain({
                     decoration. "CAN'T TAKE YET" rather than "BLOCKED" — a
                     student has no reason to know that blocked is a graph term
                     and not a hold on their account. */}
+                {/* The head only says TAKE THIS TERM when nothing is in front of
+                    it. With an unmet prerequisite drawn to its left, the
+                    instruction belongs on THAT node instead. */}
                 <text
                   x={x + NODE_W / 2}
                   y={NODE_Y - 13}
@@ -198,9 +217,23 @@ export function PrereqChain({
                   fontSize="11"
                   fontWeight="600"
                   letterSpacing="0.09em"
-                  fill={done ? "var(--muted-foreground)" : head ? accent : "var(--muted-foreground)"}
+                  fill={
+                    blocker
+                      ? accent
+                      : head
+                        ? accent
+                        : "var(--muted-foreground)"
+                  }
                 >
-                  {done ? "DONE" : head ? "TAKE THIS TERM" : "CAN'T TAKE YET"}
+                  {done
+                    ? "DONE"
+                    : blocker
+                      ? "TAKE THIS FIRST"
+                      : head
+                        ? upstreamKind === "blocker"
+                          ? "THEN THIS"
+                          : "TAKE THIS TERM"
+                        : "CAN'T TAKE YET"}
                 </text>
 
                 <rect
@@ -209,11 +242,17 @@ export function PrereqChain({
                   width={NODE_W}
                   height={NODE_H}
                   rx="10"
-                  fill={head ? accentSoft : done ? "transparent" : "var(--card)"}
+                  fill={
+                    head || blocker
+                      ? accentSoft
+                      : done
+                        ? "transparent"
+                        : "var(--card)"
+                  }
                   stroke={done ? "var(--rule)" : accent}
-                  strokeWidth={head ? 2 : 1}
+                  strokeWidth={head || blocker ? 2 : 1}
                   strokeDasharray={done ? "5 4" : undefined}
-                  strokeOpacity={done ? 1 : head ? 1 : 0.45}
+                  strokeOpacity={done || head || blocker ? 1 : 0.45}
                 />
 
                 {/* font-mono as a class, not a fontFamily string: globals.css
@@ -255,6 +294,18 @@ export function PrereqChain({
         </svg>
       </div>
       <figcaption className="mt-3 text-xs text-muted-foreground">
+        {upstreamKind === "blocker" && upstream && (
+          <>
+            <span className="font-mono font-medium text-foreground">
+              {upstream}
+            </span>{" "}
+            is not done, so{" "}
+            <span className="font-mono font-medium text-foreground">
+              {bottleneck.code}
+            </span>{" "}
+            cannot be taken next term.{" "}
+          </>
+        )}
         Everything to the right is a course you still need and cannot reach until{" "}
         <span className="font-mono font-medium text-foreground">
           {bottleneck.code}
