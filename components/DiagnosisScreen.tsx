@@ -60,8 +60,25 @@ function formatGraduation(value: string | null): string | null {
 }
 
 /** Course codes are mono everywhere else in the app; they stay mono in prose. */
+/**
+ * A course code set inline INSIDE prose.
+ *
+ * word-spacing is doing real work here. A monospace space glyph takes a full
+ * character advance, roughly twice the width of the proportional space around
+ * it, so "CS 262" dropped into an Instrument Sans headline rendered with a
+ * visible hole between the subject and the number and read as a typo. The
+ * negative value pulls it back to about the width of the surrounding text.
+ *
+ * The space is still a REAL space character rather than a sized spacer element,
+ * so a screen reader announces "CS 262" and not "CS262". whitespace-nowrap keeps
+ * the subject and number from ever being split across a line break.
+ */
 function Code({ children }: { children: string }) {
-  return <span className="font-mono font-semibold">{children}</span>;
+  return (
+    <span className="font-mono font-semibold whitespace-nowrap [word-spacing:-0.28em]">
+      {children}
+    </span>
+  );
 }
 
 /**

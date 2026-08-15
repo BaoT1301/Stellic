@@ -169,6 +169,11 @@
   --color-covered-soft: var(--covered-soft);
   --color-missing: var(--missing);
   --color-missing-soft: var(--missing-soft);
+  /* INK — a dark surface, used only by the assistant panel. See :root. */
+  --color-ink: var(--ink);
+  --color-ink-rule: var(--ink-rule);
+  --color-ink-fg: var(--ink-fg);
+  --color-ink-muted: var(--ink-muted);
 }
 
 :root {
@@ -186,6 +191,21 @@
   --covered-soft: oklch(0.964 0.028 165);
   --missing: oklch(0.5 0.155 30);
   --missing-soft: oklch(0.969 0.026 35);
+
+  /* ------------------------------------------------------------------
+   * INK. A dark surface, used only by the assistant panel.
+   *
+   * The palette above spends four hues on MEANING (red = you graduate
+   * late, ochre = act next term, slate = safe to delay, green = a skill
+   * you are already getting). The assistant is not one of those things,
+   * so it gets a SURFACE rather than a fifth hue: it reads as a distinct
+   * object without competing with anything that carries meaning, and no
+   * existing screen changes colour.
+   * ------------------------------------------------------------------ */
+  --ink: oklch(0.205 0.012 260);
+  --ink-rule: oklch(0.34 0.016 260);
+  --ink-fg: oklch(0.971 0.004 95);
+  --ink-muted: oklch(0.76 0.012 260);
 }
 
 @layer base {
@@ -197,6 +217,12 @@
 }
 
 @layer components {
+  /* The assistant's dark surface. */
+  .ink-band {
+    background-color: var(--ink);
+    color: var(--ink-fg);
+  }
+
   /* Section eyebrow. Used on every screen so the four states feel like one
      document rather than four pages. */
   .eyebrow {

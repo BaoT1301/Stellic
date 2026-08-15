@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AuditUpload, type ManualAuditEntry } from "@/components/AuditUpload";
+import { ChatPanel } from "@/components/ChatPanel";
 import { DiagnosisScreen } from "@/components/DiagnosisScreen";
 import { JobPostingInput } from "@/components/JobPostingInput";
 import { ScheduleOptions } from "@/components/ScheduleOptions";
@@ -14,6 +15,7 @@ import {
   remainingRequired,
   type DelayImpact,
 } from "@/lib/bottlenecks";
+import type { ChatContext } from "@/lib/chat-context";
 import { computeSkillGaps, type DemandedSkill } from "@/lib/gaps";
 import {
   buildSchedules,
@@ -173,6 +175,23 @@ export default function Home() {
       ),
     [bottlenecks],
   );
+  /**
+   * Everything the assistant is allowed to know. It answers ONLY from this, and
+   * the route forbids it inventing a course code, CRN or prerequisite, so this
+   * object IS the safety mechanism rather than the prompt wording.
+   */
+  const chatContext = useMemo<ChatContext>(
+    () => ({
+      audit,
+      bottlenecks,
+      gaps,
+      options,
+      titles,
+      postingCount: filledPostings || undefined,
+    }),
+    [audit, bottlenecks, gaps, options, titles, filledPostings],
+  );
+
   const skillDemand = useMemo(
     () => Object.fromEntries(gaps.map((g) => [g.skillId, g.demandCount])),
     [gaps],
@@ -538,6 +557,14 @@ export default function Home() {
               isWorking={isWorking}
               dirty={preferencesDirty}
             />
+          )}
+
+          {/* The assistant sits UNDER the analysis, never over it, and only on
+              the two screens where there is something to ground an answer in.
+              It renders itself away when the context is empty, so it can never
+              show an empty box. */}
+          {(step === "diagnosis" || step === "schedules") && (
+            <ChatPanel context={chatContext} className="mt-12" />
           )}
         </div>
       </div>
