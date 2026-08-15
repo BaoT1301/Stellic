@@ -15,6 +15,7 @@ import { BottleneckCard } from "@/components/BottleneckCard";
 import { GapMap } from "@/components/GapMap";
 import { Button } from "@/components/ui/button";
 import type { DelayImpact } from "@/lib/bottlenecks";
+import type { Ineligibility } from "@/lib/schedules";
 import { NEXT_TERM_LABEL } from "@/lib/types";
 import type { Bottleneck, SkillGap, StudentAudit } from "@/lib/types";
 
@@ -93,10 +94,11 @@ export interface DiagnosisScreenProps {
    */
   delays?: Record<string, DelayImpact>;
   /**
-   * Critical bottlenecks with no section next term. §11.3 step 2 requires these
-   * to appear here as "see your advisor" and NEVER on a schedule card.
+   * Critical bottlenecks that cannot reach a schedule card, each with the
+   * eligibility filter that turned it down. §11.3 step 2 requires these to
+   * appear here as "see your advisor" and NEVER on a card.
    */
-  unofferedCritical?: string[];
+  ineligibleCritical?: Ineligibility[];
   onContinue: () => void;
   onBack?: () => void;
   isWorking?: boolean;
@@ -109,7 +111,7 @@ export function DiagnosisScreen({
   titles,
   prereqsOf,
   delays,
-  unofferedCritical = [],
+  ineligibleCritical = [],
   onContinue,
   onBack,
   isWorking = false,
@@ -221,15 +223,15 @@ export function DiagnosisScreen({
           ))}
         </Group>
 
-        {unofferedCritical.length > 0 && (
-          <p className="mt-4 rounded-lg bg-critical-soft px-4 py-3 text-sm text-critical">
-            <span className="font-semibold">
-              {unofferedCritical.join(", ")}
-            </span>{" "}
-            {unofferedCritical.length === 1 ? "has" : "have"} no{" "}
-            {NEXT_TERM_LABEL} section, so nothing we build can include{" "}
-            {unofferedCritical.length === 1 ? "it" : "them"} — see your advisor.
-          </p>
+        {ineligibleCritical.length > 0 && (
+          <ul className="mt-4 space-y-1.5 rounded-lg bg-critical-soft px-4 py-3 text-sm text-critical">
+            {ineligibleCritical.map((entry) => (
+              <li key={entry.code}>
+                <span className="font-mono font-semibold">{entry.code}</span>{" "}
+                {ineligibilityCopy(entry, audit.major)}
+              </li>
+            ))}
+          </ul>
         )}
 
         <Group title="Take this term or next" tone="soon" count={soon.length}>
@@ -313,6 +315,55 @@ function completedPrereqsFor(
   const direct = prereqsOf?.[code] ?? [];
   const taken = new Set(audit.coursesTaken);
   return direct.filter((c) => taken.has(c));
+}
+
+/** "CS 262" · "CS 262 and CS 310" · "CS 262, CS 310 and CS 367". */
+function joinCodes(codes: string[]): string {
+  if (codes.length <= 1) return codes[0] ?? "";
+  return `${codes.slice(0, -1).join(", ")} and ${codes[codes.length - 1]}`;
+}
+
+/**
+ * Why this critical course cannot reach a schedule card — the actual filter that
+ * rejected it, not one plausible cause standing in for six.
+ *
+ * The banner used to print "has no {term} section" over the whole list.
+ * `getEligibleCourses` drops a course on any of six tests and returns only
+ * survivors, so that sentence was a guess, and for a major-restricted course it
+ * was a guess a registrar disproves from Patriot Web in 30 seconds — CS 330 has
+ * three live Fall 2026 CRNs (§0 rule 7). Every branch below is generated from
+ * `lib/schedules.ts`'s own verdict plus the parsed audit; no course code, title
+ * or offering claim is written into this file (§13).
+ */
+function ineligibilityCopy(entry: Ineligibility, major: string): string {
+  const cannotInclude = `so nothing we build can include it — see your advisor.`;
+  switch (entry.reason) {
+    case "no-section":
+      return `has no ${NEXT_TERM_LABEL} section, ${cannotInclude}`;
+    case "graduate-level":
+      return `is a graduate course, ${cannotInclude}`;
+    case "unmet-coreq":
+      return `must be taken alongside ${joinCodes(entry.blockers)}, which ${
+        entry.blockers.length === 1 ? "is" : "are"
+      } not available to you next term — see your advisor.`;
+    // A false NEGATIVE, not a hard exclusion: `majorAllows` matches the catalog's
+    // restriction prose against a free-text major string, so "CS" fails where
+    // "Computer Science" passes. Asserting she cannot take it would trade one
+    // false claim for another, so this branch points at the advisor and leaves
+    // the question open.
+    case "major-restricted":
+      return `restricts enrollment by major and we could not match yours${
+        major.trim() ? ` (“${major.trim()}”)` : ""
+      }. It may still be open to you — confirm with your advisor.`;
+    // The two below cannot be reached from this screen: app/page.tsx passes the
+    // default preferences and filters out anything with a `blockedBy` (the
+    // "Can't take yet" group explains those). They exist so that a list entry can
+    // never render without a sentence.
+    case "preferences":
+      return `has no ${NEXT_TERM_LABEL} section matching your current preferences.`;
+    case "unmet-prereq":
+      return `needs ${joinCodes(entry.blockers)} first.`;
+  }
 }
 
 const GROUP_TONE = {

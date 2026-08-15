@@ -17,8 +17,9 @@ import {
 import { computeSkillGaps, type DemandedSkill } from "@/lib/gaps";
 import {
   buildSchedules,
-  getEligibleCourses,
-  unofferedCriticals,
+  explainIneligibility,
+  ineligibleCriticals,
+  type Ineligibility,
 } from "@/lib/schedules";
 import { NEXT_TERM, NEXT_TERM_LABEL } from "@/lib/types";
 import type {
@@ -118,7 +119,7 @@ export default function Home() {
   const [titles, setTitles] = useState<Record<string, string>>({});
   const [prereqsOf, setPrereqsOf] = useState<Record<string, string[]>>({});
   const [delays, setDelays] = useState<Record<string, DelayImpact>>({});
-  const [unoffered, setUnoffered] = useState<string[]>([]);
+  const [ineligible, setIneligible] = useState<Ineligibility[]>([]);
   const [electiveSlots, setElectiveSlots] = useState(1);
 
   const [options, setOptions] = useState<ScheduleOption[]>([]);
@@ -349,25 +350,27 @@ export default function Home() {
     );
 
     // §11.3 step 1 decides registrability from SECTIONS, so a critical course
-    // with no Fall 2026 section belongs on the diagnosis screen as "see your
-    // advisor", never on a schedule card.
-    const eligible = getEligibleCourses(
+    // that cannot be registered for belongs on the diagnosis screen as "see your
+    // advisor", never on a schedule card. The eligibility pass reports WHICH of
+    // its six filters rejected each course, and the banner renders that reason —
+    // it used to assert one cause ("has no Fall 2026 section") for all six.
+    //
+    // The DEFAULT preferences deliberately: the toggles belong to screen 4, and
+    // diagnosing a course as unavailable because of a preference set later would
+    // be a different false claim.
+    const rejected = explainIneligibility(
       nextAudit,
       defaultPreferences,
       courses,
       prereqs,
     );
-    // Unblocked criticals ONLY. `unofferedCriticals` returns anything critical
-    // that missed ANY of getEligibleCourses' filters, but the banner it feeds
-    // asserts one specific cause — "has no Fall 2026 section". A prereq-blocked
-    // course fails that filter too, and CS 367 has eight live Fall 2026
-    // sections: the banner would have printed a claim a registrar can disprove
-    // from Patriot Web in 30 seconds (§0 rule 7). The blocked group on the
-    // diagnosis screen carries the prereq explanation instead.
-    setUnoffered(
-      unofferedCriticals(
+    // Unblocked criticals only — a prereq-blocked course is explained by the
+    // "Can't take yet" group on the diagnosis screen, and listing it here as
+    // well would report the same course twice.
+    setIneligible(
+      ineligibleCriticals(
         nextBottlenecks.filter((b) => b.blockedBy.length === 0),
-        eligible,
+        rejected,
       ),
     );
 
@@ -527,7 +530,7 @@ export default function Home() {
               titles={titles}
               prereqsOf={prereqsOf}
               delays={delays}
-              unofferedCritical={unoffered}
+              ineligibleCritical={ineligible}
               onContinue={() => runBuildSchedules(preferences)}
               onBack={() => setStep("audit")}
               isWorking={isWorking}

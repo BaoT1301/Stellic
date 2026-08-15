@@ -17,6 +17,7 @@ import {
   normalizeCode,
   prereqsSatisfied,
   remainingRequired,
+  unmetPrereqs,
 } from "@/lib/bottlenecks";
 import { rmpUrl } from "@/lib/rmp";
 import { NEXT_TERM } from "@/lib/types";
@@ -58,6 +59,41 @@ export interface EligibleCourse {
   course: Course;
   /** NEXT_TERM sections that also satisfy `Preferences`. Never empty. */
   sections: Section[];
+}
+
+/**
+ * WHY a course is not on the table next term — one value per filter in
+ * `computeEligibility`, in the order they are applied.
+ *
+ * `getEligibleCourses` returns only survivors, so a caller could not tell which
+ * of six tests fired. The diagnosis screen's red banner nonetheless asserted ONE
+ * cause for all of them ("has no Fall 2026 section"), which is checkably false
+ * for the other five: CS 330 is major-restricted for a student whose major
+ * string we failed to match, and it has three live Fall 2026 CRNs. §0 rule 7 —
+ * a wrong domain claim in front of registrars costs more than a bug.
+ */
+export type IneligibilityReason =
+  | "graduate-level"
+  | "no-section"
+  | "preferences"
+  | "unmet-prereq"
+  | "major-restricted"
+  | "unmet-coreq";
+
+export interface Ineligibility {
+  code: string;
+  reason: IneligibilityReason;
+  /**
+   * The other courses involved: unmet prerequisites for "unmet-prereq", unmet
+   * corequisites for "unmet-coreq". Empty for every other reason.
+   */
+  blockers: string[];
+  /**
+   * The catalog's own `majorRestriction` sentence, for "major-restricted".
+   * Null otherwise. Carried so a caller can quote the source rather than
+   * paraphrase a restriction we only heuristically failed to match.
+   */
+  restriction: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -215,28 +251,66 @@ function majorAllows(restriction: string | null | undefined, studentMajor: strin
 // ---------------------------------------------------------------------------
 
 /**
- * §11.3 step 1. Registrability is decided by SECTIONS — `section.term ===
- * NEXT_TERM` — and NEVER by `Course.termsOffered`. You cannot register without
- * a CRN (§8), and `termsOffered` is an observation, not a guarantee.
+ * §11.3 step 1, and the single source of truth for BOTH exported views of it.
+ *
+ * Registrability is decided by SECTIONS — `section.term === NEXT_TERM` — and
+ * NEVER by `Course.termsOffered`. You cannot register without a CRN (§8), and
+ * `termsOffered` is an observation, not a guarantee.
+ *
+ * The filters run in the same order they always have and `eligible` is the same
+ * map it always was; the only addition is that a rejection now records WHY
+ * instead of falling through a bare `continue`. Keeping one loop rather than a
+ * parallel "explain" copy is the point: a second implementation of this chain
+ * would drift from the one the schedule cards are actually built from, and then
+ * the banner would be confidently wrong in a new way.
  */
-export function getEligibleCourses(
+function computeEligibility(
   audit: StudentAudit,
   preferences: Preferences,
   courses: Course[],
   prereqs: PrereqGraph,
-): Map<string, EligibleCourse> {
+): { eligible: Map<string, EligibleCourse>; rejected: Map<string, Ineligibility> } {
   const taken = new Set(audit.coursesTaken.map(normalizeCode));
+  // Picks which member of an unmet `oneOf` group gets NAMED — the one the audit
+  // actually asks for. Same scope `Bottleneck.blockedBy` uses, so the banner and
+  // the "Can't take yet" cards can never name different representatives.
+  const scope = new Set(remainingRequired(audit));
   const eligible = new Map<string, EligibleCourse>();
+  const rejected = new Map<string, Ineligibility>();
+
+  const reject = (
+    code: string,
+    reason: IneligibilityReason,
+    blockers: string[] = [],
+    restriction: string | null = null,
+  ): void => {
+    rejected.set(code, { code, reason, blockers, restriction });
+  };
 
   for (const course of courses) {
     const code = normalizeCode(course.code);
+    // A course she already has is not "ineligible" — it is done. It appears in
+    // neither map, and `remainingRequired` subtracts taken courses, so no
+    // bottleneck can ever land here.
     if (taken.has(code)) continue;
     // See `isUndergraduate` in lib/bottlenecks.ts — the one addition to the
     // spec's filter list, and the reason a 600-level CRN cannot reach the cart.
-    if (!isUndergraduate(code)) continue;
+    if (!isUndergraduate(code)) {
+      reject(code, "graduate-level");
+      continue;
+    }
 
-    const sections = (course.sections ?? [])
-      .filter((s) => s.term === NEXT_TERM && matchesPreferences(s, preferences))
+    // Split in two so "there is no section" and "there is no section you'd
+    // accept" stay distinguishable. The array that comes out is identical to the
+    // single combined filter this replaced — same order, same slice.
+    const offered = (course.sections ?? []).filter((s) => s.term === NEXT_TERM);
+    if (offered.length === 0) {
+      reject(code, "no-section");
+      continue;
+    }
+
+    const sections = offered
+      .filter((s) => matchesPreferences(s, preferences))
       // Deterministic order, earliest meeting first; asynchronous sections last
       // so a card prefers a seated section when both exist.
       .sort((a, b) => {
@@ -248,10 +322,19 @@ export function getEligibleCourses(
         return a.crn.localeCompare(b.crn);
       })
       .slice(0, MAX_SECTIONS_PER_COURSE);
-    if (sections.length === 0) continue;
+    if (sections.length === 0) {
+      reject(code, "preferences");
+      continue;
+    }
 
-    if (!prereqsSatisfied(code, prereqs, taken)) continue;
-    if (!majorAllows(course.majorRestriction, audit.major)) continue;
+    if (!prereqsSatisfied(code, prereqs, taken)) {
+      reject(code, "unmet-prereq", unmetPrereqs(code, prereqs, taken, scope));
+      continue;
+    }
+    if (!majorAllows(course.majorRestriction, audit.major)) {
+      reject(code, "major-restricted", [], course.majorRestriction ?? null);
+      continue;
+    }
 
     eligible.set(code, { course, sections });
   }
@@ -265,32 +348,64 @@ export function getEligibleCourses(
     changed = false;
     for (const code of [...eligible.keys()]) {
       const coreqs = prereqs[code]?.coreq ?? [];
-      const unmet = coreqs.some((raw) => {
-        const c = normalizeCode(raw);
-        return c !== code && !taken.has(c) && !eligible.has(c);
-      });
-      if (unmet) {
+      const unmet = coreqs
+        .map(normalizeCode)
+        .filter((c) => c !== code && !taken.has(c) && !eligible.has(c));
+      if (unmet.length > 0) {
         eligible.delete(code);
+        reject(code, "unmet-coreq", [...new Set(unmet)].sort());
         changed = true;
       }
     }
   }
 
-  return eligible;
+  return { eligible, rejected };
 }
 
 /**
- * §11.3 step 2, the other half: critical bottlenecks with no registerable
- * section next term. §13 shows these as "not offered next term — see your
- * advisor" and they must NEVER appear on a schedule card.
+ * §11.3 step 1. The schedule builder's view: survivors only, unchanged.
  */
-export function unofferedCriticals(
+export function getEligibleCourses(
+  audit: StudentAudit,
+  preferences: Preferences,
+  courses: Course[],
+  prereqs: PrereqGraph,
+): Map<string, EligibleCourse> {
+  return computeEligibility(audit, preferences, courses, prereqs).eligible;
+}
+
+/**
+ * The complement: every course the same pass turned down, and why. Keyed by
+ * canonical code. Courses the student has already taken appear in neither map.
+ */
+export function explainIneligibility(
+  audit: StudentAudit,
+  preferences: Preferences,
+  courses: Course[],
+  prereqs: PrereqGraph,
+): Map<string, Ineligibility> {
+  return computeEligibility(audit, preferences, courses, prereqs).rejected;
+}
+
+/**
+ * §11.3 step 2, the other half: critical bottlenecks that cannot reach a
+ * schedule card, each carrying the reason it could not. §13 shows these on the
+ * diagnosis screen as "see your advisor" and they must NEVER appear on a card.
+ *
+ * Order follows `bottlenecks`, which `computeBottlenecks` has already sorted by
+ * urgency then chain depth.
+ */
+export function ineligibleCriticals(
   bottlenecks: Bottleneck[],
-  eligible: ReadonlyMap<string, EligibleCourse>,
-): string[] {
-  return bottlenecks
-    .filter((b) => b.urgency === "critical" && !eligible.has(normalizeCode(b.code)))
-    .map((b) => normalizeCode(b.code));
+  rejected: ReadonlyMap<string, Ineligibility>,
+): Ineligibility[] {
+  const out: Ineligibility[] = [];
+  for (const b of bottlenecks) {
+    if (b.urgency !== "critical") continue;
+    const why = rejected.get(normalizeCode(b.code));
+    if (why) out.push(why);
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
