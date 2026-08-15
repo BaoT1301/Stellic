@@ -101,8 +101,14 @@ OPENAI_API_KEY=sk-...
 exclusively inside `app/api/**` and is never exposed with a `NEXT_PUBLIC_`
 prefix. The offline scripts in `scripts/` read the same variable.
 
-Two of the six offline scripts (`build-prereqs.ts`, `embed-skills.ts`) call
-OpenAI. The rest, and the whole deployed app's non-AI surface, run without a key.
+Three scripts call OpenAI — `embed-skills.ts`, `build-prereqs.ts` (the
+comparison harness only; the graph itself is built deterministically) and
+`check-openai.ts`. Everything else in `scripts/`, and every screen of the
+deployed app, runs without a key: each route catches the missing-key error and
+serves its cached fixture rather than a 500.
+
+Note that `tsx` does **not** read `.env.local` — only `next dev` does. Scripts
+that need a key take it from the environment.
 
 When deploying, set `OPENAI_API_KEY` in the Vercel project settings too —
 `.env.local` is gitignored, so a missing dashboard variable is the single most
@@ -138,11 +144,21 @@ npx tsx scripts/scrape-catalog.ts
 #    Sections come from Fall 2026 only — that is the only registerable term.
 npx tsx scripts/scrape-sections.ts
 
-# 3. Prerequisite grammar -> data/prereqs.json   [needs OPENAI_API_KEY]
+# 3. Prerequisite grammar -> data/prereqs.json   [no key needed]
 #    GMU does not write prose prerequisites; it emits a Banner-generated boolean
-#    expression with grade codes as superscripts. We parse it with a model and
-#    validate every emitted course code against courses.json.
-npx tsx scripts/build-prereqs.ts
+#    expression with grade codes as superscripts, so it is a grammar and it can
+#    be parsed as one. Deterministic; every emitted course code is validated
+#    against courses.json and the two ground-truth strings in CLAUDE.md §9.2 are
+#    asserted on every run.
+npx tsx scripts/parse-prereqs.ts
+
+#    The MODEL implementation of the same step, kept as the §9.2 reference and
+#    as a comparison harness. Do NOT use it to overwrite data/prereqs.json:
+#    `--compare` against the live API disagrees on 47 of 270 rules, and on the
+#    one undergraduate CS course among them the deterministic parser is right
+#    and the model is wrong (CS 405's either/or group read as a hard AND, which
+#    would have dropped the course off two schedule cards). CLAUDE.md §19.
+npx tsx scripts/build-prereqs.ts --compare    # [needs OPENAI_API_KEY]
 
 # 4. GATE. Prints dangling prerequisites, cycles, and the ten deepest chains.
 #    EXITS NON-ZERO on a bad graph, so a broken graph is not committable.
@@ -178,16 +194,41 @@ postings behind the app's sample-fill button. `data/degree-template.json` is the
 BS Computer Science requirement template used by the manual-entry path when a
 student has no audit PDF.
 
+### The gates
+
+Nothing above is a test suite. These are, and they are the ones to run before a
+commit. `npm run verify` chains the three offline ones; the browser ones need a
+`npm run build && npm start` first and are wired up as npm scripts too.
+
+| Script | Checks | Exits non-zero |
+|---|---|---|
+| `smoke-pipeline.ts` | §11.1/§11.2/§11.3 end to end against the committed data and the sample audit — bottleneck arithmetic, gap partitioning, and every schedule invariant across all four preference toggles | yes |
+| `verify-prereqs.ts` | Dangling prerequisites, cycles, the ten deepest chains | yes |
+| `check-contrast.ts` | Parses the tokens straight out of `app/globals.css` and asserts WCAG contrast, sRGB gamut, and separation between the `-soft` fills | yes |
+| `audit-ui.ts` | Playwright + axe over all six screens at 1440px and 390px. WCAG 2.1 AA, plus layout and overflow | yes |
+| `check-mobile.ts` | Horizontal overflow and 24×24 tap targets at 390px | yes |
+| `shoot-screens.ts` | Drives all four states in a real browser and screenshots them | yes, on a page error |
+| `check-openai.ts` | That every schema in `lib/schemas.ts` is accepted by Structured Outputs' strict mode. **Re-run after any change to that file.** `[needs OPENAI_API_KEY]` | yes |
+| `diag-skills.ts` | Read-only replay of `/api/extract-skills` printing the raw model output beside each filter. `[needs OPENAI_API_KEY]` | no |
+| `test-audit-paths.ts` | The three ways an audit can enter the app | yes |
+
+One more script has no gate role and is kept for provenance:
+`map-skills-lexical.ts`, the lexical stand-in that `embed-skills.ts` replaced —
+CLAUDE.md §19 records what the real embeddings caught that it had hidden.
+
 ---
 
 ## Repo layout
 
 ```
-scripts/      offline pipeline. Slow and ugly is fine here.
+scripts/      offline pipeline + the gates. Slow and ugly is fine here.
 data/         committed JSON the deployed app imports statically.
 samples/      sample job postings, the audit source HTML, the degraded fixture.
-lib/          types.ts (frozen contracts), bottlenecks, gaps, schedules, rmp.
-app/          one page with four states, /register, and three API routes.
+lib/          types.ts (frozen contracts), bottlenecks, gaps, schedules, rmp,
+              openai (the one callStructured helper), schemas (zod, strict-mode
+              safe), prose (copy written without the model), utils.
+app/          one page with four states, /register, four API routes, and the
+              two error boundaries.
 components/   the UI.
 ```
 
@@ -208,7 +249,12 @@ frequently not traced into the Vercel bundle.
   with a D.
 - **No database, no persistence.** State lives in React; the catalog ships as
   static JSON.
-- Every API route degrades to a cached fixture rather than an error state.
+- Every API route degrades to a cached fixture rather than an error state — with
+  one carve-out. If you upload **your own** audit and it cannot be read, the
+  diagnosis screen says so, because the fixture behind that particular route is
+  another student's academic record and everything downstream would otherwise
+  present it as yours. Clicking "use the sample audit" never shows that line:
+  there, the fixture is exactly what the button promised.
 
 Suggestions are based on public job postings and course descriptions. Confirm
 with your advisor before registering.

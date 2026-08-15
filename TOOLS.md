@@ -42,10 +42,16 @@ runtime models.
 
 | Tool | Version | Used for |
 |---|---|---|
-| Tailwind CSS | v4 | Styling (`@theme` in `app/globals.css` — no `tailwind.config.js`) |
-| shadcn/ui | latest | Component primitives |
-| Base UI | — | shadcn's underlying primitive library as of July 2026 |
-| sonner | — | Toasts (shadcn's `toast` is deprecated) |
+| Tailwind CSS | ^4 | Styling (`@theme` in `app/globals.css` — no `tailwind.config.js`) |
+| `@tailwindcss/postcss` | ^4 | The Tailwind v4 PostCSS plugin — how the CSS is actually built |
+| shadcn/ui | ^4.18.0 | Component primitives (the CLI; components are vendored into `components/ui/`) |
+| Base UI (`@base-ui/react`) | ^1.7.0 | shadcn's underlying primitive library as of July 2026 |
+| sonner | ^2.0.8 | Toasts (shadcn's `toast` is deprecated) |
+| next-themes | ^0.4.6 | Pulled in by shadcn's sonner wrapper. The app pins the toaster to `light` and ships no dark palette, so nothing else uses it. |
+| lucide-react | ^1.31.0 | Icons |
+| class-variance-authority | ^0.7.1 | Component variant definitions (`buttonVariants`) |
+| clsx + tailwind-merge | ^2.1.1 / ^3.6.0 | The `cn()` helper in `lib/utils.ts` |
+| tw-animate-css | ^1.4.0 | The `animate-in` / `fade-in` screen transitions |
 | Geist | — | All prose — headings, body, ledes, buttons. Variable font, served self-hosted by `next/font/google`, so no request leaves the page at runtime. Licensed under the SIL Open Font License 1.1. |
 | Geist Mono | — | Machine-readable strings only — course codes, CRNs, meeting times, prereq-chain nodes. Same variable-font and self-hosting story; also SIL Open Font License 1.1. |
 | `next/font` | — | Self-hosts and subsets both fonts at build time |
@@ -58,7 +64,18 @@ runtime models.
 | pdf-parse | ^2.4.5 | Degree-audit PDF → text (v2 — named `PDFParse` export) |
 | zod | ^4.4.3 | Structured-output schemas + validation |
 | tsx | ^4.23.12 | Running the offline scripts |
-| puppeteer-core | ^24 | **devDependency only.** Drives the Microsoft Edge already installed on the machine to walk the four UI states and screenshot them (`scripts/shoot-screens.ts`). No bundled Chromium download, nothing shipped to the browser. |
+
+## Development and verification
+
+Everything in this section is a **devDependency**. None of it ships to the
+browser or runs on the server; all of it exists to gate a commit.
+
+| Tool | Version | Used for |
+|---|---|---|
+| puppeteer-core | ^25.7.0 | Drives an already-installed Edge / Chrome / Chromium to walk the four UI states and screenshot them (`scripts/shoot-screens.ts`, `check-mobile.ts`). No bundled Chromium download. |
+| playwright | ^1.62.1 | The other browser harness — `scripts/audit-ui.ts`, which is the one that can fall back to a bundled Chromium when no system browser is found |
+| `@axe-core/playwright` + `axe-core` | ^4.13.0 | The WCAG 2.1 AA audit behind the "zero axe violations at 1440px and 390px" claim in CLAUDE.md §19. It is the tool that caught the `hover:bg-primary/80` contrast regression and the 23.95px tap targets. |
+| eslint + eslint-config-next | ^9 / 16.3.1 | Linting |
 
 ## Data sources
 

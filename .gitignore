@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the template. CLAUDE.md §7 and §14 both require .env.example to be
+# committed, and README's Setup block opens with `cp .env.example .env.local`.
+# The blanket rule above silently swallowed it, so the file did not exist and
+# that first setup step failed on a fresh clone. It holds a key NAME and no key.
+!.env.example
 
 # vercel
 .vercel
