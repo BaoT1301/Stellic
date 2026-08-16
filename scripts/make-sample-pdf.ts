@@ -48,6 +48,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { findBrowser } from "./find-browser";
+
 const REPO_ROOT = process.cwd();
 const HTML_SRC = path.join(REPO_ROOT, "samples", "sample-audit.html");
 const PDF_OUT = path.join(REPO_ROOT, "public", "sample-audit.pdf");
@@ -112,25 +114,25 @@ interface PuppeteerBrowser {
 // ---------------------------------------------------------------------------
 
 function chromeCandidates(): string[] {
+  // scripts/find-browser.ts first — it is the only one of these that looks at
+  // $PATH, which is where a nix-store browser lives. The Windows entries below
+  // stay because they read the real ProgramFiles environment variables rather
+  // than assuming C:, which the shared list does not do.
   const pf = process.env["ProgramFiles"] ?? "C:/Program Files";
   const pf86 = process.env["ProgramFiles(x86)"] ?? "C:/Program Files (x86)";
   const local = process.env.LOCALAPPDATA ?? "";
 
+  const shared = findBrowser();
+
   return [
+    ...(shared ? [shared] : []),
     // Windows — Edge is the reliable one, it ships with the OS.
     path.join(pf86, "Microsoft/Edge/Application/msedge.exe"),
     path.join(pf, "Microsoft/Edge/Application/msedge.exe"),
     path.join(pf, "Google/Chrome/Application/chrome.exe"),
     path.join(pf86, "Google/Chrome/Application/chrome.exe"),
     local ? path.join(local, "Google/Chrome/Application/chrome.exe") : "",
-    // macOS / Linux, so the script is not Windows-only.
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-    "/usr/bin/chromium-browser",
-    "/usr/bin/microsoft-edge",
-  ].filter((p) => p !== "" && existsSync(p));
+  ].filter((p, i, all) => p !== "" && all.indexOf(p) === i && existsSync(p));
 }
 
 function tryHeadlessBrowser(): boolean {

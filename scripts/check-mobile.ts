@@ -11,10 +11,12 @@
  * Server must be running.  Then:  npx tsx scripts/check-mobile.ts
  */
 
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer, { type Browser, type ElementHandle, type Page } from "puppeteer-core";
+
+import { requireBrowser } from "./find-browser";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,23 +25,6 @@ const outDir = path.join(root, ".cache", "screens");
 // iPhone 15 / Pixel 8 class. 390 is the most common real-world phone width.
 const WIDTH = 390;
 const HEIGHT = 844;
-
-// Windows first (the machine this was written on), then macOS, then Linux.
-// existsSync() only ever matches one platform's paths, so the order is cosmetic.
-const BROWSERS = [
-  "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Google/Chrome/Application/chrome.exe",
-  "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  "/Applications/Chromium.app/Contents/MacOS/Chromium",
-  "/usr/bin/microsoft-edge",
-  "/usr/bin/google-chrome",
-  "/usr/bin/google-chrome-stable",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-  "/snap/bin/chromium",
-];
 
 let failures = 0;
 const check = (label: string, ok: boolean, detail: string) => {
@@ -128,12 +113,7 @@ async function audit(page: Page, name: string) {
 
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  // CHROME_PATH first. The hardcoded list below only covers browsers installed
-  // at a distro's standard prefix, so it finds nothing inside the nix devshell
-  // this project is actually developed in — a store path is content-addressed
-  // and unguessable. Same override in shoot-screens.ts.
-  const exe = process.env.CHROME_PATH ?? BROWSERS.find((p) => existsSync(p));
-  if (!exe) throw new Error("no Edge or Chrome found — set CHROME_PATH");
+  const exe = requireBrowser();
 
   let browser: Browser | undefined;
   try {

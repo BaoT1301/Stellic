@@ -7,12 +7,17 @@
  * machine through puppeteer-core, so there is no bundled-Chromium download and
  * no runtime dependency — puppeteer-core is a devDependency only.
  *
- * Run the server first:  npm run start   (PORT=3112)
- * Then:                  npx tsx scripts/shoot-screens.ts
+ * Run the server first:  npm run build && npm start
+ * Then:                  npm run gate:screens
  * Screens land in .cache/screens/ (gitignored).
+ *
+ * BASE_URL overrides the default, which is 3000 — the port `next start` uses
+ * and the one check-mobile.ts and audit-ui.ts already default to. It used to
+ * default to 3112 while claiming `npm run start` in this very comment, so the
+ * documented invocation could not work.
  */
 
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer, {
@@ -21,34 +26,11 @@ import puppeteer, {
   type Page,
 } from "puppeteer-core";
 
-const BASE = process.env.BASE_URL ?? "http://localhost:3112";
+import { requireBrowser } from "./find-browser";
+
+const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(root, ".cache", "screens");
-
-// Windows first (the machine this was written on), then macOS, then Linux.
-// existsSync() only ever matches one platform's paths, so the order is cosmetic.
-const EDGE_CANDIDATES = [
-  "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Google/Chrome/Application/chrome.exe",
-  "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  "/Applications/Chromium.app/Contents/MacOS/Chromium",
-  "/usr/bin/microsoft-edge",
-  "/usr/bin/google-chrome",
-  "/usr/bin/google-chrome-stable",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-  "/snap/bin/chromium",
-];
-
-function findBrowser(): string {
-  // CHROME_PATH first — see the note in check-mobile.ts. The list below cannot
-  // find a nix-store chromium, which is what this project's devshell provides.
-  const hit = process.env.CHROME_PATH ?? EDGE_CANDIDATES.find((p) => existsSync(p));
-  if (!hit) throw new Error("No Edge or Chrome found — set CHROME_PATH.");
-  return hit;
-}
 
 /** Click the first element whose visible text contains `text`. */
 async function clickText(page: Page, text: string, tag = "button") {
@@ -78,7 +60,7 @@ async function main() {
   let browser: Browser | undefined;
   try {
     browser = await puppeteer.launch({
-      executablePath: findBrowser(),
+      executablePath: requireBrowser(),
       headless: true,
       args: ["--disable-gpu", "--no-sandbox"],
     });

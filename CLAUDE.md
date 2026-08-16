@@ -1629,7 +1629,8 @@ the branch name only advertises the first kind.
    the same treatment.
 4. **`1e030ef` — the browser scripts could not find a nix-store chromium.**
    `existsSync()` over hardcoded distro prefixes cannot match a content-addressed
-   store path by construction. `CHROME_PATH` takes precedence now.
+   store path by construction, so `CHROME_PATH` takes precedence. Half the fix —
+   see the Housekeeping note below, which stops requiring the env var at all.
 
 **Then an audit of the whole tree.** It found the build in good shape — `tsc`
 clean, zero `any`, zero `@ts-ignore`, zero TODO/FIXME markers, and every route
@@ -1743,10 +1744,41 @@ branch to be written rather than defaulted.
 `npm run verify` chains typecheck + lint + the three offline gates; the browser
 gates get named `gate:*` entries because they need a running `npm start`. All
 eight were hand-run with `npx tsx` and nothing in `package.json` mentioned any of
-them. The unread `demanded` state is gone from `app/page.tsx`. `audit-ui.ts` was
-the one browser script `1e030ef` missed — a Playwright channel lookup cannot find
-a nix store path either, and its documented last resort is a bundled download
-this repo never fetches.
+them. The unread `demanded` state is gone from `app/page.tsx`.
+
+**The four browser scripts now share one `scripts/find-browser.ts`, and it looks
+at `$PATH`.** This is the part `1e030ef` got half-right. That commit added a
+`CHROME_PATH` override to the two puppeteer gates on the reasoning that a
+nix-store path is content-addressed and therefore unguessable — correct, but the
+conclusion "so you must set an env var" does not follow, because **the devshell
+puts `chromium` on `$PATH` like any other tool** and nothing was looking there.
+Four copies of a hardcoded absolute-path list, none of which consulted `$PATH`,
+and a fourth script (`audit-ui.ts`) that had no override at all.
+
+> Measured, not assumed, with a nix chromium FIRST on `$PATH` and `CHROME_PATH`
+> unset: Playwright's `channel: "msedge"` resolves to `/opt/microsoft/msedge/
+> msedge`, `"chrome"` to `/opt/google/chrome/chrome`, and **`"chromium"` is not
+> a system-browser lookup at all** — it means Playwright's own build, at
+> `~/.cache/ms-playwright/`, which is the same undownloaded bundle the final
+> fallback wanted. Neither Playwright nor puppeteer-core ever consults `$PATH`.
+> So all four steps of `audit-ui`'s ladder failed for one of two reasons, and
+> the gate behind every accessibility claim in this file could not start.
+
+Order is now `CHROME_PATH` → `$PATH` by binary name → the well-known install
+paths. All four gates run with **zero configuration** in the devshell.
+`make-sample-pdf.ts` keeps its own Windows entries on top of the shared list,
+because those read the real `ProgramFiles` variables instead of assuming `C:`.
+
+`shoot-screens.ts` also defaulted to **port 3112** while its own header comment
+said to start the server with `npm run start`, which is 3000 — so the documented
+invocation could not work, and its two sibling gates were already on 3000. Now
+3000, `BASE_URL` still overrides.
+
+> Note if you run `make-sample-pdf.ts` to test this: it **overwrites
+> `public/sample-audit.pdf`**, and a different browser build produces a
+> byte-different file (299,406 → 256,783 here). That asset is the one this
+> section opens by calling the biggest remaining risk in the project. Revert it
+> unless you actually meant to re-author it.
 
 **Verified after, against a PRODUCTION build (`npm run build && npm start`):**
 `tsc --noEmit` clean · `next build` clean · **eslint down to ONE warning**

@@ -200,6 +200,13 @@ Nothing above is a test suite. These are, and they are the ones to run before a
 commit. `npm run verify` chains the three offline ones; the browser ones need a
 `npm run build && npm start` first and are wired up as npm scripts too.
 
+The browser gates drive a Chromium-family browser you already have. They find it
+via `scripts/find-browser.ts`, which checks `CHROME_PATH`, then `$PATH` by binary
+name, then the well-known install paths — so on any machine with `chromium` on
+`$PATH` (including a nix devshell, where the store path is unguessable by
+construction) they need no configuration. Nothing here downloads a browser;
+`npx playwright install` is not part of this project's setup.
+
 | Script | Checks | Exits non-zero |
 |---|---|---|
 | `smoke-pipeline.ts` | §11.1/§11.2/§11.3 end to end against the committed data and the sample audit — bottleneck arithmetic, gap partitioning, and every schedule invariant across all four preference toggles | yes |

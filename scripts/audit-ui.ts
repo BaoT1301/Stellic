@@ -8,11 +8,10 @@
  * claim, and "targets WCAG 2.1 AA" is only sayable in the write-up if something
  * actually checked.
  *
- * Uses a browser already installed on the machine via Playwright's `channel`,
- * so there is no bundled-browser download and nothing ships to prod. Tries
- * Edge first (the machine this was written on), then Chrome, then Chromium —
- * `channel` has no "does this exist" check, so launchBrowser() below just
- * attempts each in order and keeps the first that starts.
+ * Uses a browser already installed on the machine, located by
+ * scripts/find-browser.ts, so there is no bundled-browser download and nothing
+ * ships to prod. See launchBrowser() below for why Playwright's `channel`
+ * option cannot do that job.
  *
  * Server must be running.  Then:  npx tsx scripts/audit-ui.ts
  * Screens land in .cache/screens/ (gitignored). Exits non-zero on a serious
@@ -24,6 +23,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, type Browser, type Page } from "playwright";
 import { AxeBuilder } from "@axe-core/playwright";
+
+import { findBrowser } from "./find-browser";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -235,33 +236,37 @@ async function walk(browser: Browser, vp: Viewport) {
 }
 
 /**
- * CHROME_PATH first, then each installed-browser channel in turn, keeping the
- * first that launches. "msedge" only resolves on a machine with Edge installed
- * (the one this was written on); "chrome" and "chromium" cover macOS and most
- * Linux setups. Playwright's own bundled Chromium is the last resort so this
- * never hard-fails just because none of the three named channels are present.
+ * The browser `scripts/find-browser.ts` found, driven by explicit
+ * `executablePath` exactly the way the three puppeteer gates drive theirs.
  *
- * CHROME_PATH is the same escape hatch the three puppeteer scripts already
- * take, and for the same reason: a channel lookup searches well-known paths and
- * cannot find a nix-store chromium, which is what this project's devshell
- * provides. Without it the last resort is not a resort either — the bundled
- * download is what `npx playwright install` fetches, and this repo never runs
- * that.
+ * This used to try `channel: "msedge" | "chrome" | "chromium"` in turn and fall
+ * back to Playwright's bundle. Every step of that is wrong on this machine, and
+ * measurably so — with a nix-store chromium FIRST on PATH, the three channels
+ * still resolve to /opt/microsoft/msedge/msedge, /opt/google/chrome/chrome, and
+ * ~/.cache/ms-playwright/. Playwright does not consult PATH for browsers, and
+ * `channel: "chromium"` is not a system-browser lookup at all — it means
+ * "Playwright's own build", which is the same undownloaded bundle the final
+ * fallback wanted. So all four steps failed for one of two reasons and the gate
+ * could not start.
+ *
+ * The channel list is kept only as a last resort, for a machine that really
+ * does have Edge or Chrome at a standard prefix and where find-browser somehow
+ * missed it.
  */
 async function launchBrowser(): Promise<Browser> {
-  const explicit = process.env.CHROME_PATH;
-  if (explicit) {
-    return chromium.launch({ executablePath: explicit, headless: true });
-  }
-  const channels = ["msedge", "chrome", "chromium"] as const;
-  for (const channel of channels) {
+  const exe = findBrowser();
+  if (exe) return chromium.launch({ executablePath: exe, headless: true });
+
+  for (const channel of ["msedge", "chrome"] as const) {
     try {
       return await chromium.launch({ channel, headless: true });
     } catch {
       // try the next channel
     }
   }
-  return chromium.launch({ headless: true });
+  throw new Error(
+    "No Chromium-family browser found. Install one, put it on PATH, or set CHROME_PATH.",
+  );
 }
 
 async function main() {
