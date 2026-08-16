@@ -13,31 +13,16 @@
  * Exits non-zero if either path fails to reach a populated diagnosis.
  */
 
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer, { type Browser, type ElementHandle, type Page } from "puppeteer-core";
 
+import { requireBrowser } from "./find-browser";
+
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(root, ".cache", "screens");
-
-// Windows first (the machine this was written on), then macOS, then Linux.
-// existsSync() only ever matches one platform's paths, so the order is cosmetic.
-const BROWSERS = [
-  "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files/Google/Chrome/Application/chrome.exe",
-  "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  "/Applications/Chromium.app/Contents/MacOS/Chromium",
-  "/usr/bin/microsoft-edge",
-  "/usr/bin/google-chrome",
-  "/usr/bin/google-chrome-stable",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-  "/snap/bin/chromium",
-];
 
 let failures = 0;
 const check = (label: string, ok: boolean, detail: string) => {
@@ -62,7 +47,30 @@ async function clickText(page: Page, text: string, tag = "button") {
 /** Everything up to and including landing on the audit step. */
 async function toAuditStep(page: Page) {
   await page.goto(BASE, { waitUntil: "networkidle2" });
+  // networkidle2 fires when the network settles, which is BEFORE React has
+  // hydrated and attached its handlers, so a click here lands on inert markup
+  // and silently does nothing. The two sibling gates never hit this only
+  // because each interposes a helper that sleeps first (shoot-screens.ts:51,
+  // check-mobile.ts:51); this one clicked straight through.
+  await new Promise((r) => setTimeout(r, 900));
   await clickText(page, "sample");
+
+  // "Load sample postings" fetches two .txt files from /samples, and
+  // "Next: your audit" stays disabled until they land. Clicking a disabled
+  // button does nothing, and the script would then wait out the full 60s on a
+  // step that never happened. Wait on the enabled state rather than on a
+  // sleep — check-mobile.ts clicks these two back-to-back and passes only
+  // because the fetch usually wins the race, which is a flake, not a pass.
+  await page.waitForFunction(
+    () =>
+      [...document.querySelectorAll("button")].some(
+        (b) =>
+          (b.textContent ?? "").toLowerCase().includes("next: your audit") &&
+          !(b as HTMLButtonElement).disabled,
+      ),
+    { timeout: 30_000 },
+  );
+
   await clickText(page, "Next: your audit");
   await page.waitForFunction(
     () => document.body.innerText.includes("Or enter it manually"),
@@ -93,8 +101,7 @@ async function readDiagnosis(page: Page) {
 
 async function main() {
   mkdirSync(outDir, { recursive: true });
-  const exe = BROWSERS.find((p) => existsSync(p));
-  if (!exe) throw new Error("no Edge or Chrome found");
+  const exe = requireBrowser();
 
   let browser: Browser | undefined;
   try {

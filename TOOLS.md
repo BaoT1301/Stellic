@@ -72,8 +72,8 @@ browser or runs on the server; all of it exists to gate a commit.
 
 | Tool | Version | Used for |
 |---|---|---|
-| puppeteer-core | ^25.7.0 | Drives an already-installed Edge / Chrome / Chromium to walk the four UI states and screenshot them (`scripts/shoot-screens.ts`, `check-mobile.ts`). No bundled Chromium download. |
-| playwright | ^1.62.1 | The other browser harness — `scripts/audit-ui.ts`, which is the one that can fall back to a bundled Chromium when no system browser is found |
+| puppeteer-core | ^25.7.0 | Drives an already-installed Edge / Chrome / Chromium to walk the four UI states and screenshot them (`scripts/shoot-screens.ts`, `check-mobile.ts`, `test-audit-paths.ts`, `make-sample-pdf.ts`). No bundled Chromium download. |
+| playwright | ^1.62.1 | The other browser harness — `scripts/audit-ui.ts`. Like the puppeteer scripts it uses an already-installed browser, located by `scripts/find-browser.ts`; there is deliberately no bundled-Chromium download fallback. |
 | `@axe-core/playwright` + `axe-core` | ^4.13.0 | The WCAG 2.1 AA audit behind the "zero axe violations at 1440px and 390px" claim in CLAUDE.md §19. It is the tool that caught the `hover:bg-primary/80` contrast regression and the 23.95px tap targets. |
 | eslint + eslint-config-next | ^9 / 16.3.1 | Linting |
 

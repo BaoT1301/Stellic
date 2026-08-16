@@ -207,17 +207,25 @@ name, then the well-known install paths — so on any machine with `chromium` on
 construction) they need no configuration. Nothing here downloads a browser;
 `npx playwright install` is not part of this project's setup.
 
-| Script | Checks | Exits non-zero |
-|---|---|---|
-| `smoke-pipeline.ts` | §11.1/§11.2/§11.3 end to end against the committed data and the sample audit — bottleneck arithmetic, gap partitioning, and every schedule invariant across all four preference toggles | yes |
-| `verify-prereqs.ts` | Dangling prerequisites, cycles, the ten deepest chains | yes |
-| `check-contrast.ts` | Parses the tokens straight out of `app/globals.css` and asserts WCAG contrast, sRGB gamut, and separation between the `-soft` fills | yes |
-| `audit-ui.ts` | Playwright + axe over all six screens at 1440px and 390px. WCAG 2.1 AA, plus layout and overflow | yes |
-| `check-mobile.ts` | Horizontal overflow and 24×24 tap targets at 390px | yes |
-| `shoot-screens.ts` | Drives all four states in a real browser and screenshots them | yes, on a page error |
-| `check-openai.ts` | That every schema in `lib/schemas.ts` is accepted by Structured Outputs' strict mode. **Re-run after any change to that file.** `[needs OPENAI_API_KEY]` | yes |
-| `diag-skills.ts` | Read-only replay of `/api/extract-skills` printing the raw model output beside each filter. `[needs OPENAI_API_KEY]` | no |
-| `test-audit-paths.ts` | The three ways an audit can enter the app | yes |
+| Script | npm script | Checks | Exits non-zero |
+|---|---|---|---|
+| `smoke-pipeline.ts` | `verify` | §11.1/§11.2/§11.3 end to end against the committed data and the sample audit — bottleneck arithmetic, gap partitioning, and every schedule invariant across all four preference toggles | yes |
+| `verify-prereqs.ts` | `verify` | Dangling prerequisites, cycles, the ten deepest chains | yes |
+| `check-contrast.ts` | `verify` | Parses the tokens straight out of `app/globals.css` and asserts WCAG contrast, sRGB gamut, and separation between the `-soft` fills | yes |
+| `audit-ui.ts` | `gate:ui` | Playwright + axe over all six screens at 1440px and 390px. WCAG 2.1 AA, plus layout and overflow | yes |
+| `check-mobile.ts` | `gate:mobile` | Horizontal overflow and 24×24 tap targets at 390px | yes |
+| `shoot-screens.ts` | `gate:screens` | Drives all four states in a real browser and screenshots them | yes, on a page error |
+| `test-audit-paths.ts` | `gate:audit-paths` | Manual entry (`auditFromManual` + `degree-template.json`) and dropzone PDF upload — the two ways into the app that the screenshot walk never touches | yes |
+| `check-openai.ts` | `gate:schemas` | That every schema in `lib/schemas.ts` is accepted by Structured Outputs' strict mode. **Re-run after any change to that file.** `[needs OPENAI_API_KEY]` | yes |
+| `diag-skills.ts` | — | Read-only replay of `/api/extract-skills` printing the raw model output beside each filter. `[needs OPENAI_API_KEY]` | no |
+
+All eight gates pass clean, with no standing baseline failures and no notes. Two
+of them count tap targets against WCAG 2.2 SC 2.5.8 and both skip the same two
+kinds of non-target: anything classed `sr-only` (the dropzone's file input,
+which has a visible "Choose a file" button beside it) and anything
+`aria-hidden` (Base UI's `Switch` renders a 1×1 form-participation checkbox
+next to the real `role=switch` control). The visible controls are measured
+normally.
 
 One more script has no gate role and is kept for provenance:
 `map-skills-lexical.ts`, the lexical stand-in that `embed-skills.ts` replaced —

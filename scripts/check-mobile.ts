@@ -75,6 +75,24 @@ async function audit(page: Page, name: string) {
     for (const el of Array.from(
       document.querySelectorAll<HTMLElement>("button, a, input, [role=button]"),
     )) {
+      // Two exemptions, both for controls that are not targets at all. SC 2.5.8
+      // sizes things a finger has to hit; neither of these is ever pointed at,
+      // and counting them made the gate FAIL by design on three screens — a red
+      // gate that is supposed to be red hides the next real regression.
+      //
+      //   sr-only — 1x1 by construction, with a visible sibling doing the
+      //   pointing. AuditUpload's file input is the case here: it stays mounted
+      //   past step 2, so it reaches the schedules screen too. audit-ui.ts
+      //   makes this same exemption.
+      //
+      //   aria-hidden — removed from the accessibility tree, so by definition
+      //   not a target. This is Base UI's form-participation input: Switch.Root
+      //   renders `type=checkbox tabIndex=-1 aria-hidden=true` beside the real
+      //   `role=switch` button (node_modules/@base-ui/react/switch/root/
+      //   SwitchRoot.js:158-160), which is why the toggles put a 1x1 input on
+      //   screen 4 only. The visible switch track is measured normally.
+      if (el.classList.contains("sr-only")) continue;
+      if (el.getAttribute("aria-hidden") === "true") continue;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       if (r.width < 24 || r.height < 24) {

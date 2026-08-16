@@ -120,6 +120,15 @@ async function layout(page: Page, viewport: string, screen: string) {
       // the visible button proxies for them. Counting them as tap targets is a
       // false positive in this check, not a real WCAG 2.5.8 failure.
       if (el.classList.contains("sr-only")) continue;
+      // Same reasoning, different mechanism: aria-hidden takes an element out
+      // of the accessibility tree, so it is not a target at all. This is Base
+      // UI's form-participation input — Switch.Root renders `type=checkbox
+      // tabIndex=-1 aria-hidden=true` beside the real `role=switch` button
+      // (@base-ui/react/switch/root/SwitchRoot.js:158-160) — which is why the
+      // preference toggles put a 1x1 input on screen 4 only. Without this the
+      // two harnesses disagree about one element and the NOTE invites someone
+      // to "fix" a control that is correct. check-mobile.ts skips it too.
+      if (el.getAttribute("aria-hidden") === "true") continue;
       if (b.width < 24 || b.height < 24) {
         small.push(`${el.tagName.toLowerCase()} "${(el.textContent ?? "").trim().slice(0, 22)}" ${Math.round(b.width)}x${Math.round(b.height)}`);
       }

@@ -12,6 +12,7 @@
     "gate:ui": "tsx scripts/audit-ui.ts",
     "gate:mobile": "tsx scripts/check-mobile.ts",
     "gate:screens": "tsx scripts/shoot-screens.ts",
+    "gate:audit-paths": "tsx scripts/test-audit-paths.ts",
     "gate:schemas": "tsx scripts/check-openai.ts"
   },
   "dependencies": {
