@@ -1746,6 +1746,11 @@ gates get named `gate:*` entries because they need a running `npm start`. All
 eight were hand-run with `npx tsx` and nothing in `package.json` mentioned any of
 them. The unread `demanded` state is gone from `app/page.tsx`.
 
+> **Both counts in this paragraph were wrong, and the entry below repeats the
+> error — corrected Aug 15, see "The gate that could not run" at the end of §19.
+> There are FIVE browser scripts, not four, and `test-audit-paths.ts` got
+> neither the shared browser lookup nor an npm script.**
+
 **The four browser scripts now share one `scripts/find-browser.ts`, and it looks
 at `$PATH`.** This is the part `1e030ef` got half-right. That commit added a
 `CHROME_PATH` override to the two puppeteer gates on the reasoning that a
@@ -1807,6 +1812,116 @@ Two things a gate cannot cover were driven by hand in a real browser:
 > assumed: stripping the criticals out of the combos returns CS 310 and CS 330 as
 > `did-not-fit`, and both have live Fall 2026 sections, so the sentence it
 > generates is true.
+
+### The gate that could not run, and the gate that was always red (Aug 15)
+
+The entry above claims *"The four browser scripts now share one
+`scripts/find-browser.ts`"* and *"All eight were hand-run."* **There are five
+browser scripts.** `test-audit-paths.ts` got neither the shared lookup nor an
+npm script, and the two claims are corrected in place above.
+
+That matters more than a miscount, because of *which* script it was. It is the
+only automated exercise of `auditFromManual()` and the `data/degree-template.json`
+merge — the sole producer of `requirements[].missing` on the manual path, and
+therefore the only input to §11.1 step 1. It still carried its own hardcoded
+`BROWSERS` array resolved with `existsSync`, which is exactly the bug the entry
+above measured and declared fixed: none of its twelve paths exist in the
+devshell, while `chromium` **is** on `$PATH`. So it could not start at all.
+
+**It did not pass once it could start**, and the two failures are the interesting
+part — an unrunnable gate rots silently against the UI it is supposed to guard.
+
+1. **`networkidle2` is not hydration.** It fires when the network settles, which
+   is before React attaches handlers, so the first click landed on inert markup
+   and the script waited out the full 60s on a step that never happened. Its two
+   siblings never hit this only because each interposes a screenshot/audit helper
+   that sleeps first (`shoot-screens.ts:51`, `check-mobile.ts:51`) — the settle
+   was a side effect of an unrelated helper, in all three.
+2. **A race that `check-mobile` wins by luck.** "Load sample postings" fetches
+   two `.txt` files and "Next: your audit" stays disabled until they land.
+   Clicking a disabled button does nothing. `check-mobile.ts` clicks those two
+   back-to-back and passes because the fetch usually wins — that is a flake, not
+   a pass. `test-audit-paths` now waits on the button's **enabled state** rather
+   than on a sleep.
+
+Both audit paths now pass: manual entry reaches the diagnosis screen with 16
+distinct course codes out of the template merge, and the dropzone upload reaches
+it with 23.
+
+**`check-mobile.ts` was red by design and is now green.** §19 records "its
+documented baseline (the `sr-only` file input)" five times. A gate whose passing
+state is a known FAIL teaches you to skim it, and hides the next real
+regression. Both tap-target harnesses now skip the same two kinds of non-target,
+and `audit-ui.ts` got the second one so the two cannot disagree about one
+element:
+
+- **`sr-only`** — 1×1 by construction, with a visible sibling doing the
+  pointing. `AuditUpload`'s file input, which stays mounted past step 2.
+- **`aria-hidden="true"`** — out of the accessibility tree, so not a target at
+  all. This is Base UI's form-participation input: `Switch.Root` renders
+  `type=checkbox tabIndex=-1 aria-hidden=true` beside the real `role=switch`
+  button (`@base-ui/react/switch/root/SwitchRoot.js:158-160`), which is why the
+  preference toggles put a 1×1 input on **screen 4 only**. Verified in the
+  package source rather than inferred from the symptom.
+
+Neither is a real SC 2.5.8 failure and the visible controls are still measured.
+
+`TOOLS.md` also said `audit-ui.ts` "can fall back to a bundled Chromium when no
+system browser is found." `find-browser.ts:25-26` says the opposite —
+*"There is deliberately no download fallback."* Corrected, and the puppeteer row
+now names all four of its scripts.
+
+Verified after: `npm run verify` **exits 0** (typecheck clean, eslint at its
+documented one-warning baseline, `smoke-pipeline` ALL CHECKS PASSED,
+`verify-prereqs` clean, `check-contrast` PALETTE CLEAN) · `next build` clean ·
+against a production `npm start`: `gate:mobile` **ALL CHECKS PASSED** on all five
+screens, `gate:audit-paths` **ALL CHECKS PASSED** on both paths, `gate:ui`
+**AUDIT CLEAN with zero violations and — now — zero notes.**
+
+### Both gap-map headings described half the set they were computed from (Aug 16)
+
+Raised as a question about what *"Nothing you have left teaches these"* means —
+whether it was about courses already taken or courses still to come. It is both,
+and neither heading said so.
+
+§11.2 step 2 covers a skill from `taken ∪ stillRequired` (`lib/gaps.ts:129`) —
+already on the transcript, **or** locked in by the degree. Both headings named
+only the second half:
+
+| Was | Now |
+|---|---|
+| Nothing you have left teaches these | Nothing you've taken or still need teaches these |
+| Already covered by courses you have to take | Already covered by courses you've taken or still need |
+
+The two failures are different sizes.
+
+1. **The missing heading was ambiguous in the alarming direction.** "Nothing you
+   have left" reads as *nothing available to you*, which is the opposite of what
+   the group is for: most of those chips carry a `closableBy` badge naming an
+   elective that WOULD teach the skill, and `closableBy` is computed **only**
+   where `!covered` (`gaps.ts:142`). That group is the actionable one — it is
+   the point of the screen. The only chips there with nothing available are the
+   ones already saying so, in the "behind a prerequisite" badge.
+2. **The covered heading was checkably false.** Measured against the committed
+   skill map and the sample student, **2 of her 15 demanded skills are covered
+   only by courses she has already completed** — *"Analyze security of systems,
+   network, or data"* by MATH 125, and *"Implement security measures for
+   computer or information systems"* by CS 110. Neither is a course she "has to
+   take". §0 rule 7, on the screen §13 says sells the product.
+
+Worth noting: `/api/build-schedules`' prompt already had it right — *"already
+covered by courses this student has taken or must still take"*
+(`route.ts:129`). The model was being told the truth while the student was not.
+
+Presentational only; no algorithm, no contract, no `data/*.json`. The headings
+are longer, so the risk was layout and contrast rather than logic.
+
+Verified after: `npm run verify` exits 0 · `next build` clean · against a
+production server, `gate:ui` **AUDIT CLEAN**, zero violations and zero notes at
+1440px and 390px · `gate:mobile` **ALL CHECKS PASSED**, no overflow at 390px
+with the longer strings · `gate:audit-paths` **ALL CHECKS PASSED** on both
+paths · both new strings confirmed present in the production chunks and both old
+strings absent from them.
 
 ---
 

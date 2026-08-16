@@ -17,7 +17,8 @@ import { cn } from "@/lib/utils";
  * been taught our private vocabulary, and a heading is not the place to teach
  * it. Do not rename the file or the props to match the heading.
  *
- * Two colours: already covered by courses she is taking anyway, versus open.
+ * Two colours: already covered by a course she has taken or still must take,
+ * versus open.
  * §11.2's design note is the whole point of the first colour — "you're already
  * getting this, don't waste an elective on it" is a more useful message than a
  * longer gap list, and it is carried by the group heading itself rather than by
@@ -64,8 +65,23 @@ export function GapMap({ gaps, className }: GapMapProps) {
         <Stat label="Covered" value={covered.length} tone="covered" />
       </dl>
 
+      {/*
+        Both headings name BOTH halves of `lockedIn`, and they have to.
+        §11.2 step 2 covers a skill from `taken ∪ stillRequired` (lib/gaps.ts:129),
+        but these read "nothing you have left" and "courses you have to take" —
+        the still-required half only. Two problems with that:
+
+          - The missing heading was ambiguous in the alarming direction. "Nothing
+            you have left" reads as "nothing available to you", when most of
+            these chips carry a `closableBy` badge naming an elective that WOULD
+            teach the skill. That group is the actionable one; it is the point of
+            the screen.
+          - The covered heading was checkably FALSE. On the sample student two of
+            fifteen skills are covered only by MATH 125 and CS 110, both already
+            completed — courses she does not "have to take". §0 rule 7.
+      */}
       <Group
-        title="Nothing you have left teaches these"
+        title="Nothing you've taken or still need teaches these"
         count={missing.length}
         tone="missing"
       >
@@ -76,7 +92,7 @@ export function GapMap({ gaps, className }: GapMapProps) {
 
       {covered.length > 0 && (
         <Group
-          title="Already covered by courses you have to take"
+          title="Already covered by courses you've taken or still need"
           count={covered.length}
           tone="covered"
         >
